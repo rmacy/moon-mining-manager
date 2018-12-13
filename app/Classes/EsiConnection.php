@@ -7,7 +7,6 @@ use Seat\Eseye\Configuration;
 use Seat\Eseye\Containers\EsiAuthentication;
 use Seat\Eseye\Eseye;
 use App\User;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Generic class for use by controllers or queued jobs that need to request information
@@ -23,6 +22,9 @@ class EsiConnection
 
     /**
      * Class constructor. Create an ESI API object to handle all requests.
+     *
+     * @throws \Seat\Eseye\Exceptions\EsiScopeAccessDeniedException
+     * @throws \Seat\Eseye\Exceptions\InvalidContainerDataException
      */
     public function __construct()
     {
@@ -67,7 +69,7 @@ class EsiConnection
         $authentication = new EsiAuthentication([
             'secret'        => $secret,
             'client_id'     => $client_id,
-            'access_token'  => $new_token->access_token,
+            'access_token'  => isset($new_token->access_token) ? $new_token->access_token : null,
             'refresh_token' => $user->refresh_token,
             'scopes'        => [
                                 'esi-industry.read_corporation_mining.v1',
@@ -76,7 +78,9 @@ class EsiConnection
                                 'esi-universe.read_structures.v1',
                                 'esi-corporations.read_structures.v1',
                             ],
-            'token_expires' => date('Y-m-d H:i:s', time() + $new_token->expires_in),
+            'token_expires' => isset($new_token->expires_in) ?
+                                date('Y-m-d H:i:s', time() + $new_token->expires_in) :
+                                null,
         ]);
 
         // Create ESI API object.
@@ -90,8 +94,8 @@ class EsiConnection
         // Set object variables for use by other classes.
         $this->character_id = $user->eve_id;
         $this->corporation_id = $character->corporation_id;
-        $this->token = $new_token->access_token;
-                
+        $this->token = isset($new_token->access_token) ? $new_token->access_token : null;
+
     }
-    
+
 }
