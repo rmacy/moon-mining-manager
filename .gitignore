@@ -27,3 +27,6 @@ Homestead.json
 
 # Database dumps.
 db-dump.sql
+
+# IDEs
+.idea
