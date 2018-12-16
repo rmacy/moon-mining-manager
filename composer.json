@@ -19,6 +19,7 @@
         "squareboat/sneaker": "^4.0"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.5",
         "doctrine/dbal": "^2.6",
         "filp/whoops": "~2.0",
         "fzaninotto/faker": "~1.4",
