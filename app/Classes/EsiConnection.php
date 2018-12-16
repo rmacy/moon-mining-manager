@@ -2,6 +2,8 @@
 
 namespace App\Classes;
 
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 use Ixudra\Curl\Facades\Curl;
 use Seat\Eseye\Configuration;
 use Seat\Eseye\Containers\EsiAuthentication;
@@ -34,7 +36,16 @@ class EsiConnection
         $configuration->datasource = env('ESEYE_DATASOURCE', 'tranquility');
 
         // Create authentication with app details and refresh token from nominated prime user.
-        $user = User::where('eve_id', env('ESI_PRIME_USER_ID', 0))->first();
+        try {
+            $user = User::where('eve_id', env('ESI_PRIME_USER_ID', 0))->first();
+        } catch(QueryException $e) {
+            Log::alert($e->getMessage()); // e. g. table users doesn't exist
+            return;
+        }
+        if ($user === null) {
+            Log::alert('Environment variable ESI_PRIME_USER_ID not set or user not found.');
+            return;
+        }
 
         $url = 'https://login.eveonline.com/oauth/token';
         $secret = env('EVEONLINE_CLIENT_SECRET');
