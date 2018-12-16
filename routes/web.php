@@ -35,7 +35,7 @@ Route::get('/', 'AppController@home')->middleware('admin');
 // Access management.
 Route::middleware(['admin'])->prefix('access')->group(function () {
     Route::get('/', 'AppController@showAuthorisedUsers');
-    Route::get('/new', 'AppController@showUserAccessHistory');
+    //Route::get('/new', 'AppController@showUserAccessHistory');
     Route::post('/admin/{id}', 'AppController@makeUserAdmin');
     Route::post('/whitelist/{id}', 'AppController@whitelistUser');
     Route::post('/blacklist/{id}', 'AppController@blacklistUser');
@@ -93,7 +93,7 @@ Route::middleware(['admin'])->prefix('taxes')->group(function () {
     Route::post('/update_value/{id}', 'TaxController@updateValue');
     Route::post('/update_rate/{id}', 'TaxController@updateTaxRate');
     Route::post('/update_master_rate', 'TaxController@updateMasterTaxRate');
-    Route::get('/load', 'TaxController@loadInitialTaxRates');
+    //Route::get('/load', 'TaxController@loadInitialTaxRates');
 });
 
 // Email template management.
