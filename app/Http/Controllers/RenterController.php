@@ -41,6 +41,10 @@ class RenterController extends Controller
 
     /**
      * Show a summary of invoices and payments for a specific refinery.
+     *
+     * @param $id
+     * @throws \Exception
+     * @return mixed
      */
     public function refineryDetails($id = NULL)
     {
@@ -51,18 +55,21 @@ class RenterController extends Controller
         }
 
         $renter = Renter::where('refinery_id', $id)->first();
+        $refinery = Refinery::where('observer_id', $id)->first();
 
         // Pull the renter character information via ESI.
-        $esi = new EsiConnection;
-        $renter->character = $esi->esi->invoke('get', '/characters/{character_id}/', [
-            'character_id' => $renter->character_id,
-        ]);
-        $renter->character->avatar = $esi->esi->invoke('get', '/characters/{character_id}/portrait/', [
-            'character_id' => $renter->character_id,
-        ]);
-        $renter->character->corporation = $esi->esi->invoke('get', '/corporations/{corporation_id}/', [
-            'corporation_id' => $renter->character->corporation_id,
-        ]);
+        if ($renter !== null) {
+            $esi = new EsiConnection;
+            $renter->character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+                'character_id' => $renter->character_id,
+            ]);
+            $renter->character->avatar = $esi->esi->invoke('get', '/characters/{character_id}/portrait/', [
+                'character_id' => $renter->character_id,
+            ]);
+            $renter->character->corporation = $esi->esi->invoke('get', '/corporations/{corporation_id}/', [
+                'corporation_id' => $renter->character->corporation_id,
+            ]);
+        }
 
         // Build a list of all the invoice and payment activity of this refinery.
         $invoices = RentalInvoice::where('refinery_id', $id)->get();
@@ -84,6 +91,7 @@ class RenterController extends Controller
 
         return view('renters.refinery', [
             'renter' => $renter,
+            'refinery' => $refinery,
             'activity_log' => $activity_log,
         ]);
 

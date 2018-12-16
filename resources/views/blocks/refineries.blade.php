@@ -8,10 +8,10 @@
 
     @foreach ($refineries as $refinery)
         @include('common.card', [
-            'link' => '/refinery/' . $refinery->observer_id,
+            'link' => '/renters/refinery/' . $refinery->observer_id,
             'size' => 'small',
             'avatar' => 'https://imageserver.eveonline.com/Render/35835_128.png',
-            'name' => $refinery->name, 
+            'name' => $refinery->name,
             'amount' => $refinery->income,
             'is_active' => $refinery->extraction_start_time,
         ])
