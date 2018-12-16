@@ -73,7 +73,7 @@ class MinerCheck implements ShouldQueue
             {
                 $new_corporation = new Corporation;
                 $new_corporation->corporation_id = $character->corporation_id;
-                $new_corporation->name = $corporation->corporation_name;
+                $new_corporation->name = $corporation->name;
                 $new_corporation->save();
                 Log::info('MinerCheck: stored new corporation ' . $character->corporation_id);
             }
@@ -87,7 +87,7 @@ class MinerCheck implements ShouldQueue
                     $alliance = $esi->esi->invoke('get', '/alliances/{alliance_id}/', [
                         'alliance_id' => $corporation->alliance_id,
                     ]);
-                    $new_alliance->name = $alliance->alliance_name;
+                    $new_alliance->name = $alliance->name;
                     $new_alliance->save();
                     Log::info('MinerCheck: stored new alliance ' . $corporation->alliance_id);
                 }
