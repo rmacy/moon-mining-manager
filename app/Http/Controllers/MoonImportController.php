@@ -105,7 +105,7 @@ class MoonImportController extends Controller
         }
 
         // Redirect back to the moon list.
-        return redirect('/moons');
+        return redirect('/moonadmin');
 
     }
 
@@ -122,17 +122,17 @@ class MoonImportController extends Controller
 
             // Calculate what volume of the total ore will be this type.
             $ore_volume = $this->total_ore_volume * $percent / 100;
-    
+
             // Based on the volume of the ore type, how many units does that volume represent.
             $type = Type::find($type_id);
             $units = $ore_volume / $type->volume;
-    
+
             // Calculate the tax rate to apply (premium applied in the Impass pocket).
             $tax_rate = (SolarSystem::find($solar_system_id)->constellationID == 20000383) ? 10 : 7;
 
             // For non-moon ores, apply a 50% discount.
             $discount = (in_array($type->groupID, [1884, 1920, 1921, 1922, 1923])) ? 1 : 0.5;
-    
+
             // Calculate the tax value to be charged for the volume of this ore that can be mined.
             return $ore_value * $units * $tax_rate / 100 * $discount;
         }
