@@ -9,7 +9,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
 use App\MiningActivity;
-use App\Jobs\MinerCheck;
 use App\TaxRate;
 use App\Miner;
 use Carbon\Carbon;
@@ -20,71 +19,41 @@ class PollRefinery implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 10;
+
+    /**
+     * @var int
+     */
     private $observer_id;
+
+    /**
+     * @var int
+     */
     private $page;
-    private $total_pages = 1;
 
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param int $id
+     * @param int $page
      */
     public function __construct($id, $page = 1)
     {
-        $esi = new EsiConnection;
         $this->observer_id = $id;
         $this->page = $page;
-    }
-
-    /**
-     * Grab the X-Pages header out of the response header.
-     */
-    private function extractXPagesHeader($curl, $header)
-    {
-        if (stristr($header, 'X-Pages'))
-        {
-            preg_match('/\d+/', $header, $matches);
-            if (count($matches))
-            {
-                $this->total_pages = $matches[0];
-            }
-        }
-        return strlen($header);
     }
 
     /**
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
-
         $esi = new EsiConnection;
 
-        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
-        if ($this->page == 1)
-        {
-            // This raw curl request can be replaced with an $esi call once the Eseye library is updated to return response headers.
-            $url = 'https://esi.tech.ccp.is/latest/corporation/' . $esi->corporation_id . '/mining/observers/' . $this->observer_id . '/?datasource=' . env('ESEYE_DATASOURCE', 'tranquility') . '&token=' . $esi->token;
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, "extractXPagesHeader"));
-            $body = curl_exec($ch);
-            if ($this->total_pages > 1)
-            {
-                Log::info('PollRefinery: found more than 1 page of mining data, queuing additional jobs for ' . $this->total_pages . ' total pages');
-                $delay_counter = 1;
-                for ($i = 2; $i <= $this->total_pages; $i++)
-                {
-                    PollRefinery::dispatch($this->observer_id, $i)->delay(Carbon::now()->addMinutes($delay_counter));
-                    $delay_counter++;
-                }
-            }
-        }
-        
-        Log::info('PollRefinery: requesting mining activity log for refinery ' . $this->observer_id . ', page ' . $this->page);
+        Log::info('PollRefinery: requesting mining activity log for refinery ' .
+            $this->observer_id . ', page ' . $this->page);
 
         // Retrieve the mining activity log page for this refinery.
         $activity_log = $esi->esi->setQueryString([
@@ -94,6 +63,19 @@ class PollRefinery implements ShouldQueue
             'observer_id' => $this->observer_id,
         ]);
 
+        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
+        if ($this->page == 1 && $activity_log->pages > 1)
+        {
+            Log::info('PollRefinery: found more than 1 page of mining data, queuing additional jobs for ' .
+                $activity_log->pages . ' total pages');
+            $delay_counter = 1;
+            for ($i = 2; $i <= $activity_log->pages; $i++)
+            {
+                PollRefinery::dispatch($this->observer_id, $i)->delay(Carbon::now()->addMinutes($delay_counter));
+                $delay_counter++;
+            }
+        }
+
         Log::info('PollRefinery: received ' . count($activity_log) . ' mining records');
 
         $new_mining_activity_records = array();
@@ -102,8 +84,11 @@ class PollRefinery implements ShouldQueue
 
         foreach ($activity_log as $log_entry)
         {
-
-            $hash = hash('sha1', $log_entry->character_id . $this->observer_id . $log_entry->type_id . $log_entry->quantity . $log_entry->last_updated);
+            $hash = hash(
+                'sha1',
+                $log_entry->character_id . $this->observer_id . $log_entry->type_id .
+                    $log_entry->quantity . $log_entry->last_updated
+            );
 
             // Add a new mining activity array to the list.
             $new_mining_activity_records[] = [
@@ -127,14 +112,13 @@ class PollRefinery implements ShouldQueue
             {
                 $type_ids[] = $log_entry->type_id;
             }
-
         }
 
         // Insert all of the new mining activity records to the database.
         MiningActivity::insertIgnore($new_mining_activity_records);
 
         Log::info('PollRefinery: inserted up to ' . count($new_mining_activity_records) . ' new mining activity records');
-        
+
         // Check if this miner is already known.
         $delay_counter = 1;
         foreach ($miner_ids as $miner_id)

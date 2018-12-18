@@ -16,24 +16,40 @@ use App\User;
  */
 class EsiConnection
 {
+    /**
+     * Eseye object for performing all ESI requests
+     *
+     * @var Eseye
+     */
+    public $esi;
 
-    public $esi; // Eseye object for performing all ESI requests
-    public $character_id; // reference to the prime user's character ID
-    public $corporation_id; // reference to the prime user's corporation ID
-    public $token; // reference to the renewed token, needed by the raw curl check for X-Pages header
+    /**
+     * The prime user's character ID
+     *
+     * @var int
+     */
+    public $character_id;
+
+    /**
+     * The prime user's corporation ID
+     *
+     * @var int
+     */
+    public $corporation_id;
 
     /**
      * Class constructor. Create an ESI API object to handle all requests.
      *
      * @throws \Seat\Eseye\Exceptions\EsiScopeAccessDeniedException
      * @throws \Seat\Eseye\Exceptions\InvalidContainerDataException
+     * @throws \Seat\Eseye\Exceptions\UriDataMissingException
      */
     public function __construct()
     {
-
         // Set config datasource using environment variable.
         $configuration = Configuration::getInstance();
         $configuration->datasource = env('ESEYE_DATASOURCE', 'tranquility');
+        $configuration->logfile_location = storage_path() . '/logs';
 
         // Create authentication with app details and refresh token from nominated prime user.
         try {
@@ -105,8 +121,5 @@ class EsiConnection
         // Set object variables for use by other classes.
         $this->character_id = $user->eve_id;
         $this->corporation_id = $character->corporation_id;
-        $this->token = isset($new_token->access_token) ? $new_token->access_token : null;
-
     }
-
 }

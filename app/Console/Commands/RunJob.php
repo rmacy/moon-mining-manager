@@ -11,7 +11,7 @@ class RunJob extends Command
      *
      * @var string
      */
-    protected $signature = 'command:run-job {class : The (short) class name}';
+    protected $signature = 'command:run-job {class : The (short) class name} {arguments?*}';
 
     /**
      * The console command description.
@@ -43,7 +43,14 @@ class RunJob extends Command
             return 0;
         }
 
-        (new $class)->handle();
+        $arguments = $this->argument('arguments');
+        if (count($arguments) > 0) {
+            $job = new $class(...$arguments);
+        } else {
+            $job = new $class;
+        }
+
+        $job->handle();
 
         $this->output->writeln('Done.');
         return 0;

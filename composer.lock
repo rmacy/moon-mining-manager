@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "d713589b393f7f076782d9d19d3eeba3",
+    "content-hash": "ebd6ecf85fb81abf0ebb3073fac09446",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -261,23 +261,23 @@
         },
         {
             "name": "eveseat/eseye",
-            "version": "0.0.10",
+            "version": "1.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/eveseat/eseye.git",
-                "reference": "1dafe7ecb067554cc4bb7c1ebdf1a8fa44adb2c9"
+                "reference": "cae27823beccfe5a5ee0d5c9f4fc778d4a420ac8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/eveseat/eseye/zipball/1dafe7ecb067554cc4bb7c1ebdf1a8fa44adb2c9",
-                "reference": "1dafe7ecb067554cc4bb7c1ebdf1a8fa44adb2c9",
+                "url": "https://api.github.com/repos/eveseat/eseye/zipball/cae27823beccfe5a5ee0d5c9f4fc778d4a420ac8",
+                "reference": "cae27823beccfe5a5ee0d5c9f4fc778d4a420ac8",
                 "shasum": ""
             },
             "require": {
                 "guzzlehttp/guzzle": "^6.2",
                 "monolog/monolog": "^1.22",
                 "nesbot/carbon": "^1.21",
-                "php": ">= 7.0",
+                "php": ">= 7.1",
                 "predis/predis": "^1.1"
             },
             "require-dev": {
@@ -308,7 +308,7 @@
                 }
             ],
             "description": "A Standalone PHP ESI (EVE Swagger Interface) Client Library",
-            "time": "2017-09-20T15:13:08+00:00"
+            "time": "2018-06-30T09:36:51+00:00"
         },
         {
             "name": "fideloper/proxy",
@@ -5583,8 +5583,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.0.0",
-        "ext-curl": "*",
+        "php": ">=7.1.0",
         "ext-json": "*"
     },
     "platform-dev": []

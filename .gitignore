@@ -12,8 +12,6 @@ public/hot
 public/cache/latest
 cache/latest
 public/logFile.txt
-public/logs/eseye.log
-logs/eseye.log
 logFile.txt
 storage/*.key
 .env.*.php

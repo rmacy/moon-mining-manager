@@ -17,66 +17,32 @@ class PollStructures implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
+
+    /**
+     * @var int
+     */
     private $page;
-    private $total_pages = 1;
 
     /**
      * Create a new job instance.
      *
+     * @param int $page
      * @return void
      */
     public function __construct($page = 1)
     {
-        $esi = new EsiConnection;
         $this->page = $page;
-    }
-
-    /**
-     * Grab the X-Pages header out of the response header.
-     */
-    private function extractXPagesHeader($curl, $header)
-    {
-        if (stristr($header, 'X-Pages'))
-        {
-            preg_match('/\d+/', $header, $matches);
-            if (count($matches))
-            {
-                $this->total_pages = $matches[0];
-            }
-        }
-        return strlen($header);
     }
 
     /**
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
         $esi = new EsiConnection;
-        
-        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
-        if ($this->page == 1)
-        {
-            // This raw curl request can be replaced with an $esi call once the Eseye library is updated to return response headers.
-            $url = 'https://esi.tech.ccp.is/latest/corporations/' . $esi->corporation_id . '/structures/?datasource=' . env('ESEYE_DATASOURCE', 'tranquility') . '&token=' . $esi->token;
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, "extractXPagesHeader"));
-            $body = curl_exec($ch);
-            if ($this->total_pages > 1)
-            {
-                Log::info('PollStructures: found more than 1 page of corporation structures, queuing additional jobs for ' . $this->total_pages . ' total pages');
-                $delay_counter = 1;
-                for ($i = 2; $i <= $this->total_pages; $i++)
-                {
-                    PollStructures::dispatch($i)->delay(Carbon::now()->addMinutes($delay_counter));
-                    $delay_counter++;
-                }
-            }
-        }
 
         Log::info('PollStructures: requesting corporation structures, page ' . $this->page);
 
@@ -86,6 +52,21 @@ class PollStructures implements ShouldQueue
         ])->invoke('get', '/corporations/{corporation_id}/structures/', [
             'corporation_id' => $esi->corporation_id,
         ]);
+
+        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
+        if ($this->page == 1 && $structures->pages > 1)
+        {
+            Log::info(
+                'PollStructures: found more than 1 page of corporation structures, queuing additional jobs for ' .
+                $structures->pages . ' total pages'
+            );
+            $delay_counter = 1;
+            for ($i = 2; $i <= $structures->pages; $i++)
+            {
+                PollStructures::dispatch($i)->delay(Carbon::now()->addMinutes($delay_counter));
+                $delay_counter++;
+            }
+        }
 
         // Loop through all the structures, looking for Athanors or Tataras.
         $refineries = array(
