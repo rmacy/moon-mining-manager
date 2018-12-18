@@ -33,6 +33,7 @@ class UpdateMaterialValue implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
@@ -45,7 +46,7 @@ class UpdateMaterialValue implements ShouldQueue
         $material = ReprocessedMaterial::find($this->materialTypeID);
 
         // Pull history for this material.
-        $history = (array) $esi->esi->setQueryString([
+        $history = (array) $esi->getConnection()->setQueryString([
             'type_id' => $material->materialTypeID,
         ])->invoke('get', '/markets/{region_id}/history/', [
             'region_id' => $the_forge,
@@ -79,6 +80,6 @@ class UpdateMaterialValue implements ShouldQueue
         $history->average_price = $weighted_average / $weighted_total;
         $history->save();
         Log::info('UpdateMaterialValue: saved the historical value for material ' . $this->materialTypeID);
-        
+
     }
 }

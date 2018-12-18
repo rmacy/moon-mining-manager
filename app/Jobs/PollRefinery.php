@@ -56,10 +56,10 @@ class PollRefinery implements ShouldQueue
             $this->observer_id . ', page ' . $this->page);
 
         // Retrieve the mining activity log page for this refinery.
-        $activity_log = $esi->esi->setQueryString([
+        $activity_log = $esi->getConnection($esi->getPrimeUserId())->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporation/{corporation_id}/mining/observers/{observer_id}/', [
-            'corporation_id' => $esi->corporation_id,
+            'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
             'observer_id' => $this->observer_id,
         ]);
 

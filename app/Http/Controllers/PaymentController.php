@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Miner;
 use App\Renter;
 use App\Payment;
@@ -13,7 +12,10 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    
+
+    /**
+     * @throws \Exception
+     */
     public function addNewPayment()
     {
 
@@ -24,7 +26,7 @@ class PaymentController extends Controller
         $esi = new EsiConnection;
         foreach ($renters as $renter)
         {
-            $renter->character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+            $renter->character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $renter->character_id,
             ]);
         }
@@ -33,7 +35,7 @@ class PaymentController extends Controller
             'miners' => Miner::orderBy('name', 'asc')->get(),
             'renters' => $renters,
         ]);
-        
+
     }
 
     public function insertNewPayment(Request $request)
@@ -58,7 +60,8 @@ class PaymentController extends Controller
             $miner->save();
 
             // Log the payment.
-            Log::info('PaymentController: payment of ' . number_format($amount) . ' ISK manually submitted for miner ' . $miner_id);
+            Log::info('PaymentController: payment of ' . number_format($amount) .
+                ' ISK manually submitted for miner ' . $miner_id);
 
         }
 
@@ -80,7 +83,9 @@ class PaymentController extends Controller
             $renter->save();
 
             // Log the payment.
-            Log::info('PaymentController: rental payment of ' . number_format($amount) . ' ISK manually submitted for renter ' . $renter->character_id . ' renting refinery ' . $renter->refinery_id);
+            Log::info('PaymentController: rental payment of ' . number_format($amount) .
+                ' ISK manually submitted for renter ' . $renter->character_id .
+                ' renting refinery ' . $renter->refinery_id);
 
         }
 

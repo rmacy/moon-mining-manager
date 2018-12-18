@@ -51,19 +51,21 @@ class AuthController extends Controller
      * Obtain the user information from EVE Online.
      *
      * @return Response
+     * @throws \Exception
      */
     public function handleProviderCallback()
     {
-        
+
         // Find or create the user.
         $user = Socialite::driver($this->socialite_driver)->user();
         $authUser = $this->findOrCreateUser($user);
         Log::info('AuthController: login attempt by ' . $authUser->name);
 
         $esi = new EsiConnection;
+        $conn = $esi->getConnection();
 
         // Check if the user is a member of the correct alliance.
-        $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+        $character = $conn->invoke('get', '/characters/{character_id}/', [
             'character_id' => $authUser->eve_id,
         ]);
 
@@ -74,7 +76,7 @@ class AuthController extends Controller
             $authUser->save();
         }
 
-        $corporation = $esi->esi->invoke('get', '/corporations/{corporation_id}/', [
+        $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
             'corporation_id' => $character->corporation_id,
         ]);
 
@@ -118,7 +120,7 @@ class AuthController extends Controller
              $authUser->save();
              return $authUser;
          }
- 
+
          return User::create([
              'eve_id' => $user->id,
              'corporation_id' => NULL,
@@ -128,5 +130,5 @@ class AuthController extends Controller
              'refresh_token' => $user->refreshToken,
          ]);
      }
-    
+
 }

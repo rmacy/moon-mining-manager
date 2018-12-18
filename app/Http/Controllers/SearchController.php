@@ -8,11 +8,15 @@ use Illuminate\Support\Facades\Log;
 
 class SearchController extends Controller
 {
+    /**
+     * @throws \Exception
+     */
     public function search(Request $request)
     {
         $esi = new EsiConnection;
+        $conn = $esi->getConnection();
 
-        $result = $esi->esi->setQueryString([
+        $result = $conn->setQueryString([
             'categories' => 'character',
             'search' => $request->q,
             'strict' => 'true',
@@ -26,15 +30,15 @@ class SearchController extends Controller
         if (isset($result) && isset($result->character))
         {
             $character_id = $result->character[0];
-            $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+            $character = $conn->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $character_id,
             ]);
             $character->id = $character_id;
-            $portrait = $esi->esi->invoke('get', '/characters/{character_id}/portrait/', [
+            $portrait = $conn->invoke('get', '/characters/{character_id}/portrait/', [
                 'character_id' => $character_id,
             ]);
             $character->portrait = $portrait->px128x128;
-            $corporation = $esi->esi->invoke('get', '/corporations/{corporation_id}/', [
+            $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
                 'corporation_id' => $character->corporation_id,
             ]);
             $character->corporation = $corporation->name;

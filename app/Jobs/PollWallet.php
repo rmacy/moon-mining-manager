@@ -13,7 +13,6 @@ use App\Renter;
 use App\Payment;
 use App\RentalPayment;
 use App\Template;
-use App\Jobs\SendEvemail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -38,19 +37,21 @@ class PollWallet implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
-        
+
         $esi = new EsiConnection;
+        $conn = $esi->getConnection($esi->getPrimeUserId());
 
         Log::info('PollWallet: Retrieving transactions, page ' . $this->page);
 
         // Request the transactions from the master wallet division.
-        $transactions = $esi->esi->setQueryString([
+        $transactions = $conn->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporations/{corporation_id}/wallets/{division}/journal/', [
-            'corporation_id' => $esi->corporation_id,
+            'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
             'division' => 1, // master wallet
         ]);
 
@@ -72,7 +73,7 @@ class PollWallet implements ShouldQueue
                     ['amount_owed', $transaction->amount],
                 ])->first();
                 $miner = Miner::where('eve_id', $transaction->first_party_id)->first();
-                
+
                 // First check if the payment comes from a recognised renter and is exactly the right amount for an outstanding refinery balance.
                 if (isset($renter))
                 {
@@ -91,13 +92,13 @@ class PollWallet implements ShouldQueue
                     Log::info('PollWallet: saved a new payment from renter ' . $renter->character_id . ' at refinery ' . $renter->refinery_id . ' for ' . $transaction->amount);
 
                     // Retrieve the name of the character.
-                    $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+                    $character = $conn->invoke('get', '/characters/{character_id}/', [
                         'character_id' => $renter->character_id,
                     ]);
 
                     // Send a receipt.
                     $template = Template::where('name', 'receipt')->first();
-                    
+
                     // Replace placeholder elements in email template.
                     $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
                     $template->subject = str_replace('{name}', $character->name, $template->subject);
@@ -118,7 +119,7 @@ class PollWallet implements ShouldQueue
                         'subject' => $template->subject,
                         'approved_cost' => 5000,
                     );
-        
+
                     // Queue sending the evemail, spaced at 1-minute intervals to avoid triggering the mailspam limiter (4/min).
                     SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($delay_counter));
                     $delay_counter++;
@@ -239,19 +240,19 @@ class PollWallet implements ShouldQueue
                             ),
                             'subject' => $template->subject,
                         );
-            
+
                         // Queue sending the evemail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
                         SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($delay_counter));
                         Log::info('PollWallet: queued job to send tax receipt evemail in ' . $delay_counter . ' minutes');
                         $delay_counter++;
-                
+
                     }
                 }
             }
 
         }
 
-        /* FIX SCRIPT FOR UNPROCESSED WALLET TRANSACTIONS, IF NEEDED UPDATE THE DATE TO THE LAST WORKING WALLET IMPORT. 
+        /* FIX SCRIPT FOR UNPROCESSED WALLET TRANSACTIONS, IF NEEDED UPDATE THE DATE TO THE LAST WORKING WALLET IMPORT.
 
         // If the last transaction date is not earlier than a specified date, request the next page of wallet results.
         if (isset($date) && $date > '2018-04-25')

@@ -21,11 +21,12 @@ class PollExtractions implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
         $esi = new EsiConnection;
-        
+
         Log::info('PollExtractions: clearing all extraction data more than 2 days old');
 
         // Delete any extraction data that relates to periods that have already passed (the field natural decay time + 2 days).
@@ -37,9 +38,10 @@ class PollExtractions implements ShouldQueue
         ]);
 
         // Request all active extraction cycle information for the prime user's corporation.
-        $structures = $esi->esi->invoke('get', '/corporation/{corporation_id}/mining/extractions/', [
-            'corporation_id' => $esi->corporation_id,
-        ]);
+        $structures = $esi->getConnection($esi->getPrimeUserId())
+            ->invoke('get', '/corporation/{corporation_id}/mining/extractions/', [
+                'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
+            ]);
 
         // Loop through all the extraction data, updating the current status and time remaining for any active extraction cycles.
         foreach ($structures as $structure)

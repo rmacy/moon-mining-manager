@@ -7,7 +7,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Jobs\SendEvemail;
 use App\Template;
 use App\Refinery;
 use App\Renter;
@@ -38,16 +37,17 @@ class GenerateRentNotification implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
 
         // Retrieve the renter record.
         $renter = Renter::find($this->id);
-        
+
         // Request the character name for this rental agreement.
         $esi = new EsiConnection;
-        $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+        $character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
             'character_id' => $renter->character_id,
         ]);
 
@@ -59,11 +59,11 @@ class GenerateRentNotification implements ShouldQueue
 
         // Pick up the renter notice template to apply text substitutions.
         $template = Template::where('name', 'renter_notification')->first();
-        
+
         // Grab the template subject and body.
         $subject = $template->subject;
         $body = $template->body;
-        
+
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
         $subject = str_replace('{name}', $character->name, $subject);

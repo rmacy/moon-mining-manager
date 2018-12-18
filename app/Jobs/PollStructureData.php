@@ -32,6 +32,7 @@ class PollStructureData implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
@@ -39,9 +40,10 @@ class PollStructureData implements ShouldQueue
         $esi = new EsiConnection;
 
         // Pull down additional information about this structure.
-        $structure = $esi->esi->invoke('get', '/universe/structures/{structure_id}/', [
-            'structure_id' => $this->structure_id,
-        ]);
+        $structure = $esi->getConnection($esi->getPrimeUserId())
+            ->invoke('get', '/universe/structures/{structure_id}/', [
+                'structure_id' => $this->structure_id,
+            ]);
 
         // Update the refinery item with the new information.
         $refinery = Refinery::where('observer_id', $this->structure_id)->first();

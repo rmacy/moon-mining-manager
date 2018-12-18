@@ -10,7 +10,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 class SendEvemail implements ShouldQueue
@@ -34,13 +33,15 @@ class SendEvemail implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
         $esi = new EsiConnection;
-        $esi->esi->setBody($this->mail);
-        $esi->esi->invoke('post', '/characters/{character_id}/mail/', [
-            'character_id' => $esi->character_id,
+        $conn = $esi->getConnection($esi->getPrimeUserId());
+        $conn->setBody($this->mail);
+        $conn->invoke('post', '/characters/{character_id}/mail/', [
+            'character_id' => $esi->getPrimeUserId(),
         ]);
         Log::info('SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id']);
     }
@@ -54,12 +55,12 @@ class SendEvemail implements ShouldQueue
         if (
             (
                 is_object($exception->getEsiResponse()) && (
-                    stristr($exception->getEsiResponse()->error, 'Too many errors') || 
+                    stristr($exception->getEsiResponse()->error, 'Too many errors') ||
                     stristr($exception->getEsiResponse()->error, 'This software has exceeded the error limit for ESI')
                 )
             ) || (
                 is_string($exception->getEsiResponse()) && (
-                    stristr($exception->getEsiResponse(), 'Too many errors') || 
+                    stristr($exception->getEsiResponse(), 'Too many errors') ||
                     stristr($exception->getEsiResponse(), 'This software has exceeded the error limit for ESI')
                 )
             )
@@ -67,8 +68,8 @@ class SendEvemail implements ShouldQueue
             // We somehow have triggered the error rate limiter, stop requeueing jobs until we can figure out what broke. :(
             Log::info('SendEvemail: bounceback due to hitting the error rate limiter, dumping email job');
             mail(
-                env('ADMIN_EMAIL'), 
-                'Mining Manager rate limiter alert', 
+                env('ADMIN_EMAIL'),
+                'Mining Manager rate limiter alert',
                 date('Y-m-d H:i:s') . ' - SendEvemail: bounceback due to hitting the error rate limiter, dumping email job',
                 'From: ' . env('MAIL_FROM_NAME') . ' <' . env('MAIL_FROM_ADDRESS') . '>'
             );

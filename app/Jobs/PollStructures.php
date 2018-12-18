@@ -47,10 +47,10 @@ class PollStructures implements ShouldQueue
         Log::info('PollStructures: requesting corporation structures, page ' . $this->page);
 
         // Request all corporation structures of the prime user's corporation.
-        $structures = $esi->esi->setQueryString([
+        $structures = $esi->getConnection($esi->getPrimeUserId())->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporations/{corporation_id}/structures/', [
-            'corporation_id' => $esi->corporation_id,
+            'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
         ]);
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
