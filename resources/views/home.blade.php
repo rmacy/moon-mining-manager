@@ -12,8 +12,8 @@
                 @include('common.card', [
                     'link' => '/miners/' . $top_miner->eve_id,
                     'avatar' => $top_miner->avatar,
-                    'name' => $top_miner->name, 
-                    'sub' => $top_miner->corporation->name, 
+                    'name' => $top_miner->name,
+                    'sub' => $top_miner->corporation->name,
                     'amount' => $top_miner->total
                 ])
             </div>
@@ -24,8 +24,8 @@
                 <div class="card-heading">Top Refinery</div>
                 @include('common.card', [
                     'avatar' => 'https://imageserver.eveonline.com/Render/35835_128.png',
-                    'name' => $top_refinery->name, 
-                    'sub' => $top_refinery->system->solarSystemName, 
+                    'name' => $top_refinery->name,
+                    'sub' => $top_refinery->system ? $top_refinery->system->solarSystemName : null,
                     'amount' => $top_refinery->income
                 ])
             </div>
@@ -36,8 +36,8 @@
                 <div class="card-heading">Top System</div>
                 @include('common.card', [
                     'avatar' => 'https://imageserver.eveonline.com/Type/3802_64.png',
-                    'name' => $top_system->solarSystemName, 
-                    'sub' => $top_system->region->regionName, 
+                    'name' => $top_system->solarSystemName,
+                    'sub' => $top_system->region->regionName,
                     'amount' => $top_system->total
                 ])
             </div>
@@ -55,7 +55,7 @@
             @include('blocks.refineries')
             @include('blocks.ninjas')
         </div>
-    
+
     </div>
 
 @endsection

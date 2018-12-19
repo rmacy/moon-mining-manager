@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Whitelist;
@@ -10,8 +9,6 @@ use App\User;
 use App\Miner;
 use App\Refinery;
 use App\Payment;
-use App\SolarSystem;
-use App\MiningActivity;
 
 class AppController extends Controller
 {
@@ -57,7 +54,7 @@ class AppController extends Controller
         }
         $top_refinery = Refinery::orderBy('income', 'desc')->first();
         $top_refinery_system = Refinery::select(DB::raw('solar_system_id, SUM(income) AS total'))->groupBy('solar_system_id')->orderBy('total', 'desc')->first();
-        if (isset($top_refinery_system))
+        if (isset($top_refinery_system) && $top_refinery_system->solar_system_id > 0)
         {
             $top_system = SolarSystem::find($top_refinery_system->solar_system_id);
             $top_system->total = $top_refinery_system->total;
@@ -79,7 +76,7 @@ class AppController extends Controller
     /**
      * Access management user list. List all the current whitelisted users, together
      * with the person that authorised them.
-     * 
+     *
      * @return Response
      */
     public function showAuthorisedUsers()
@@ -92,7 +89,7 @@ class AppController extends Controller
                 $q->select('eve_id')->from('whitelist');
             })->get(),
         ]);
-        
+
     }
 
     /**
