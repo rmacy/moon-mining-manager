@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\SolarSystem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Whitelist;
