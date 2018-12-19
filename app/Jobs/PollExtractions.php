@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -16,6 +17,19 @@ class PollExtractions implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
+
+    /**
+     * @var int
+     */
+    private $page;
+
+    /**
+     * @param int $page
+     */
+    public function __construct($page = 1)
+    {
+        $this->page = $page;
+    }
 
     /**
      * Execute the job.
@@ -38,20 +52,34 @@ class PollExtractions implements ShouldQueue
         ]);
 
         // Request all active extraction cycle information for the prime user's corporation.
-        $structures = $esi->getConnection($esi->getPrimeUserId())
+        $timers = $esi->getConnection($esi->getPrimeUserId())
+            ->setQueryString(['page' => $this->page])
             ->invoke('get', '/corporation/{corporation_id}/mining/extractions/', [
                 'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
             ]);
 
+        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
+        if ($this->page == 1 && $timers->pages > 1) {
+            Log::info(
+                'PollExtractions: found more than 1 page of timers, queuing additional jobs for ' .
+                $timers->pages . ' total pages'
+            );
+            $delayCounter = 1;
+            for ($i = 2; $i <= $timers->pages; $i++) {
+                PollExtractions::dispatch($i)->delay(Carbon::now()->addMinutes($delayCounter));
+                $delayCounter++;
+            }
+        }
+
         // Loop through all the extraction data, updating the current status and time remaining for any active extraction cycles.
-        foreach ($structures as $structure)
+        foreach ($timers as $timer)
         {
-            $refinery = Refinery::where('observer_id', $structure->structure_id)->first();
-            $refinery->extraction_start_time = $this->convertTimestampFormat($structure->extraction_start_time);
-            $refinery->chunk_arrival_time = $this->convertTimestampFormat($structure->chunk_arrival_time);
-            $refinery->natural_decay_time = $this->convertTimestampFormat($structure->natural_decay_time);
+            $refinery = Refinery::where('observer_id', $timer->structure_id)->first();
+            $refinery->extraction_start_time = $this->convertTimestampFormat($timer->extraction_start_time);
+            $refinery->chunk_arrival_time = $this->convertTimestampFormat($timer->chunk_arrival_time);
+            $refinery->natural_decay_time = $this->convertTimestampFormat($timer->natural_decay_time);
             $refinery->save();
-            Log::info('PollExtractions: saved current extraction timestamps for ' . $structure->structure_id);
+            Log::info('PollExtractions: saved current extraction timestamps for ' . $timer->structure_id);
         }
 
     }

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -19,6 +20,19 @@ class PollRefineries implements ShouldQueue
     public $tries = 10;
 
     /**
+     * @var int
+     */
+    private $page;
+
+    /**
+     * @param int $page
+     */
+    public function __construct($page = 1)
+    {
+        $this->page = $page;
+    }
+
+    /**
      * Execute the job.
      *
      * @return void
@@ -26,7 +40,6 @@ class PollRefineries implements ShouldQueue
      */
     public function handle()
     {
-
         $esi = new EsiConnection;
 
         // Clear out all claim details for refinery detonations that have happened in the last 24 hours.
@@ -38,9 +51,23 @@ class PollRefineries implements ShouldQueue
 
         // Request a list of all of the active mining observers belonging to the corporation.
         $mining_observers = $esi->getConnection($esi->getPrimeUserId())
+            ->setQueryString(['page' => $this->page])
             ->invoke('get', '/corporation/{corporation_id}/mining/observers/', [
                 'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
             ]);
+
+        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
+        if ($this->page == 1 && $mining_observers->pages > 1) {
+            Log::info(
+                'PollRefineries: found more than 1 page of refineries, queuing additional jobs for ' .
+                $mining_observers->pages . ' total pages'
+            );
+            $delayCounter = 1;
+            for ($i = 2; $i <= $mining_observers->pages; $i++) {
+                PollRefineries::dispatch($i)->delay(Carbon::now()->addMinutes($delayCounter));
+                $delayCounter++;
+            }
+        }
 
         Log::info('PollRefineries: found ' . count($mining_observers) . ' refineries with active asteroid fields');
 
