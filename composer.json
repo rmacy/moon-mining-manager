@@ -7,8 +7,10 @@
     "require": {
         "php": ">=7.1.0",
         "ext-json": "*",
+        "bravecollective/web-ui": "*@dev",
         "eveseat/eseye": "^1.1.0",
         "fideloper/proxy": "~3.3",
+        "frontpack/composer-assets-plugin": "^0.9.4",
         "ixudra/curl": "^6.13",
         "jdavidbakr/replaceable-model": "^1.0",
         "laravel/framework": "5.5.*",
@@ -26,6 +28,9 @@
         "mockery/mockery": "0.9.*",
         "phpunit/phpunit": "~6.0"
     },
+    "repositories": [
+        { "type": "git", "url": "https://github.com/bravecollective/web-ui.git" }
+    ],
     "autoload": {
         "classmap": [
             "database/seeds",
@@ -59,6 +64,7 @@
         ]
     },
     "config": {
+        "assets-dir": "public/assets",
         "preferred-install": "dist",
         "sort-packages": true,
         "optimize-autoloader": true,
