@@ -28,17 +28,24 @@ class PollRefinery implements ShouldQueue
     /**
      * @var int
      */
+    private $corporation_id;
+
+    /**
+     * @var int
+     */
     private $page;
 
     /**
      * Create a new job instance.
      *
-     * @param int $id
+     * @param int $observer_id
+     * @param int $corporation_id
      * @param int $page
      */
-    public function __construct($id, $page = 1)
+    public function __construct($observer_id, $corporation_id, $page = 1)
     {
-        $this->observer_id = $id;
+        $this->observer_id = $observer_id;
+        $this->corporation_id = $corporation_id;
         $this->page = $page;
     }
 
@@ -55,11 +62,17 @@ class PollRefinery implements ShouldQueue
         Log::info('PollRefinery: requesting mining activity log for refinery ' .
             $this->observer_id . ', page ' . $this->page);
 
+        $userId = $esi->getPrimeUserOfCorporation($this->corporation_id);
+        if ($userId === null) {
+            Log::error('PollRefinery:: Prime user not found for corporation ' . $this->corporation_id);
+            return;
+        }
+
         // Retrieve the mining activity log page for this refinery.
-        $activity_log = $esi->getConnection($esi->getPrimeUserId())->setQueryString([
+        $activity_log = $esi->getConnection($userId)->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporation/{corporation_id}/mining/observers/{observer_id}/', [
-            'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
+            'corporation_id' => $esi->getCorporationId($userId),
             'observer_id' => $this->observer_id,
         ]);
 
@@ -71,7 +84,8 @@ class PollRefinery implements ShouldQueue
             $delay_counter = 1;
             for ($i = 2; $i <= $activity_log->pages; $i++)
             {
-                PollRefinery::dispatch($this->observer_id, $i)->delay(Carbon::now()->addMinutes($delay_counter));
+                PollRefinery::dispatch($this->observer_id, $this->corporation_id, $i)
+                    ->delay(Carbon::now()->addMinutes($delay_counter));
                 $delay_counter++;
             }
         }

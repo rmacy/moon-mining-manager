@@ -21,13 +21,20 @@ class PollExtractions implements ShouldQueue
     /**
      * @var int
      */
+    private $user_id;
+
+    /**
+     * @var int
+     */
     private $page;
 
     /**
+     * @param int $user_id
      * @param int $page
      */
-    public function __construct($page = 1)
+    public function __construct($user_id, $page = 1)
     {
+        $this->user_id = $user_id;
         $this->page = $page;
     }
 
@@ -52,10 +59,10 @@ class PollExtractions implements ShouldQueue
         ]);
 
         // Request all active extraction cycle information for the prime user's corporation.
-        $timers = $esi->getConnection($esi->getPrimeUserId())
+        $timers = $esi->getConnection($this->user_id)
             ->setQueryString(['page' => $this->page])
             ->invoke('get', '/corporation/{corporation_id}/mining/extractions/', [
-                'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
+                'corporation_id' => $esi->getCorporationId($this->user_id),
             ]);
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
@@ -66,7 +73,7 @@ class PollExtractions implements ShouldQueue
             );
             $delayCounter = 1;
             for ($i = 2; $i <= $timers->pages; $i++) {
-                PollExtractions::dispatch($i)->delay(Carbon::now()->addMinutes($delayCounter));
+                PollExtractions::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delayCounter));
                 $delayCounter++;
             }
         }

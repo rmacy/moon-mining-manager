@@ -38,16 +38,6 @@ class EsiConnection
     }
 
     /**
-     * TODO temporary until all places use getPrimeUserIds()
-     *
-     * @return int
-     */
-    public function getPrimeUserId()
-    {
-        return $this->getPrimeUserIds()[0];
-    }
-
-    /**
      * @param int $userId
      * @return int
      * @throws \Exception
@@ -83,6 +73,26 @@ class EsiConnection
         }
 
         return array_unique($userIds);
+    }
+
+    /**
+     * @param int $corporationId
+     * @return int|null
+     */
+    public function getPrimeUserOfCorporation($corporationId)
+    {
+        foreach ($this->getPrimeUserIds() as $userId) {
+            try {
+                $corpId = $this->getCorporationId($userId);
+            } catch (\Exception $e) {
+                continue;
+            }
+            if ($corpId == $corporationId) {
+                return $userId;
+            }
+        }
+
+        return null;
     }
 
     /**

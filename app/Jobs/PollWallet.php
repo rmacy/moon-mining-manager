@@ -21,15 +21,24 @@ class PollWallet implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 10;
+
+    /**
+     * @var int
+     */
+    private $user_id;
+
+    /**
+     * @var int
+     */
     private $page;
 
     /**
-     * Create a new job instance.
-     *
-     * @return void
+     * @param int $user_id
+     * @param int $page
      */
-    public function __construct($page = 1)
+    public function __construct($user_id, $page = 1)
     {
+        $this->user_id = $user_id;
         $this->page = $page;
     }
 
@@ -41,9 +50,8 @@ class PollWallet implements ShouldQueue
      */
     public function handle()
     {
-
         $esi = new EsiConnection;
-        $conn = $esi->getConnection($esi->getPrimeUserId());
+        $conn = $esi->getConnection($this->user_id);
 
         Log::info('PollWallet: Retrieving transactions, page ' . $this->page);
 
@@ -51,7 +59,7 @@ class PollWallet implements ShouldQueue
         $transactions = $conn->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporations/{corporation_id}/wallets/{division}/journal/', [
-            'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
+            'corporation_id' => $esi->getCorporationId($this->user_id),
             'division' => 1, // master wallet
         ]);
 

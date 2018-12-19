@@ -22,13 +22,20 @@ class PollRefineries implements ShouldQueue
     /**
      * @var int
      */
+    private $user_id;
+
+    /**
+     * @var int
+     */
     private $page;
 
     /**
+     * @param int $user_id
      * @param int $page
      */
-    public function __construct($page = 1)
+    public function __construct($user_id, $page = 1)
     {
+        $this->user_id = $user_id;
         $this->page = $page;
     }
 
@@ -50,10 +57,11 @@ class PollRefineries implements ShouldQueue
         Log::info('PollRefineries: cleared ' . $previous_detonations . ' claimed refinery detonations from the previous 24 hours');
 
         // Request a list of all of the active mining observers belonging to the corporation.
-        $mining_observers = $esi->getConnection($esi->getPrimeUserId())
+        $corporation_id = $esi->getCorporationId($this->user_id);
+        $mining_observers = $esi->getConnection($this->user_id)
             ->setQueryString(['page' => $this->page])
             ->invoke('get', '/corporation/{corporation_id}/mining/observers/', [
-                'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
+                'corporation_id' => $corporation_id,
             ]);
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
@@ -64,7 +72,7 @@ class PollRefineries implements ShouldQueue
             );
             $delayCounter = 1;
             for ($i = 2; $i <= $mining_observers->pages; $i++) {
-                PollRefineries::dispatch($i)->delay(Carbon::now()->addMinutes($delayCounter));
+                PollRefineries::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delayCounter));
                 $delayCounter++;
             }
         }
@@ -73,6 +81,7 @@ class PollRefineries implements ShouldQueue
 
         // Process the refineries list. For each entry, we want to check and see if it already exists
         // in the database. If it doesn't, we create a new database entry for it.
+        // Updates, such as the owner, are performed regularly in PollStructures.
         foreach ($mining_observers as $observer)
         {
             $refinery = Refinery::where('observer_id', $observer->observer_id)->first();
@@ -81,10 +90,11 @@ class PollRefineries implements ShouldQueue
                 $refinery = new Refinery;
                 $refinery->observer_id = $observer->observer_id;
                 $refinery->observer_type = $observer->observer_type;
+                $refinery->corporation_id = $corporation_id;
                 $refinery->save();
                 Log::info('PollRefineries: created new refinery record for ' . $observer->observer_id);
                 // Create a new job to fill in the parts we don't know from this response.
-                PollStructureData::dispatch($observer->observer_id);
+                PollStructureData::dispatch($observer->observer_id, $this->user_id);
             }
         }
 

@@ -33,7 +33,8 @@ class PollMiningObservers implements ShouldQueue
         // For each refinery create a new job in the queue to poll the API.
         foreach ($refineries as $refinery)
         {
-            PollRefinery::dispatch($refinery->observer_id)->delay(Carbon::now()->addMinutes($delay_counter));
+            PollRefinery::dispatch($refinery->observer_id, $refinery->corporation_id)
+                ->delay(Carbon::now()->addMinutes($delay_counter));
             $delay_counter++;
         }
 

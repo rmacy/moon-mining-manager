@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Refinery extends Model
 {
-    
+
     protected $table = 'refineries';
 
     /**
@@ -41,4 +41,8 @@ class Refinery extends Model
         return $this->belongsTo('App\User', 'claimed_by_secondary', 'eve_id');
     }
 
+    public function corporation()
+    {
+        return $this->belongsTo('App\Corporation', 'corporation_id', 'corporation_id');
+    }
 }

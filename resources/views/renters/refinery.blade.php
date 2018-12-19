@@ -16,7 +16,8 @@
                         $renter->moon->moon . ', ' .
                         $renter->refinery->system->solarSystemName . ', ' .
                         $renter->moon->region->regionName :
-                    $refinery->name
+                    $refinery->name,
+                'sub2' => $refinery->corporation ? $refinery->corporation->name : ''
             ])
         </div>
 

@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Classes\EsiConnection;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\PollWallet;
@@ -40,31 +41,46 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $esi = new EsiConnection();
 
-        // Poll all corporation structures to look for refineries.
-        $schedule->job(new PollStructures)->dailyAt('00:00');
+        $minutes1 = 0;
+        $minutes2 = 10;
+        $minutes3 = 20;
+        $minutes4 = 30;
+        foreach ($esi->getPrimeUserIds() as $userId) {
+            if ($minutes1 > 9) {
+                break;
+            }
 
-        // Poll all refineries for information about upcoming extraction cycles.
-        $schedule->job(new PollExtractions)->dailyAt('00:10');
+            // Poll all corporation structures to look for refineries.
+            $schedule->job(new PollStructures($userId))->dailyAt('00:0'.$minutes1);
+            $minutes1 ++;
 
-        // Check for any newly active refineries.
-        $schedule->job(new PollRefineries)->dailyAt('00:20');
+            // Poll all refineries for information about upcoming extraction cycles.
+            $schedule->job(new PollExtractions($userId))->dailyAt('00:'.$minutes2);
+            $minutes2 ++;
 
-        // Check for miners making payments to the corporation wallet.
-        $schedule->job(new PollWallet)->hourlyAt(30);
+            // Check for any newly active refineries.
+            $schedule->job(new PollRefineries($userId))->dailyAt('00:'.$minutes3);
+            $minutes3 ++;
+
+            // Check for miners making payments to the corporation wallet.
+            $schedule->job(new PollWallet($userId))->hourlyAt($minutes4);
+            $minutes4 ++;
+        }
 
         // Pull the mining activity for the day and store it.
         $schedule->job(new PollMiningObservers)->dailyAt('12:00');
 
         // Check for any new ores that have been mined where we don't have details of their component materials.
         $schedule->job(new UpdateReprocessedMaterials)->twiceDaily(4, 16);
-        
+
         // Update the stored prices for materials and ores.
         $schedule->job(new UpdateMaterialValues)->dailyAt('05:00');
-        
+
         // Process any new mining activity.
         $schedule->job(new ProcessMiningActivity)->dailyAt('14:00');
-        
+
         // Archive old price history records.
         $schedule->job(new ArchiveReprocessedMaterialsHistory)->dailyAt('06:55');
 

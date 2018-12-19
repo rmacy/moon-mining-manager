@@ -21,16 +21,22 @@ class PollStructures implements ShouldQueue
     /**
      * @var int
      */
+    private $user_id;
+
+    /**
+     * @var int
+     */
     private $page;
 
     /**
      * Create a new job instance.
      *
+     * @param int $user_id
      * @param int $page
-     * @return void
      */
-    public function __construct($page = 1)
+    public function __construct($user_id, $page = 1)
     {
+        $this->user_id = $user_id;
         $this->page = $page;
     }
 
@@ -47,10 +53,10 @@ class PollStructures implements ShouldQueue
         Log::info('PollStructures: requesting corporation structures, page ' . $this->page);
 
         // Request all corporation structures of the prime user's corporation.
-        $structures = $esi->getConnection($esi->getPrimeUserId())->setQueryString([
+        $structures = $esi->getConnection($this->user_id)->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporations/{corporation_id}/structures/', [
-            'corporation_id' => $esi->getCorporationId($esi->getPrimeUserId()),
+            'corporation_id' => $esi->getCorporationId($this->user_id),
         ]);
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
@@ -63,7 +69,7 @@ class PollStructures implements ShouldQueue
             $delay_counter = 1;
             for ($i = 2; $i <= $structures->pages; $i++)
             {
-                PollStructures::dispatch($i)->delay(Carbon::now()->addMinutes($delay_counter));
+                PollStructures::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delay_counter));
                 $delay_counter++;
             }
         }
@@ -85,11 +91,15 @@ class PollStructures implements ShouldQueue
                     $refinery = new Refinery;
                     $refinery->observer_id = $structure->structure_id;
                     $refinery->observer_type = 'structure';
+                    $refinery->corporation_id = $structure->corporation_id;
                     $refinery->save();
                     Log::info('PollStructures: created new refinery record for ' . $structure->structure_id);
                 }
-                // Create a new job to fetch or update the parts we don't get from this response.
-                PollStructureData::dispatch($structure->structure_id)->delay(Carbon::now()->addMinutes($delay_counter));
+
+                // Create a new job to fetch or update the parts we don't get from this response,
+                // it also updates the owner.
+                PollStructureData::dispatch($structure->structure_id, $this->user_id)
+                    ->delay(Carbon::now()->addMinutes($delay_counter));
                 $delay_counter++;
             }
         }

@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Seat\Eseye\Exceptions\RequestFailedException;
 
 class SendEvemail implements ShouldQueue
 {
@@ -22,7 +23,7 @@ class SendEvemail implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param array $mail
      */
     public function __construct($mail)
     {
@@ -38,10 +39,11 @@ class SendEvemail implements ShouldQueue
     public function handle()
     {
         $esi = new EsiConnection;
-        $conn = $esi->getConnection($esi->getPrimeUserId());
+        $userId = $esi->getPrimeUserIds()[0];
+        $conn = $esi->getConnection($userId);
         $conn->setBody($this->mail);
         $conn->invoke('post', '/characters/{character_id}/mail/', [
-            'character_id' => $esi->getPrimeUserId(),
+            'character_id' => $userId,
         ]);
         Log::info('SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id']);
     }
@@ -51,6 +53,12 @@ class SendEvemail implements ShouldQueue
      */
     public function failed(Exception $exception)
     {
+        if (! $exception instanceof RequestFailedException) {
+            // e. g. EsiScopeAccessDeniedException or something else
+            Log::error('SendEvemail: ' . $exception->getMessage());
+            return;
+        }
+
         // Check what type of exception was thrown.
         if (
             (
