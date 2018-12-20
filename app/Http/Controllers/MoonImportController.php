@@ -71,8 +71,56 @@ class MoonImportController extends Controller
         }
 
         // Redirect back to the list.
-        return redirect('/moons');
+        return redirect('/moonadmin');
 
+    }
+
+    public function importSurveyData(Request $request)
+    {
+        $moon = null;
+        $num = 0;
+        foreach (explode("\n", $request->input('data')) as $row) {
+            $cols = explode("\t", $row);
+
+            // new moon?
+            $matches = [];
+            if (preg_match('/([A-Z0-9-]{6}) ([XVI]{1,4}) - Moon ([0-9]{1,2})/', trim($cols[0]), $matches)) {
+
+                // save previous moon
+                if ($moon instanceof Moon) {
+                    $moon->save();
+                }
+
+                $num = 0;
+                $moon = new Moon;
+                $moon->planet = $this->romanNumberToInteger($matches[2]);
+                $moon->moon = $matches[3]; // moon number
+                $moon->monthly_rental_fee = 0;
+                $moon->previous_monthly_rental_fee = 0;
+
+                continue;
+            }
+
+            // skip the headline
+            if ($moon === null) {
+                continue;
+            }
+
+            // moon data
+            $num ++;
+            $moon->solar_system_id = trim($cols[4]);
+            $moon->region_id = SolarSystem::where('solarSystemID', trim($cols[4]))->first()->regionID;
+            $moon->{'mineral_'.$num.'_type_id'} = trim($cols[3]);
+            $moon->{'mineral_'.$num.'_percent'} = trim($cols[2]) * 100;
+        }
+
+        // save last moon
+        if ($moon instanceof Moon) {
+            $moon->save();
+        }
+
+        // Redirect back to the list.
+        return redirect('/moonadmin');
     }
 
     /**
@@ -153,4 +201,33 @@ class MoonImportController extends Controller
         }
     }
 
+    private function romanNumberToInteger($roman)
+    {
+        $romans = array(
+            'M' => 1000,
+            'CM' => 900,
+            'D' => 500,
+            'CD' => 400,
+            'C' => 100,
+            'XC' => 90,
+            'L' => 50,
+            'XL' => 40,
+            'X' => 10,
+            'IX' => 9,
+            'V' => 5,
+            'IV' => 4,
+            'I' => 1,
+        );
+
+        $result = 0;
+
+        foreach ($romans as $key => $value) {
+            while (strpos($roman, $key) === 0) {
+                $result += $value;
+                $roman = substr($roman, strlen($key));
+            }
+        }
+
+        return $result;
+    }
 }
