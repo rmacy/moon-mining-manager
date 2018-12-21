@@ -38,8 +38,16 @@ class SendEvemail implements ShouldQueue
      */
     public function handle()
     {
+        $userId = env('MAIL_USER_ID', 0);
+        if ($userId <= 0) {
+            Log::info(
+                'SendEvemail: cannot send mail to character ' .
+                $this->mail['recipients'][0]['recipient_id']. ', MAIL_USER_ID not set'
+            );
+            return;
+        }
+
         $esi = new EsiConnection;
-        $userId = $esi->getPrimeUserIds()[0];
         $conn = $esi->getConnection($userId);
         $conn->setBody($this->mail);
         $conn->invoke('post', '/characters/{character_id}/mail/', [

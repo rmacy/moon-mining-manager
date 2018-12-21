@@ -68,7 +68,7 @@ class EsiConnection
         if (count($userIds) === 0) {
             // fallback to old variable
             if ((int) env('ESI_PRIME_USER_ID') > 0) {
-                $userIds[] = env('ESI_PRIME_USER_ID');
+                $userIds[] = (int) env('ESI_PRIME_USER_ID');
             }
         }
 
