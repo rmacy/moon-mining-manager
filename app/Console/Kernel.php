@@ -93,7 +93,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new GenerateRentalInvoices)->monthlyOn(1, '09:00');
 
         // Monthly check of miner corporation membership.
-        $schedule->job(new CorporationChecks)->monthlyOn(15, '23:00');
+        $schedule->job(new CorporationChecks)->monthlyOn(15, '20:00');
 
         // Monthly recalculation of moon rental fees.
         $schedule->job(new CalculateRent)->monthlyOn(25, '16:00');
