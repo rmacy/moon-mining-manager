@@ -34,7 +34,7 @@ class PollMiningObservers implements ShouldQueue
         foreach ($refineries as $refinery)
         {
             PollRefinery::dispatch($refinery->observer_id, $refinery->corporation_id)
-                ->delay(Carbon::now()->addMinutes($delay_counter));
+                ->delay(Carbon::now()->addSecond(20 * $delay_counter));
             $delay_counter++;
         }
 

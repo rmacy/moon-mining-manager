@@ -85,7 +85,7 @@ class PollRefinery implements ShouldQueue
             for ($i = 2; $i <= $activity_log->pages; $i++)
             {
                 PollRefinery::dispatch($this->observer_id, $this->corporation_id, $i)
-                    ->delay(Carbon::now()->addMinutes($delay_counter));
+                    ->delay(Carbon::now()->addSecond(20 * $delay_counter));
                 $delay_counter++;
             }
         }

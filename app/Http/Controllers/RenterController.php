@@ -194,7 +194,7 @@ class RenterController extends Controller
 
         return view('renters.edit', [
             'renter' => $renter,
-            'refineries' => Refinery::all(),
+            'refineries' => Refinery::orderBy('name')->get(),
             'moons' => $moons,
         ]);
     }
@@ -208,7 +208,7 @@ class RenterController extends Controller
         $moons = Moon::orderBy('region_id')->orderBy('solar_system_id')->orderBy('planet')->orderBy('moon')->get();
 
         return view('renters.new', [
-            'refineries' => Refinery::all(),
+            'refineries' => Refinery::orderBy('name')->get(),
             'moons' => $moons,
         ]);
     }
