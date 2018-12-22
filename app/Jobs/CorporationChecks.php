@@ -8,7 +8,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Miner;
-use App\Jobs\CorporationCheck;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -32,7 +31,8 @@ class CorporationChecks implements ShouldQueue
         foreach ($miners as $miner)
         {
             CorporationCheck::dispatch($miner->eve_id)->delay(Carbon::now()->addSecond(15 * $delay_counter));
-            Log::info('CorporationChecks: dispatched job to check the corporation for miner ' . $miner->eve_id . ' in ' . $delay_counter . ' minutes');
+            Log::info('CorporationChecks: dispatched job to check the corporation for miner ' .
+                $miner->eve_id . ' in ' . (15 * $delay_counter) . ' seconds');
             $delay_counter++;
         }
 
