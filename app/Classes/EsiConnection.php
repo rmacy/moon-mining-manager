@@ -38,6 +38,8 @@ class EsiConnection
     }
 
     /**
+     * Returns the EVE corporation ID of an user.
+     *
      * @param int $userId
      * @return int
      * @throws \Exception
@@ -76,6 +78,8 @@ class EsiConnection
     }
 
     /**
+     * Returns the configured "prime" user for a corporation.
+     *
      * @param int $corporationId
      * @return int|null
      */

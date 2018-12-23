@@ -47,7 +47,6 @@ class Kernel extends ConsoleKernel
         $minutes1 = 0;
         $minutes2 = 10;
         $minutes3 = 20;
-        $minutes4 = 30;
         foreach ($esi->getPrimeUserIds() as $userId) {
             if ($minutes1 > 9) {
                 Log::error('Too many prime users.');
@@ -65,9 +64,12 @@ class Kernel extends ConsoleKernel
             // Check for any newly active refineries.
             $schedule->job(new PollRefineries($userId))->dailyAt('00:'.$minutes3);
             $minutes3 ++;
+        }
 
+        $minutes4 = 30;
+        foreach ([env('RENT_CORPORATION_ID'), env('TAX_CORPORATION_ID')] as $corporationId) {
             // Check for miners making payments to the corporation wallet.
-            $schedule->job(new PollWallet($userId))->hourlyAt($minutes4);
+            $schedule->job(new PollWallet($corporationId))->hourlyAt($minutes4);
             $minutes4 ++;
         }
 
