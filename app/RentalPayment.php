@@ -13,4 +13,9 @@ class RentalPayment extends Model
     {
         return $this->hasOne('App\Refinery', 'observer_id', 'refinery_id');
     }
+
+    public function createdBy()
+    {
+        return $this->belongsTo('App\User', 'created_by', 'eve_id');
+    }
 }

@@ -13,6 +13,7 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 * Run `npm install` to install frontend dependencies
 * Run `php artisan migrate` to create the database tables
 * Rename the `.env.example` file to `.env` and add values for your application ID and secret, chosen prime characters (must have director role within the corporation) and alliance, and whitelisted alliances/corporations
+* Regenerate js/css with `npm run production` if they have changed.
 
 ## Operation instructions
 

@@ -83,6 +83,7 @@ Route::middleware(['admin'])->prefix('moonadmin')->group(function () {
 
 // Payment management.
 Route::middleware(['admin'])->prefix('payment')->group(function () {
+    Route::get('/', 'PaymentController@listManualPayments');
     Route::get('/new', 'PaymentController@addNewPayment');
     Route::post('/new', 'PaymentController@insertNewPayment');
 });
