@@ -66,12 +66,9 @@ class Kernel extends ConsoleKernel
             $minutes3 ++;
         }
 
-        $minutes4 = 30;
-        foreach ([env('RENT_CORPORATION_ID'), env('TAX_CORPORATION_ID')] as $corporationId) {
-            // Check for miners making payments to the corporation wallet.
-            $schedule->job(new PollWallet($corporationId))->hourlyAt($minutes4);
-            $minutes4 ++;
-        }
+        // Check for miners making payments to the corporation wallet.
+        $schedule->job(new PollWallet(env('RENT_CORPORATION_ID')))->hourlyAt(30);
+        $schedule->job(new PollWallet(env('TAX_CORPORATION_ID')))->hourlyAt(35);
 
         // Pull the mining activity for the day and store it.
         $schedule->job(new PollMiningObservers)->dailyAt('12:00');
