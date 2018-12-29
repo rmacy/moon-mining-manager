@@ -103,7 +103,7 @@ class PollWallet implements ShouldQueue
                     $this->processRents($transaction, $renter, $ref_id);
                 }
                 // Next, if this donation is actually from a recognised miner.
-                elseif ($this->corporationId == env('TAX_CORPORATION_ID') && isset($miner))
+                if ($this->corporationId == env('TAX_CORPORATION_ID') && isset($miner))
                 {
                     $this->processTaxes($transaction, $miner, $date, $ref_id);
                 }
