@@ -101,6 +101,7 @@ class TimerController extends Controller
             'activity_log' => (isset($activity_log)) ? $activity_log : NULL,
             'is_whitelisted_user' => (isset($whitelist)) ? TRUE : FALSE,
             'timers' => $refineries,
+            'isAdmin' => $whitelist && $whitelist->is_admin,
         ]);
 
     }

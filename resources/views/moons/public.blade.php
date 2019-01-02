@@ -96,7 +96,7 @@
 
     <body>
 
-        @include('common.public-nav', ['page' => 'timers'])
+        @include('common.public-nav', ['page' => 'timers', 'admin' => $isAdmin])
 
         <img src="https://wiki.bravecollective.com/lib/tpl/vector/user/logo.png" alt="Brave Collective" class="logo">
 
@@ -154,11 +154,11 @@
         <script src="/js/app.js"></script>
 
         <script>
-        
+
             window.addEventListener('load', function () {
                 $('#moons').tablesorter();
             });
-        
+
         </script>
 
     </body>

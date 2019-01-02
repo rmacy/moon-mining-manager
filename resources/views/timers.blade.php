@@ -200,7 +200,7 @@
         @endif
     >
 
-        @include('common.public-nav', ['page' => 'timers'])
+        @include('common.public-nav', ['page' => 'timers', 'admin' => $isAdmin])
 
         @if ($miner)
             <div class="miner-bar">
@@ -316,7 +316,7 @@
                 <ul id="activity-log">
                     @foreach ($activity_log as $event)
                         <li>
-                            {{ date('Y-m-d', strtotime($event->created_at)) }} - 
+                            {{ date('Y-m-d', strtotime($event->created_at)) }} -
                             @if (isset($event->amount))
                                 Invoice sent for {{ number_format($event->amount) }} ISK
                             @endif

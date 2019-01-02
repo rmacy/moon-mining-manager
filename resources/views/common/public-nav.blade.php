@@ -3,6 +3,11 @@
         <li>
             <a href="/logout">Log out</a>
         </li>
+        @if ($admin)
+            <li>
+                <a href="/">Admin</a>
+            </li>
+        @endif
         <li>
             <a href="/moons"
                 @if ($page == 'moons')
