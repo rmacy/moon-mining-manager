@@ -106,6 +106,10 @@
 
         <p>For more information on the Brave moon rental program, please consult <a href="https://wiki.bravecollective.com/member/alliance/industry/moon-rental" target="_blank">this wiki page</a>.</p>
 
+        <p>
+            <strong>Any moon with an ID > 1502 is NOT for rent.</strong>
+        </p>
+
         <div class="row">
 
             <table id="moons">
