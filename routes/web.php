@@ -78,6 +78,7 @@ Route::middleware(['admin'])->prefix('moonadmin')->group(function () {
     Route::get('/', 'MoonImportController@index');
     Route::post('/import', 'MoonImportController@import');
     Route::post('/import_survey_data', 'MoonImportController@importSurveyData');
+    Route::get('/export', 'MoonImportController@export');
     Route::get('/calculate', 'MoonImportController@calculate');
 });
 

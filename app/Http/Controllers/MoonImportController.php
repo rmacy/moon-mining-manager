@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\EsiConnection;
+use App\User;
 use Illuminate\Http\Request;
 use App\Moon;
 use App\Region;
 use App\SolarSystem;
-use App\Miner;
 use App\Type;
 use App\TaxRate;
 use App\Jobs\UpdateReprocessedMaterials;
@@ -17,6 +18,22 @@ class MoonImportController extends Controller
 {
 
     protected $total_ore_volume = 14000000; // 14m m3 represents a thirty day mining cycle, approximately
+
+    private $romans = [
+        'M' => 1000,
+        'CM' => 900,
+        'D' => 500,
+        'CD' => 400,
+        'C' => 100,
+        'XC' => 90,
+        'L' => 50,
+        'XL' => 40,
+        'X' => 10,
+        'IX' => 9,
+        'V' => 5,
+        'IV' => 4,
+        'I' => 1,
+    ];
 
     public function index()
     {
@@ -124,6 +141,80 @@ class MoonImportController extends Controller
     }
 
     /**
+     * @throws \Exception
+     */
+    public function export()
+    {
+        $conn = (new EsiConnection())->getConnection();
+
+        $rows = [];
+        $rows[] = [
+            'Region',
+            'System',
+            'ID',
+            'Location',
+            'P',
+            'M',
+            'Renter (char ID)',
+            'Renter (char name)',
+            'status',
+            '',
+            'Mineral 1',
+            '% 1',
+            'Mineral 2',
+            '% 2',
+            'Mineral 3',
+            '% 3',
+            'Mineral 4',
+            '% 4',
+        ];
+
+        foreach (Moon::all()->sortBy('id') as $moon) { /* @var $moon Moon */
+
+            // get renter name from DB if available, otherwise from ESI
+            $renterCharId = $moon->getActiveRenterAttribute() ? $moon->getActiveRenterAttribute()->character_id : null;
+            $renterName = '';
+            if ($renterCharId) {
+                $user = User::where('eve_id', '=', $renterCharId)->first();
+                if ($user){
+                    $renterName = $user->name;
+                } else {
+                    $renterName = $conn->invoke('get', '/characters/{character_id}/', [
+                        'character_id' => $renterCharId,
+                    ])->name;
+                }
+            }
+
+            $cols = [
+                $moon->region ? $moon->region->regionName : '',
+                $moon->system ? $moon->system->solarSystemName : '',
+                $moon->id,
+                $this->integerToRomanNumber($moon->planet) . ' - M ' . $moon->moon,
+                $moon->planet,
+                $moon->moon,
+                $renterCharId,
+                $renterName, //
+                '', // status
+                '', //
+                $moon->mineral_1->typeName,
+                $moon->mineral_1_percent .'%',
+                $moon->mineral_2->typeName,
+                $moon->mineral_2_percent .'%',
+                $moon->mineral_3 ? $moon->mineral_3->typeName : '',
+                $moon->mineral_3_percent ? $moon->mineral_3_percent .'%' : '',
+                $moon->mineral_4 ? $moon->mineral_4->typeName : '',
+                $moon->mineral_4_percent ? $moon->mineral_4_percent .'%' : '',
+            ];
+            $rows[] = $cols;
+        }
+
+        return response($this->arrayToCsv($rows), 200, [
+            'Content-Type' => 'text/cvs',
+            'Content-disposition' => 'attachment;filename=moon-export.csv'
+        ]);
+    }
+
+    /**
      * Calculate the monthly rental fee for every moon, based on its mineral composition.
      */
     public function calculate()
@@ -198,35 +289,54 @@ class MoonImportController extends Controller
             // Queue the jobs to update the ore values rather than waiting for the next scheduled job.
             UpdateReprocessedMaterials::dispatch();
             UpdateMaterialValues::dispatch();
+
+            return 0;
         }
     }
 
     private function romanNumberToInteger($roman)
     {
-        $romans = array(
-            'M' => 1000,
-            'CM' => 900,
-            'D' => 500,
-            'CD' => 400,
-            'C' => 100,
-            'XC' => 90,
-            'L' => 50,
-            'XL' => 40,
-            'X' => 10,
-            'IX' => 9,
-            'V' => 5,
-            'IV' => 4,
-            'I' => 1,
-        );
-
         $result = 0;
-
-        foreach ($romans as $key => $value) {
+        foreach ($this->romans as $key => $value) {
             while (strpos($roman, $key) === 0) {
                 $result += $value;
                 $roman = substr($roman, strlen($key));
             }
         }
+        return $result;
+    }
+
+    private function integerToRomanNumber($number)
+    {
+        $returnValue = '';
+        while ($number > 0) {
+            foreach ($this->romans as $roman => $int) {
+                if ($number >= $int) {
+                    $number -= $int;
+                    $returnValue .= $roman;
+                    break;
+                }
+            }
+        }
+        return $returnValue;
+    }
+
+    private function arrayToCsv(array $rows)
+    {
+        $result = '';
+
+        $fp = fopen('php://temp', 'w');
+
+        foreach ($rows as $fields) {
+            fputcsv($fp, $fields, ';', '"');
+        }
+
+        rewind($fp);
+        while (($buffer = fgets($fp, 4096)) !== false) {
+            $result .= $buffer;
+        }
+
+        fclose($fp);
 
         return $result;
     }

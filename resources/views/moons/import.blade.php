@@ -7,7 +7,11 @@
     <div class="row">
 
         <div class="col-12">
-            <div class="card-heading">Existing Moon Data (<a href="/moonadmin/calculate">Calculate monthly rents</a>)</div>
+            <div class="card-heading">
+                Existing Moon Data (<a href="/moonadmin/calculate">Calculate monthly rents</a>)
+                - <a href="/moonadmin/export">Export</a>
+            </div>
+
             <table id="moons">
                 <thead>
                     <tr>
