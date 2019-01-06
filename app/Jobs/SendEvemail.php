@@ -53,7 +53,10 @@ class SendEvemail implements ShouldQueue
         $conn->invoke('post', '/characters/{character_id}/mail/', [
             'character_id' => $userId,
         ]);
-        Log::info('SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id']);
+        Log::info(
+            'SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id'] .
+            (count($this->mail['recipients']) > 1 ? ' and ' . (count($this->mail['recipients'])-1) . ' more.' : '')
+        );
     }
 
     /**
