@@ -15,13 +15,8 @@ class MoonController extends Controller
 
         // We want to display information differently to administrators and prospective renters.
 
-        // Retrieve the current user's whitelisted status.
-        $user = Auth::user();
-        $whitelist = Whitelist::where('eve_id', $user->eve_id)->first();
-
         return view('moons.public', [
             'moons' => $moons,
-            'isAdmin' => $whitelist && $whitelist->is_admin,
         ]);
     }
 

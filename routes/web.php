@@ -73,6 +73,11 @@ Route::middleware(['login'])->prefix('moons')->group(function () {
     Route::get('/', 'MoonController@index');
 });
 
+// Contact form
+Route::middleware(['login'])->prefix('contact-form')->group(function () {
+    Route::get('/', 'ContactFormController@index');
+});
+
 // Moon composition importer.
 Route::middleware(['admin'])->prefix('moonadmin')->group(function () {
     Route::get('/', 'MoonImportController@index');
