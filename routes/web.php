@@ -76,6 +76,7 @@ Route::middleware(['login'])->prefix('moons')->group(function () {
 // Contact form
 Route::middleware(['login'])->prefix('contact-form')->group(function () {
     Route::get('/', 'ContactFormController@index');
+    Route::post('/', 'ContactFormController@send');
 });
 
 // Moon composition importer.

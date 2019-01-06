@@ -104,7 +104,7 @@ class SendEvemail implements ShouldQueue
         }
         else
         {
-            // Send failed for some other reason, try again in a while.
+            // Send failed for some other reason (for example downtime), try again in a while.
             SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes(15));
             Log::info('SendEvemail: re-queued job to send mail in 15 minutes');
         }

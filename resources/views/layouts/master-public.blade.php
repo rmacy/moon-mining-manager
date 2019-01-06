@@ -210,6 +210,18 @@
                 list-style: none;
                 padding: 0;
             }
+
+            /* contact form */
+
+            .contact-form form {
+                margin: 0 auto;
+                width: 80%;
+            }
+
+            .contact-form textarea {
+                width: 100%;
+            }
+
         </style>
 
     </head>

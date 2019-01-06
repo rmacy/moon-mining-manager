@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Whitelist;
 use App\Moon;
-use Illuminate\Support\Facades\Auth;
 
 class MoonController extends Controller
 {
