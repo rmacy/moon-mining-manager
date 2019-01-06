@@ -25,7 +25,7 @@ class PollWallet implements ShouldQueue
     /**
      * @var int
      */
-    private $corporationId;
+    private $userId;
 
     /**
      * @var int
@@ -43,12 +43,12 @@ class PollWallet implements ShouldQueue
     private $delay_counter;
 
     /**
-     * @param int $corporationId
+     * @param int $userId
      * @param int $page
      */
-    public function __construct($corporationId, $page = 1)
+    public function __construct($userId, $page = 1)
     {
-        $this->corporationId = $corporationId;
+        $this->userId = $userId;
         $this->page = $page;
     }
 
@@ -61,19 +61,16 @@ class PollWallet implements ShouldQueue
     public function handle()
     {
         $esi = new EsiConnection;
-        $userId = $esi->getPrimeUserOfCorporation($this->corporationId);
-        if ($userId === null) {
-            Log::error('PollWallet: no prime user found for corporation ' . $this->corporationId);
-        }
-        $this->conn = $esi->getConnection($userId);
+        $this->conn = $esi->getConnection($this->userId);
+        $corporationId = $esi->getCorporationId($this->userId);
 
-        Log::info('PollWallet: Retrieving transactions, corporation ' . $this->corporationId . ', page ' . $this->page);
+        Log::info('PollWallet: Retrieving transactions, corporation ' . $corporationId . ', page ' . $this->page);
 
         // Request the transactions from the master wallet division.
         $transactions = $this->conn->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporations/{corporation_id}/wallets/{division}/journal/', [
-            'corporation_id' => $this->corporationId,
+            'corporation_id' => $corporationId,
             'division' => 1, // master wallet
         ]);
 
@@ -103,12 +100,12 @@ class PollWallet implements ShouldQueue
                 // First check if the payment comes from a recognised renter and is exactly
                 // the right amount for an outstanding refinery balance
                 // (and wasn't already processed).
-                if ($this->corporationId == env('RENT_CORPORATION_ID') && isset($renter) && !isset($rental_payment))
+                if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') && isset($renter) && !isset($rental_payment))
                 {
                     $this->processRents($transaction, $renter, $ref_id);
                 }
                 // Next, if this donation is actually from a recognised miner (and wasn't already processed).
-                if ($this->corporationId == env('TAX_CORPORATION_ID') &&
+                if ($this->userId == env('TAX_CORPORATION_PRIME_USER_ID') &&
                     isset($miner) && !isset($payment) && !isset($rental_payment)
                 ) {
                     $this->processTaxes($transaction, $miner, $date, $ref_id);

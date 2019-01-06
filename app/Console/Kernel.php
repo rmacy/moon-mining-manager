@@ -2,7 +2,6 @@
 
 namespace App\Console;
 
-use App\Classes\EsiConnection;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\PollWallet;
@@ -21,7 +20,6 @@ use App\Jobs\CalculateRent;
 use App\Jobs\GenerateRentNotifications;
 use App\Jobs\GenerateRentReminders;
 use App\Jobs\SendRenterDelinquencyList;
-use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -42,33 +40,24 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $esi = new EsiConnection();
+        $rentUserId = env('RENT_CORPORATION_PRIME_USER_ID', 0);
+        $taxUserId = env('TAX_CORPORATION_PRIME_USER_ID', 0);
 
-        $minutes1 = 0;
-        $minutes2 = 10;
-        $minutes3 = 20;
-        foreach ($esi->getPrimeUserIds() as $userId) {
-            if ($minutes1 > 9) {
-                Log::error('Too many prime users.');
-                break;
-            }
+        // Poll all corporation structures to look for refineries.
+        $schedule->job(new PollStructures($rentUserId))->dailyAt('00:00');
+        $schedule->job(new PollStructures($taxUserId))->dailyAt('00:05');
 
-            // Poll all corporation structures to look for refineries.
-            $schedule->job(new PollStructures($userId))->dailyAt('00:0'.$minutes1);
-            $minutes1 ++;
+        // Poll all refineries for information about upcoming extraction cycles.
+        $schedule->job(new PollExtractions($rentUserId))->dailyAt('00:10');
+        $schedule->job(new PollExtractions($taxUserId))->dailyAt('00:15');
 
-            // Poll all refineries for information about upcoming extraction cycles.
-            $schedule->job(new PollExtractions($userId))->dailyAt('00:'.$minutes2);
-            $minutes2 ++;
-
-            // Check for any newly active refineries.
-            $schedule->job(new PollRefineries($userId))->dailyAt('00:'.$minutes3);
-            $minutes3 ++;
-        }
+        // Check for any newly active refineries.
+        $schedule->job(new PollRefineries($rentUserId))->dailyAt('00:20');
+        $schedule->job(new PollRefineries($taxUserId))->dailyAt('00:25');
 
         // Check for miners making payments to the corporation wallet.
-        $schedule->job(new PollWallet(env('RENT_CORPORATION_ID')))->hourlyAt(30);
-        $schedule->job(new PollWallet(env('TAX_CORPORATION_ID')))->hourlyAt(35);
+        $schedule->job(new PollWallet($rentUserId))->hourlyAt(30);
+        $schedule->job(new PollWallet($taxUserId))->hourlyAt(35);
 
         // Pull the mining activity for the day and store it.
         $schedule->job(new PollMiningObservers)->dailyAt('12:00');

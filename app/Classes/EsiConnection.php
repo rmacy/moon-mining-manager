@@ -55,29 +55,6 @@ class EsiConnection
     }
 
     /**
-     * @return array
-     */
-    public function getPrimeUserIds()
-    {
-        $userIds = [];
-        foreach (explode(',', env('ESI_PRIME_USER_IDS')) as $userId) {
-            $userId = (int) trim($userId);
-            if ($userId > 0) {
-                $userIds[] = $userId;
-            }
-        }
-
-        if (count($userIds) === 0) {
-            // fallback to old variable
-            if ((int) env('ESI_PRIME_USER_ID') > 0) {
-                $userIds[] = (int) env('ESI_PRIME_USER_ID');
-            }
-        }
-
-        return array_unique($userIds);
-    }
-
-    /**
      * Returns the configured "prime" user for a corporation.
      *
      * @param int $corporationId
@@ -85,7 +62,7 @@ class EsiConnection
      */
     public function getPrimeUserOfCorporation($corporationId)
     {
-        foreach ($this->getPrimeUserIds() as $userId) {
+        foreach ([env('RENT_CORPORATION_PRIME_USER_ID', 0), env('TAX_CORPORATION_PRIME_USER_ID', 0)] as $userId) {
             try {
                 $corpId = $this->getCorporationId($userId);
             } catch (\Exception $e) {
