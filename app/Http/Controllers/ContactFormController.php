@@ -6,6 +6,7 @@ use App\Jobs\PostSlackMessage;
 use App\Jobs\SendEvemail;
 use App\Whitelist;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ContactFormController extends Controller
@@ -18,10 +19,18 @@ class ContactFormController extends Controller
 
     public function send(Request $request)
     {
-        $input = $request->all();
+		$user = Auth::user();
+		if (! $user) {
+			return view('/contact-form');
+		}
 
-        $this->sendMail($input['text']);
-        $this->postSlack($input['text']);
+		$text =
+			"FROM: " . $user->name . "\n" .
+			"TEXT: \n" .
+			$request->post('text');
+
+        $this->sendMail($text);
+        $this->postSlack($text);
 
         return view('/contact-form-result');
     }
@@ -32,9 +41,9 @@ class ContactFormController extends Controller
     private function sendMail($text)
     {
         $recipients = [];
-        foreach (Whitelist::where('is_admin', 1)->get() as $admin) {
+        foreach (Whitelist::where('form_mail', 1)->get() as $recipient) {
             $recipients[] = [
-                'recipient_id' => $admin->eve_id,
+                'recipient_id' => $recipient->eve_id,
                 'recipient_type' => 'character'
             ];
         }
@@ -59,9 +68,12 @@ class ContactFormController extends Controller
      */
     private function postSlack($text)
     {
-        $webHookUrl = env('SLACK_WEBHOOK_URL');
-        $body = ['text' => $text];
+        $webHookUrl = env('SLACK_WEBHOOK_URL', '');
+        if ($webHookUrl === '') {
+			Log::error('ContactFormController: SLACK_WEBHOOK_URL not set.');
+			return;
+		}
 
-        PostSlackMessage::dispatch($webHookUrl, $body);
+        PostSlackMessage::dispatch($webHookUrl, ['text' => "*Contact Form*\n\n" . $text]);
     }
 }

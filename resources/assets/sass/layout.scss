@@ -60,6 +60,18 @@ html, body {
     }
 }
 
+.card.access {
+    padding-top: 10px;
+    .avatar {
+        margin: -20px 10px 20px 0;
+    }
+    form {
+        margin-top: 2px;
+        font-size: .8rem;
+        line-height: .8rem;
+    }
+}
+
 .card-small {
     padding-top: 0;
     line-height: 40px;

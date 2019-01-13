@@ -39,6 +39,7 @@ Route::middleware(['admin'])->prefix('access')->group(function () {
     Route::post('/admin/{id}', 'AppController@makeUserAdmin');
     Route::post('/whitelist/{id}', 'AppController@whitelistUser');
     Route::post('/blacklist/{id}', 'AppController@blacklistUser');
+    Route::post('/toggle-form-mail/{id}', 'AppController@toggleFormMail');
 });
 
 // Reports.

@@ -18,7 +18,7 @@ class AppController extends Controller
      * App homepage. Check if the user is currently signed in, and either show
      * a signin prompt or the homepage.
      *
-     * @return Response
+     * @return \Illuminate\View\View
      */
     public function home()
     {
@@ -61,7 +61,7 @@ class AppController extends Controller
             $top_system->total = $top_refinery_system->total;
         }
 
-        return view('home', [
+		return view('home', [
             'top_miner' => (isset($top_miner)) ? $top_miner : null,
             'top_refinery' => (isset($top_refinery)) ? $top_refinery : null,
             'top_system' => (isset($top_system)) ? $top_system : null,
@@ -71,14 +71,13 @@ class AppController extends Controller
             'refineries' => Refinery::orderBy('income', 'desc')->get(),
             'total_income' => $total_income->total,
         ]);
-
     }
 
     /**
      * Access management user list. List all the current whitelisted users, together
      * with the person that authorised them.
      *
-     * @return Response
+     * @return \Illuminate\View\View
      */
     public function showAuthorisedUsers()
     {
@@ -135,6 +134,8 @@ class AppController extends Controller
 
     /**
      * Blacklist a new user. (Well, it's not really a blacklist, just de-whitelist them.)
+	 *
+	 * @throws \Exception
      */
     public function blacklistUser($id = NULL)
     {
@@ -147,10 +148,21 @@ class AppController extends Controller
         return redirect('/access');
     }
 
+    public function toggleFormMail($id)
+	{
+		$user = Whitelist::where('eve_id', $id)->first();
+		if ($user) {
+			$user->form_mail = ! $user->form_mail;
+			$user->save();
+		}
+
+		return redirect('/access');
+	}
+
     /**
      * Logout the currently authenticated user.
      *
-     * @return Response
+     * @return \Illuminate\View\View
      */
     public function logout()
     {
