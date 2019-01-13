@@ -14,7 +14,7 @@ class AddFormMailWhitelist extends Migration
     public function up()
     {
         Schema::table('whitelist', function (Blueprint $table) {
-			$table->boolean('form_mail')->default(0)->after('is_admin');
+            $table->boolean('form_mail')->default(0)->after('is_admin');
         });
     }
 

@@ -61,7 +61,7 @@ class AppController extends Controller
             $top_system->total = $top_refinery_system->total;
         }
 
-		return view('home', [
+        return view('home', [
             'top_miner' => (isset($top_miner)) ? $top_miner : null,
             'top_refinery' => (isset($top_refinery)) ? $top_refinery : null,
             'top_system' => (isset($top_system)) ? $top_system : null,
@@ -149,15 +149,15 @@ class AppController extends Controller
     }
 
     public function toggleFormMail($id)
-	{
-		$user = Whitelist::where('eve_id', $id)->first();
-		if ($user) {
-			$user->form_mail = ! $user->form_mail;
-			$user->save();
-		}
+    {
+        $user = Whitelist::where('eve_id', $id)->first();
+        if ($user) {
+            $user->form_mail = ! $user->form_mail;
+        $user->save();
+        }
 
-		return redirect('/access');
-	}
+        return redirect('/access');
+    }
 
     /**
      * Logout the currently authenticated user.

@@ -91,9 +91,9 @@ class PollWallet implements ShouldQueue
                 $payment = Payment::where('ref_id', $ref_id)->first();
                 $rental_payment = RentalPayment::where('ref_id', $ref_id)->first();
                 if ($payment || $rental_payment) {
-					$pollNextPage = false;
-					continue;
-				}
+                    $pollNextPage = false;
+                    continue;
+                }
 
                 // Look for matching payers among renters and miners.
                 $renter = Renter::where([
@@ -119,13 +119,13 @@ class PollWallet implements ShouldQueue
         }
 
         if ($pollNextPage) {
-			Log::info(
-				'PollWallet: queued job to poll page ' . ($this->page + 1) .
-				' in ' . $this->delay_counter . ' minutes'
-			);
-			PollWallet::dispatch($this->userId, $this->page + 1)
-				->delay(Carbon::now()->addMinutes($this->delay_counter));
-		}
+            Log::info(
+                'PollWallet: queued job to poll page ' . ($this->page + 1) .
+                ' in ' . $this->delay_counter . ' minutes'
+            );
+            PollWallet::dispatch($this->userId, $this->page + 1)
+                ->delay(Carbon::now()->addMinutes($this->delay_counter));
+        }
 
         /* FIX SCRIPT FOR UNPROCESSED WALLET TRANSACTIONS, IF NEEDED UPDATE THE DATE TO THE LAST WORKING WALLET IMPORT.
 

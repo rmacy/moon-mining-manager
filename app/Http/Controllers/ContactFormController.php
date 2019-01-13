@@ -19,15 +19,15 @@ class ContactFormController extends Controller
 
     public function send(Request $request)
     {
-		$user = Auth::user();
-		if (! $user) {
-			return view('/contact-form');
-		}
+        $user = Auth::user();
+        if (! $user) {
+            return view('/contact-form');
+        }
 
-		$text =
-			"FROM: " . $user->name . "\n" .
-			"TEXT: \n" .
-			$request->post('text');
+        $text =
+            "FROM: " . $user->name . "\n" .
+            "TEXT: \n" .
+            $request->post('text');
 
         $this->sendMail($text);
         $this->postSlack($text);
@@ -70,9 +70,9 @@ class ContactFormController extends Controller
     {
         $webHookUrl = env('SLACK_WEBHOOK_URL', '');
         if ($webHookUrl === '') {
-			Log::error('ContactFormController: SLACK_WEBHOOK_URL not set.');
-			return;
-		}
+            Log::error('ContactFormController: SLACK_WEBHOOK_URL not set.');
+            return;
+        }
 
         PostSlackMessage::dispatch($webHookUrl, ['text' => "*Contact Form*\n\n" . $text]);
     }
