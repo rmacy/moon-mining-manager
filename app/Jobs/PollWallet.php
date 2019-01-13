@@ -78,6 +78,7 @@ class PollWallet implements ShouldQueue
 
         $this->delay_counter = 1;
         $date = NULL;
+        $pollNextPage = $transactions->pages < $this->page;
 
         foreach ($transactions as $transaction)
         {
@@ -89,6 +90,10 @@ class PollWallet implements ShouldQueue
                 // Checks to see if this donation was already processed.
                 $payment = Payment::where('ref_id', $ref_id)->first();
                 $rental_payment = RentalPayment::where('ref_id', $ref_id)->first();
+                if ($payment || $rental_payment) {
+					$pollNextPage = false;
+					continue;
+				}
 
                 // Look for matching payers among renters and miners.
                 $renter = Renter::where([
@@ -105,14 +110,22 @@ class PollWallet implements ShouldQueue
                     $this->processRents($transaction, $renter, $ref_id);
                 }
                 // Next, if this donation is actually from a recognised miner (and wasn't already processed).
-                if ($this->userId == env('TAX_CORPORATION_PRIME_USER_ID') &&
-                    isset($miner) && !isset($payment) && !isset($rental_payment)
-                ) {
+                elseif ($this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner) && !isset($payment))
+                {
                     $this->processTaxes($transaction, $miner, $date, $ref_id);
                 }
             }
 
         }
+
+        if ($pollNextPage) {
+			Log::info(
+				'PollWallet: queued job to poll page ' . ($this->page + 1) .
+				' in ' . $this->delay_counter . ' minutes'
+			);
+			PollWallet::dispatch($this->userId, $this->page + 1)
+				->delay(Carbon::now()->addMinutes($this->delay_counter));
+		}
 
         /* FIX SCRIPT FOR UNPROCESSED WALLET TRANSACTIONS, IF NEEDED UPDATE THE DATE TO THE LAST WORKING WALLET IMPORT.
 
