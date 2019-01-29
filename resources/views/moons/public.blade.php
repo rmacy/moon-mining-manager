@@ -7,17 +7,17 @@
     <h1>Alliance Moons</h1>
 
     <p class="center">
-        Click on table headings to sort. To inquire about renting a moon, please evemail
-        <a href="https://zkillboard.com/character/93533671/">Metric Candy</a> quoting the relevant moon ID.
+        To inquire about renting a moon, please use the
+        <a href="/contact-form">contact form</a>
+        quoting the relevant moon ID.
     </p>
-
     <p class="center">
         For more information on the Brave moon rental program, please consult
         <a href="https://wiki.bravecollective.com/member/alliance/industry/moon-rental" target="_blank">this wiki page</a>.
     </p>
-
+    <br>
     <p class="center">
-        <strong>Any moon with an ID > 1502 is NOT for rent.</strong>
+        Click on table headings to sort.
     </p>
 
     <div class="row">
