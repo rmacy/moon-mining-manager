@@ -27,11 +27,6 @@
                             <img src="/assets/bravecollective/web-ui/images/EVE_SSO_Login_Buttons_Large_Black.png"
                                  alt="LOG IN with EVE Online" />
                         </a>
-                        <br><br><hr>
-                        <span class="text-muted">
-                            Admins login
-                            <a class="text-muted" style="text-decoration: underline" href="/admin-sso">here</a>.
-                        </span>
                     </div>
                     <div class="col col-lg-4">
                         <img src="/assets/bravecollective/web-ui/images/logo_vector.svg"
