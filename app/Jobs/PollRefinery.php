@@ -98,6 +98,10 @@ class PollRefinery implements ShouldQueue
 
         foreach ($activity_log as $log_entry)
         {
+            if ($log_entry->last_updated >= date('Y-m-d')) {
+                continue; // ignore entries from today, they may still change
+            }
+
             $hash = hash(
                 'sha1',
                 $log_entry->character_id . $this->observer_id . $log_entry->type_id .
