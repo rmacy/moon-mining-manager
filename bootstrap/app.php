@@ -1,5 +1,8 @@
 <?php
 
+// allow group to change files
+umask(0002);
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application

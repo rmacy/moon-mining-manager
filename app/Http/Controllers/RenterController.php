@@ -167,13 +167,15 @@ class RenterController extends Controller
      */
     public function editRenter($id = NULL)
     {
-        if ($id == NULL)
-        {
+        if ($id == NULL) {
             return redirect('/renters');
         }
 
         // Retrieve more detailed information about the named character.
         $renter = Renter::find($id);
+        if ($renter === null) {
+            return redirect('/renters');
+        }
         $esi = new EsiConnection;
         $conn = $esi->getConnection();
         $character = $conn->invoke('get', '/characters/{character_id}/', [

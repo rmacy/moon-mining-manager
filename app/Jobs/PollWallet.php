@@ -60,6 +60,11 @@ class PollWallet implements ShouldQueue
      */
     public function handle()
     {
+        if (empty($this->userId)) { // it happened, not sure why
+            Log::error('PollWallet:: called without userId.');
+            return;
+        }
+
         $esi = new EsiConnection;
         $this->conn = $esi->getConnection($this->userId);
         $corporationId = $esi->getCorporationId($this->userId);

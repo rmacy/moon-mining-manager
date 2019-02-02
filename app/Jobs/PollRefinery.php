@@ -57,6 +57,11 @@ class PollRefinery implements ShouldQueue
      */
     public function handle()
     {
+        if (empty($this->corporation_id)) {
+            Log::error('PollRefinery:: called without corporation_id with observer_id ' . $this->observer_id);
+            return;
+        }
+
         $esi = new EsiConnection;
 
         Log::info('PollRefinery: requesting mining activity log for refinery ' .
