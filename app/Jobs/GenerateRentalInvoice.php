@@ -78,6 +78,7 @@ class GenerateRentalInvoice implements ShouldQueue
 
         // Update the amount this renter currently owes.
         $renter->amount_owed += $invoice_amount;
+        $renter->generate_invoices_job_run = date('Y-m-d H:i:s');
         Log::info('GenerateRentalInvoice: updated stored amount owed by renter ' . $character->name .
             ' for refinery ' . $refinery->name . ' to ' . $renter->amount_owed);
         $renter->save();
