@@ -7,7 +7,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Jobs\SendEvemail;
 use App\Template;
 use App\Refinery;
 use App\Renter;
@@ -39,16 +38,17 @@ class GenerateRentalInvoice implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
 
         // Retrieve the renter record.
         $renter = Renter::find($this->id);
-        
+
         // Request the character name for this rental agreement.
         $esi = new EsiConnection;
-        $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+        $character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
             'character_id' => $renter->character_id,
         ]);
 
@@ -78,16 +78,18 @@ class GenerateRentalInvoice implements ShouldQueue
 
         // Update the amount this renter currently owes.
         $renter->amount_owed += $invoice_amount;
-        Log::info('GenerateRentalInvoice: updated stored amount owed by renter ' . $character->name . ' for refinery ' . $refinery->name . ' to ' . $renter->amount_owed);
+        $renter->generate_invoices_job_run = date('Y-m-d H:i:s');
+        Log::info('GenerateRentalInvoice: updated stored amount owed by renter ' . $character->name .
+            ' for refinery ' . $refinery->name . ' to ' . $renter->amount_owed);
         $renter->save();
 
         // Pick up the renter invoice template to apply text substitutions.
         $template = Template::where('name', 'renter_invoice')->first();
-        
+
         // Grab the template subject and body.
         $subject = $template->subject;
         $body = $template->body;
-        
+
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
         $subject = str_replace('{name}', $character->name, $subject);
@@ -121,7 +123,8 @@ class GenerateRentalInvoice implements ShouldQueue
         $invoice->amount = $invoice_amount;
         $invoice->save();
 
-        Log::info('GenerateRentalInvoice: saved new invoice for renter ' . $renter->character_id . ' at refinery ' . $renter->refinery_id . ' for amount ' . $invoice_amount);
+        Log::info('GenerateRentalInvoice: saved new invoice for renter ' . $renter->character_id .
+            ' at refinery ' . $renter->refinery_id . ' for amount ' . $invoice_amount);
 
     }
 

@@ -8,6 +8,9 @@
 @if (isset($sub))
     <div class="secondary">{{ $sub }}</div>
 @endif
+@if (isset($sub2))
+    <div class="secondary">{{ $sub2 }}</div>
+@endif
 @if (isset($amount))
     <div class="amount {{ ($amount >= 0) ? 'num-positive' : 'num-negative' }}">
         @if ($amount >= 0)

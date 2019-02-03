@@ -29,7 +29,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        'App\Console\Commands\RunJob'
     ];
 
     /**
@@ -40,31 +40,37 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $rentUserId = env('RENT_CORPORATION_PRIME_USER_ID', 0);
+        $taxUserId = env('TAX_CORPORATION_PRIME_USER_ID', 0);
 
         // Poll all corporation structures to look for refineries.
-        $schedule->job(new PollStructures)->dailyAt('00:00');
+        $schedule->job(new PollStructures($rentUserId))->dailyAt('00:00');
+        $schedule->job(new PollStructures($taxUserId))->dailyAt('00:05');
 
         // Poll all refineries for information about upcoming extraction cycles.
-        $schedule->job(new PollExtractions)->dailyAt('00:10');
+        $schedule->job(new PollExtractions($rentUserId))->dailyAt('00:10');
+        $schedule->job(new PollExtractions($taxUserId))->dailyAt('00:15');
 
         // Check for any newly active refineries.
-        $schedule->job(new PollRefineries)->dailyAt('00:20');
+        $schedule->job(new PollRefineries($rentUserId))->dailyAt('00:20');
+        $schedule->job(new PollRefineries($taxUserId))->dailyAt('00:25');
 
         // Check for miners making payments to the corporation wallet.
-        $schedule->job(new PollWallet)->hourlyAt(30);
+        $schedule->job(new PollWallet($rentUserId))->hourlyAt(30);
+        $schedule->job(new PollWallet($taxUserId))->hourlyAt(35);
 
         // Pull the mining activity for the day and store it.
         $schedule->job(new PollMiningObservers)->dailyAt('12:00');
 
         // Check for any new ores that have been mined where we don't have details of their component materials.
         $schedule->job(new UpdateReprocessedMaterials)->twiceDaily(4, 16);
-        
+
         // Update the stored prices for materials and ores.
         $schedule->job(new UpdateMaterialValues)->dailyAt('05:00');
-        
+
         // Process any new mining activity.
-        $schedule->job(new ProcessMiningActivity)->dailyAt('14:00');
-        
+        $schedule->job(new ProcessMiningActivity)->dailyAt('15:00');
+
         // Archive old price history records.
         $schedule->job(new ArchiveReprocessedMaterialsHistory)->dailyAt('06:55');
 
@@ -75,10 +81,10 @@ class Kernel extends ConsoleKernel
         $schedule->job(new GenerateRentalInvoices)->monthlyOn(1, '09:00');
 
         // Monthly check of miner corporation membership.
-        $schedule->job(new CorporationChecks)->monthlyOn(15, '23:00');
+        $schedule->job(new CorporationChecks)->monthlyOn(15, '20:00');
 
         // Monthly recalculation of moon rental fees.
-        $schedule->job(new CalculateRent)->monthlyOn(25, '15:00');
+        $schedule->job(new CalculateRent)->monthlyOn(25, '16:00');
 
         // Monthly notification of updated moon rental fees.
         $schedule->job(new GenerateRentNotifications)->monthlyOn(25, '22:00');

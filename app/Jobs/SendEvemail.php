@@ -10,8 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Seat\Eseye\Exceptions\RequestFailedException;
 
 class SendEvemail implements ShouldQueue
 {
@@ -23,7 +23,7 @@ class SendEvemail implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param array $mail
      */
     public function __construct($mail)
     {
@@ -34,15 +34,29 @@ class SendEvemail implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
+        $userId = env('MAIL_USER_ID', 0);
+        if ($userId <= 0) {
+            Log::info(
+                'SendEvemail: cannot send mail to character ' .
+                $this->mail['recipients'][0]['recipient_id']. ', MAIL_USER_ID not set'
+            );
+            return;
+        }
+
         $esi = new EsiConnection;
-        $esi->esi->setBody($this->mail);
-        $esi->esi->invoke('post', '/characters/{character_id}/mail/', [
-            'character_id' => $esi->character_id,
+        $conn = $esi->getConnection($userId);
+        $conn->setBody($this->mail);
+        $conn->invoke('post', '/characters/{character_id}/mail/', [
+            'character_id' => $userId,
         ]);
-        Log::info('SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id']);
+        Log::info(
+            'SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id'] .
+            (count($this->mail['recipients']) > 1 ? ' and ' . (count($this->mail['recipients'])-1) . ' more.' : '')
+        );
     }
 
     /**
@@ -50,16 +64,22 @@ class SendEvemail implements ShouldQueue
      */
     public function failed(Exception $exception)
     {
+        if (! $exception instanceof RequestFailedException) {
+            // e. g. EsiScopeAccessDeniedException or something else
+            Log::error('SendEvemail: ' . $exception->getMessage());
+            return;
+        }
+
         // Check what type of exception was thrown.
         if (
             (
                 is_object($exception->getEsiResponse()) && (
-                    stristr($exception->getEsiResponse()->error, 'Too many errors') || 
+                    stristr($exception->getEsiResponse()->error, 'Too many errors') ||
                     stristr($exception->getEsiResponse()->error, 'This software has exceeded the error limit for ESI')
                 )
             ) || (
                 is_string($exception->getEsiResponse()) && (
-                    stristr($exception->getEsiResponse(), 'Too many errors') || 
+                    stristr($exception->getEsiResponse(), 'Too many errors') ||
                     stristr($exception->getEsiResponse(), 'This software has exceeded the error limit for ESI')
                 )
             )
@@ -67,8 +87,8 @@ class SendEvemail implements ShouldQueue
             // We somehow have triggered the error rate limiter, stop requeueing jobs until we can figure out what broke. :(
             Log::info('SendEvemail: bounceback due to hitting the error rate limiter, dumping email job');
             mail(
-                env('ADMIN_EMAIL'), 
-                'Mining Manager rate limiter alert', 
+                env('ADMIN_EMAIL'),
+                'Mining Manager rate limiter alert',
                 date('Y-m-d H:i:s') . ' - SendEvemail: bounceback due to hitting the error rate limiter, dumping email job',
                 'From: ' . env('MAIL_FROM_NAME') . ' <' . env('MAIL_FROM_ADDRESS') . '>'
             );
@@ -87,7 +107,7 @@ class SendEvemail implements ShouldQueue
         }
         else
         {
-            // Send failed for some other reason, try again in a while.
+            // Send failed for some other reason (for example downtime), try again in a while.
             SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes(15));
             Log::info('SendEvemail: re-queued job to send mail in 15 minutes');
         }

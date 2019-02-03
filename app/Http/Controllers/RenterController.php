@@ -16,6 +16,8 @@ class RenterController extends Controller
 
     /**
      * List all current renting individuals and corporations.
+     *
+     * @throws \Exception
      */
     public function showRenters()
     {
@@ -27,7 +29,7 @@ class RenterController extends Controller
         $esi = new EsiConnection;
         foreach ($renters as $renter)
         {
-            $renter->character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+            $renter->character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $renter->character_id,
             ]);
         }
@@ -41,6 +43,10 @@ class RenterController extends Controller
 
     /**
      * Show a summary of invoices and payments for a specific refinery.
+     *
+     * @param $id
+     * @throws \Exception
+     * @return mixed
      */
     public function refineryDetails($id = NULL)
     {
@@ -51,18 +57,22 @@ class RenterController extends Controller
         }
 
         $renter = Renter::where('refinery_id', $id)->first();
+        $refinery = Refinery::where('observer_id', $id)->first();
 
         // Pull the renter character information via ESI.
-        $esi = new EsiConnection;
-        $renter->character = $esi->esi->invoke('get', '/characters/{character_id}/', [
-            'character_id' => $renter->character_id,
-        ]);
-        $renter->character->avatar = $esi->esi->invoke('get', '/characters/{character_id}/portrait/', [
-            'character_id' => $renter->character_id,
-        ]);
-        $renter->character->corporation = $esi->esi->invoke('get', '/corporations/{corporation_id}/', [
-            'corporation_id' => $renter->character->corporation_id,
-        ]);
+        if ($renter !== null) {
+            $esi = new EsiConnection;
+            $conn = $esi->getConnection();
+            $renter->character = $conn->invoke('get', '/characters/{character_id}/', [
+                'character_id' => $renter->character_id,
+            ]);
+            $renter->character->avatar = $conn->invoke('get', '/characters/{character_id}/portrait/', [
+                'character_id' => $renter->character_id,
+            ]);
+            $renter->character->corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
+                'corporation_id' => $renter->character->corporation_id,
+            ]);
+        }
 
         // Build a list of all the invoice and payment activity of this refinery.
         $invoices = RentalInvoice::where('refinery_id', $id)->get();
@@ -84,6 +94,7 @@ class RenterController extends Controller
 
         return view('renters.refinery', [
             'renter' => $renter,
+            'refinery' => $refinery,
             'activity_log' => $activity_log,
         ]);
 
@@ -91,6 +102,10 @@ class RenterController extends Controller
 
     /**
      * Show a summary of invoices and payments for a specific character that is renting refinery(s).
+     *
+     * @param null|int $id
+     * @return mixed
+     * @throws \Exception
      */
     public function renterDetails($id = NULL)
     {
@@ -102,13 +117,14 @@ class RenterController extends Controller
 
         // Pull the renter character information via ESI.
         $esi = new EsiConnection;
-        $renter = $esi->esi->invoke('get', '/characters/{character_id}/', [
+        $conn = $esi->getConnection();
+        $renter = $conn->invoke('get', '/characters/{character_id}/', [
             'character_id' => $id,
         ]);
-        $renter->avatar = $esi->esi->invoke('get', '/characters/{character_id}/portrait/', [
+        $renter->avatar = $conn->invoke('get', '/characters/{character_id}/portrait/', [
             'character_id' => $id,
         ]);
-        $renter->corporation = $esi->esi->invoke('get', '/corporations/{corporation_id}/', [
+        $renter->corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
             'corporation_id' => $renter->corporation_id,
         ]);
 
@@ -133,8 +149,10 @@ class RenterController extends Controller
         return view('renters.character', [
             'renter' => $renter,
             'activity_log' => $activity_log,
-            'total_rent_paid' => DB::table('rental_payments')->select(DB::raw('SUM(amount_received) AS total'))->where('renter_id', $id)->first()->total,
-            'total_rent_due' => DB::table('renters')->select(DB::raw('SUM(amount_owed) AS total'))->where('character_id', $id)->first()->total,
+            'total_rent_paid' => DB::table('rental_payments')
+                ->select(DB::raw('SUM(amount_received) AS total'))->where('renter_id', $id)->first()->total,
+            'total_rent_due' => DB::table('renters')
+                ->select(DB::raw('SUM(amount_owed) AS total'))->where('character_id', $id)->first()->total,
             'rentals' => Renter::where('character_id', $id)->whereNotNull('refinery_id')->get(),
         ]);
 
@@ -142,25 +160,32 @@ class RenterController extends Controller
 
     /**
      * Form to edit an existing renter record.
+     *
+     * @param null|int $id
+     * @return mixed
+     * @throws \Exception
      */
     public function editRenter($id = NULL)
     {
-        if ($id == NULL)
-        {
+        if ($id == NULL) {
             return redirect('/renters');
         }
 
         // Retrieve more detailed information about the named character.
         $renter = Renter::find($id);
+        if ($renter === null) {
+            return redirect('/renters');
+        }
         $esi = new EsiConnection;
-        $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+        $conn = $esi->getConnection();
+        $character = $conn->invoke('get', '/characters/{character_id}/', [
             'character_id' => $renter->character_id,
         ]);
-        $portrait = $esi->esi->invoke('get', '/characters/{character_id}/portrait/', [
+        $portrait = $conn->invoke('get', '/characters/{character_id}/portrait/', [
             'character_id' => $renter->character_id,
         ]);
         $character->portrait = $portrait->px128x128;
-        $corporation = $esi->esi->invoke('get', '/corporations/{corporation_id}/', [
+        $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
             'corporation_id' => $character->corporation_id,
         ]);
         $character->corporation = $corporation->name;
@@ -171,7 +196,7 @@ class RenterController extends Controller
 
         return view('renters.edit', [
             'renter' => $renter,
-            'refineries' => Refinery::all(),
+            'refineries' => Refinery::orderBy('name')->get(),
             'moons' => $moons,
         ]);
     }
@@ -185,7 +210,7 @@ class RenterController extends Controller
         $moons = Moon::orderBy('region_id')->orderBy('solar_system_id')->orderBy('planet')->orderBy('moon')->get();
 
         return view('renters.new', [
-            'refineries' => Refinery::all(),
+            'refineries' => Refinery::orderBy('name')->get(),
             'moons' => $moons,
         ]);
     }

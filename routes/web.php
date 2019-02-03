@@ -35,10 +35,11 @@ Route::get('/', 'AppController@home')->middleware('admin');
 // Access management.
 Route::middleware(['admin'])->prefix('access')->group(function () {
     Route::get('/', 'AppController@showAuthorisedUsers');
-    Route::get('/new', 'AppController@showUserAccessHistory');
+    //Route::get('/new', 'AppController@showUserAccessHistory');
     Route::post('/admin/{id}', 'AppController@makeUserAdmin');
     Route::post('/whitelist/{id}', 'AppController@whitelistUser');
     Route::post('/blacklist/{id}', 'AppController@blacklistUser');
+    Route::post('/toggle-form-mail/{id}', 'AppController@toggleFormMail');
 });
 
 // Reports.
@@ -73,15 +74,24 @@ Route::middleware(['login'])->prefix('moons')->group(function () {
     Route::get('/', 'MoonController@index');
 });
 
+// Contact form
+Route::middleware(['login'])->prefix('contact-form')->group(function () {
+    Route::get('/', 'ContactFormController@index');
+    Route::post('/', 'ContactFormController@send');
+});
+
 // Moon composition importer.
 Route::middleware(['admin'])->prefix('moonadmin')->group(function () {
     Route::get('/', 'MoonImportController@index');
     Route::post('/import', 'MoonImportController@import');
+    Route::post('/import_survey_data', 'MoonImportController@importSurveyData');
+    Route::get('/export', 'MoonImportController@export');
     Route::get('/calculate', 'MoonImportController@calculate');
 });
 
 // Payment management.
 Route::middleware(['admin'])->prefix('payment')->group(function () {
+    Route::get('/', 'PaymentController@listManualPayments');
     Route::get('/new', 'PaymentController@addNewPayment');
     Route::post('/new', 'PaymentController@insertNewPayment');
 });
@@ -93,7 +103,7 @@ Route::middleware(['admin'])->prefix('taxes')->group(function () {
     Route::post('/update_value/{id}', 'TaxController@updateValue');
     Route::post('/update_rate/{id}', 'TaxController@updateTaxRate');
     Route::post('/update_master_rate', 'TaxController@updateMasterTaxRate');
-    Route::get('/load', 'TaxController@loadInitialTaxRates');
+    //Route::get('/load', 'TaxController@loadInitialTaxRates');
 });
 
 // Email template management.

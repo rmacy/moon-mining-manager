@@ -10,25 +10,40 @@
             <div class="card-heading">Refinery</div>
             @include('common.card', [
                 'avatar' => 'https://imageserver.eveonline.com/Render/35835_128.png',
-                'name' => $renter->refinery->name, 
-                'sub' => 'P' . $renter->moon->planet . '-M' . $renter->moon->moon . ', ' . $renter->refinery->system->solarSystemName . ', ' . $renter->moon->region->regionName
+                'name' => $refinery->name,
+                'sub' => $renter ?
+                    'P' . $renter->moon->planet . '-M' .
+                        $renter->moon->moon . ', ' .
+                        $renter->refinery->system->solarSystemName . ', ' .
+                        $renter->moon->region->regionName :
+                    $refinery->name,
+                'sub2' => $refinery->corporation ? $refinery->corporation->name : ''
             ])
         </div>
 
         <div class="col-4">
             <div class="card-heading">Rented by</div>
-            @include('common.card', [
-                'link' => '/renters/character/' . $renter->character_id,
-                'avatar' => $renter->character->avatar->px128x128,
-                'name' => $renter->character->name, 
-                'sub' => $renter->character->corporation->name
-            ])
+            @if($renter)
+                @include('common.card', [
+                    'link' => '/renters/character/' . $renter->character_id,
+                    'avatar' => $renter->character->avatar->px128x128,
+                    'name' => $renter->character->name,
+                    'sub' => $renter->character->corporation->name
+                ])
+            @else
+                @include('common.card', [
+                    'avatar' => '',
+                    'name' => 'Not rented.'
+                ])
+            @endif
         </div>
 
         <div class="col-4">
             <div class="card-heading">Monthly rent</div>
             <div class="card highlight">
-                <span class="num">{{ number_format($renter->monthly_rental_fee) }}</span> ISK
+                @if($renter)
+                    <span class="num">{{ number_format($renter->monthly_rental_fee) }}</span> ISK
+                @endif
             </div>
         </div>
 

@@ -7,7 +7,11 @@
     <div class="row">
 
         <div class="col-12">
-            <div class="card-heading">Existing Moon Data (<a href="/moons/calculate">Calculate monthly rents</a>)</div>
+            <div class="card-heading">
+                Existing Moon Data (<a href="/moonadmin/calculate">Calculate monthly rents</a>)
+                - <a href="/moonadmin/export">Export</a>
+            </div>
+
             <table id="moons">
                 <thead>
                     <tr>
@@ -58,7 +62,7 @@
         <div class="col-12">
             <div class="card-heading">Import Moon Data</div>
             <div class="card">
-                <form action="/moons/import" method="post">
+                <form action="/moonadmin/import" method="post">
                     {{ csrf_field() }}
                     <textarea name="data" rows="50" cols="200" placeholder="Paste raw moon data here from spreadsheet in the following format (columns): Region name, System name, Planet number, Moon number, Renter name, Mineral 1 name, Mineral 1 %, Mineral 2 name, Mineral 2 %, [Mineral 3 name, Mineral 3 %, [Mineral 4 name, Mineral 4 %]]"></textarea>
                     <div class="form-actions">
@@ -70,12 +74,48 @@
 
     </div>
 
+    <div class="row">
+        <div class="col-12">
+            <div class="card-heading">Import Moon Survey Data</div>
+            <div class="card">
+                <form action="/moonadmin/import_survey_data" method="post">
+                    {{ csrf_field() }}
+                    <textarea name="data" rows="50" cols="200" placeholder="copy paste from game"></textarea>
+                    <a href="#" onclick="moonAdminImportToggleExample(event)">example data</a>
+<pre class="moon-admin-survey-data-example" style="display: none">
+Moon	Moon Product	Quant.	TypeID	SolarSystemID	PlanetID	MoonID
+KBP7-G VII - Moon 3
+	Euxenite	0.6	45495	30003729	40236155	40236159
+	Carnotite	0.4	45502	30003729	40236155	40236159
+KBP7-G VII - Moon 4
+	Cinnabar	0.19	45506	30003729	40236155	40236160
+	Cubic Bistot	0.23	46676	30003729	40236155	40236160
+	Euxenite	0.4	45495	30003729	40236155	40236160
+	Loparite	0.18	45512	30003729	40236155	40236160
+</pre>
+                    <div class="form-actions">
+                        <button type="submit">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
-    
+
         window.addEventListener('load', function () {
             $('#moons').tablesorter();
         });
-    
+
+        function moonAdminImportToggleExample(evt) {
+            $.Event(evt).preventDefault();
+            var $example = $('.moon-admin-survey-data-example');
+            if ($example.is(':visible')) {
+                $example.hide();
+            } else {
+                $example.show();
+            }
+        }
     </script>
 
 @endsection

@@ -8,7 +8,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Renter;
-use App\Jobs\GenerateRentalInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -26,8 +25,16 @@ class GenerateRentalInvoices implements ShouldQueue
     public function handle()
     {
 
-        // Grab all the renters with active agreements.
-        $renters = Renter::whereRaw('refinery_id IS NOT NULL && start_date <= CURDATE() AND (end_date IS NULL OR end_date >= CURDATE())')->get();
+        // Grab all the renters with active agreements that were not yet updated this month.
+        $renters = Renter::whereRaw(
+            'refinery_id IS NOT NULL AND 
+            start_date <= CURDATE() AND 
+            (end_date IS NULL OR end_date >= CURDATE()) AND
+            (
+                generate_invoices_job_run IS NULL OR
+                generate_invoices_job_run < CONCAT(LAST_DAY(DATE_SUB(NOW(), INTERVAL 1 MONTH)), " 23:59:59")
+            )'
+        )->get();
 
         // Loop through all the renters and send an invoice for the appropriate amount (taking into account partial months).
         $delay_counter = 1;

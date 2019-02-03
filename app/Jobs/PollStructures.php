@@ -17,75 +17,62 @@ class PollStructures implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
+
+    /**
+     * @var int
+     */
+    private $user_id;
+
+    /**
+     * @var int
+     */
     private $page;
-    private $total_pages = 1;
 
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param int $user_id
+     * @param int $page
      */
-    public function __construct($page = 1)
+    public function __construct($user_id, $page = 1)
     {
-        $esi = new EsiConnection;
+        $this->user_id = $user_id;
         $this->page = $page;
-    }
-
-    /**
-     * Grab the X-Pages header out of the response header.
-     */
-    private function extractXPagesHeader($curl, $header)
-    {
-        if (stristr($header, 'X-Pages'))
-        {
-            preg_match('/\d+/', $header, $matches);
-            if (count($matches))
-            {
-                $this->total_pages = $matches[0];
-            }
-        }
-        return strlen($header);
     }
 
     /**
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
         $esi = new EsiConnection;
-        
-        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
-        if ($this->page == 1)
-        {
-            // This raw curl request can be replaced with an $esi call once the Eseye library is updated to return response headers.
-            $url = 'https://esi.tech.ccp.is/latest/corporations/' . $esi->corporation_id . '/structures/?datasource=' . env('ESEYE_DATASOURCE', 'tranquility') . '&token=' . $esi->token;
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, "extractXPagesHeader"));
-            $body = curl_exec($ch);
-            if ($this->total_pages > 1)
-            {
-                Log::info('PollStructures: found more than 1 page of corporation structures, queuing additional jobs for ' . $this->total_pages . ' total pages');
-                $delay_counter = 1;
-                for ($i = 2; $i <= $this->total_pages; $i++)
-                {
-                    PollStructures::dispatch($i)->delay(Carbon::now()->addMinutes($delay_counter));
-                    $delay_counter++;
-                }
-            }
-        }
 
         Log::info('PollStructures: requesting corporation structures, page ' . $this->page);
 
         // Request all corporation structures of the prime user's corporation.
-        $structures = $esi->esi->setQueryString([
+        $structures = $esi->getConnection($this->user_id)->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporations/{corporation_id}/structures/', [
-            'corporation_id' => $esi->corporation_id,
+            'corporation_id' => $esi->getCorporationId($this->user_id),
         ]);
+
+        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
+        if ($this->page == 1 && $structures->pages > 1)
+        {
+            Log::info(
+                'PollStructures: found more than 1 page of corporation structures, queuing additional jobs for ' .
+                $structures->pages . ' total pages'
+            );
+            $delay_counter = 1;
+            for ($i = 2; $i <= $structures->pages; $i++)
+            {
+                PollStructures::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delay_counter));
+                $delay_counter++;
+            }
+        }
 
         // Loop through all the structures, looking for Athanors or Tataras.
         $refineries = array(
@@ -104,11 +91,15 @@ class PollStructures implements ShouldQueue
                     $refinery = new Refinery;
                     $refinery->observer_id = $structure->structure_id;
                     $refinery->observer_type = 'structure';
+                    $refinery->corporation_id = $structure->corporation_id;
                     $refinery->save();
                     Log::info('PollStructures: created new refinery record for ' . $structure->structure_id);
                 }
-                // Create a new job to fetch or update the parts we don't get from this response.
-                PollStructureData::dispatch($structure->structure_id)->delay(Carbon::now()->addMinutes($delay_counter));
+
+                // Create a new job to fetch or update the parts we don't get from this response,
+                // it also updates the owner.
+                PollStructureData::dispatch($structure->structure_id, $this->user_id)
+                    ->delay(Carbon::now()->addMinutes($delay_counter));
                 $delay_counter++;
             }
         }

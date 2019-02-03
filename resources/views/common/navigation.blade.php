@@ -59,5 +59,10 @@
             Settings
         </a>
     </li>
+    <li>
+        <a href="/payment">
+            <i class="icon-credit-card"></i>
+            Manual Payment
+        </a>
+    </li>
 </ul>
-        

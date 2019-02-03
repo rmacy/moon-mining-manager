@@ -9,7 +9,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Renter;
 use App\Refinery;
-use App\Jobs\SendEvemail;
 use App\Classes\EsiConnection;
 use Illuminate\Support\Facades\Log;
 
@@ -23,6 +22,7 @@ class SendRenterDelinquencyList implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
@@ -38,7 +38,7 @@ class SendRenterDelinquencyList implements ShouldQueue
         foreach ($renters as $renter)
         {
             // Request the character name for this rental agreement.
-            $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+            $character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $renter->character_id,
             ]);
             // Grab a reference to the refinery that is being rented.
@@ -46,7 +46,7 @@ class SendRenterDelinquencyList implements ShouldQueue
             // Output the details of this renter to the email body.
             $body .= 'Renter: <url=showinfo:1376//93533671>' . $character->name . '</url>';
             $body .= "\n";
-            $body .= 'Refinery: <loc><url=http://http://goo.bravecollective.com/renters/refinery/' . $renter->refinery_id . '>' . $refinery->name . '</url></loc>';
+            $body .= 'Refinery: <loc><url=https://moons.bravecollective.com/renters/refinery/' . $renter->refinery_id . '>' . $refinery->name . '</url></loc>';
             $body .= "\n";
             $body .= 'Balance: ' . number_format($renter->amount_owed, 0) . ' ISK';
             $body .= "\n\n";

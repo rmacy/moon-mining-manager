@@ -13,7 +13,6 @@ use App\Renter;
 use App\Payment;
 use App\RentalPayment;
 use App\Template;
-use App\Jobs\SendEvemail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -22,15 +21,34 @@ class PollWallet implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 10;
+
+    /**
+     * @var int
+     */
+    private $userId;
+
+    /**
+     * @var int
+     */
     private $page;
 
     /**
-     * Create a new job instance.
-     *
-     * @return void
+     * @var \Seat\Eseye\Eseye
      */
-    public function __construct($page = 1)
+    private $conn;
+
+    /**
+     * @var int
+     */
+    private $delay_counter;
+
+    /**
+     * @param int $userId
+     * @param int $page
+     */
+    public function __construct($userId, $page = 1)
     {
+        $this->userId = $userId;
         $this->page = $page;
     }
 
@@ -38,26 +56,34 @@ class PollWallet implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
-        
-        $esi = new EsiConnection;
+        if (empty($this->userId)) { // it happened, not sure why
+            Log::error('PollWallet:: called without userId.');
+            return;
+        }
 
-        Log::info('PollWallet: Retrieving transactions, page ' . $this->page);
+        $esi = new EsiConnection;
+        $this->conn = $esi->getConnection($this->userId);
+        $corporationId = $esi->getCorporationId($this->userId);
+
+        Log::info('PollWallet: Retrieving transactions, corporation ' . $corporationId . ', page ' . $this->page);
 
         // Request the transactions from the master wallet division.
-        $transactions = $esi->esi->setQueryString([
+        $transactions = $this->conn->setQueryString([
             'page' => $this->page,
         ])->invoke('get', '/corporations/{corporation_id}/wallets/{division}/journal/', [
-            'corporation_id' => $esi->corporation_id,
+            'corporation_id' => $corporationId,
             'division' => 1, // master wallet
         ]);
 
         Log::info('PollWallet: retrieved ' . count($transactions) . ' transactions from the corporation wallet');
 
-        $delay_counter = 1;
+        $this->delay_counter = 1;
         $date = NULL;
+        $pollNextPage = $transactions->pages < $this->page;
 
         foreach ($transactions as $transaction)
         {
@@ -69,6 +95,10 @@ class PollWallet implements ShouldQueue
                 // Checks to see if this donation was already processed.
                 $payment = Payment::where('ref_id', $ref_id)->first();
                 $rental_payment = RentalPayment::where('ref_id', $ref_id)->first();
+                if ($payment || $rental_payment) {
+                    $pollNextPage = false;
+                    continue;
+                }
 
                 // Look for matching payers among renters and miners.
                 $renter = Renter::where([
@@ -76,178 +106,33 @@ class PollWallet implements ShouldQueue
                     ['amount_owed', $transaction->amount],
                 ])->first();
                 $miner = Miner::where('eve_id', $transaction->first_party_id)->first();
-                
-                // First check if the payment comes from a recognised renter and is exactly the right amount for an outstanding refinery balance (and wasn't already processed).
-                if (isset($renter) && !isset($rental_payment))
+
+                // First check if the payment comes from a recognised renter and is exactly
+                // the right amount for an outstanding refinery balance
+                // (and wasn't already processed).
+                if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') && isset($renter) && !isset($rental_payment))
                 {
-                    // Record this transaction in the rental_payments table.
-                    $payment = new RentalPayment;
-                    $payment->renter_id = $transaction->first_party_id;
-                    $payment->refinery_id = $renter->refinery_id;
-                    $payment->ref_id = $ref_id;
-                    $payment->amount_received = $transaction->amount;
-                    $payment->save();
-
-                    // Clear their outstanding debt.
-                    $renter->amount_owed = 0;
-                    $renter->save();
-                    Log::info('PollWallet: saved a new payment from renter ' . $renter->character_id . ' at refinery ' . $renter->refinery_id . ' for ' . $transaction->amount);
-
-                    // Retrieve the name of the character.
-                    $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
-                        'character_id' => $renter->character_id,
-                    ]);
-
-                    // Send a receipt.
-                    $template = Template::where('name', 'receipt')->first();
-                    
-                    // Replace placeholder elements in email template.
-                    $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
-                    $template->subject = str_replace('{name}', $character->name, $template->subject);
-                    $template->subject = str_replace('{amount}', $transaction->amount, $template->subject);
-                    $template->subject = str_replace('{amount_owed}', $renter->amount_owed, $template->subject);
-                    $template->body = str_replace('{date}', date('Y-m-d'), $template->body);
-                    $template->body = str_replace('{name}', $character->name, $template->body);
-                    $template->body = str_replace('{amount}', $transaction->amount, $template->body);
-                    $template->body = str_replace('{amount_owed}', $renter->amount_owed, $template->body);
-                    $mail = array(
-                        'body' => $template->body,
-                        'recipients' => array(
-                            array(
-                                'recipient_id' => $renter->character_id,
-                                'recipient_type' => 'character'
-                            )
-                        ),
-                        'subject' => $template->subject,
-                        'approved_cost' => 5000,
-                    );
-        
-                    // Queue sending the evemail, spaced at 1-minute intervals to avoid triggering the mailspam limiter (4/min).
-                    SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($delay_counter));
-                    $delay_counter++;
-                    Log::info('PollWallet: queued job to send rental receipt evemail');
+                    $this->processRents($transaction, $renter, $ref_id);
                 }
                 // Next, if this donation is actually from a recognised miner (and wasn't already processed).
-                elseif (isset($miner) && !isset($payment) && !isset($rental_payment))
+                elseif ($this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner) && !isset($payment))
                 {
-
-                    Log::info('PollWallet: found a player donation of ' . $transaction->amount . ' ISK from a recognised miner ' . $miner->eve_id . ' on ' . $date . ', reference ' . $ref_id);
-
-                    // Parse the 'reason' entered by the player to see if they want to pay off other players/alts bills.
-                    if (isset($transaction->reason))
-                    {
-                        $reason = $transaction->reason;
-                    }
-                    if (isset($reason) && strlen($reason) > 0)
-                    {
-                        // Split by commas.
-                        $elements = explode(',', $reason);
-                        $recipients = [];
-
-                        // For each element found, test it to see if it is a character ID or name, and find a reference to the relevant miner.
-                        foreach ($elements as $element)
-                        {
-                            if (preg_match('/^\d+$/', trim($element)))
-                            {
-                                $recipient_miner = Miner::where('eve_id', trim($element))->first();
-                            }
-                            else
-                            {
-                                $recipient_miner = Miner::where('name', trim($element))->first();
-                            }
-                            if (isset($recipient_miner))
-                            {
-                                $recipients[] = $recipient_miner;
-                            }
-                        }
-                        Log::info('PollWallet: detected player-entered reason for payment, parsed for alternative recipients of payment, found ' . count($recipients) . ' additional valid recipients', [
-                            'recipients' => $recipients
-                        ]);
-
-                        // If any valid recipients were found, create payments to them.
-                        if (count($recipients) > 0)
-                        {
-                            foreach ($recipients as $recipient)
-                            {
-                                // Calculate how much to pay off for this recipient - either the full amount, or whatever is left of the balance.
-                                if ($transaction->amount >= $recipient->amount_owed)
-                                {
-                                    $payment_amount = $recipient->amount_owed;
-                                }
-                                else
-                                {
-                                    $payment_amount = $transaction->amount;
-                                }
-
-                                // Update the remaining balance of what was sent.
-                                $transaction->amount = $transaction->amount - $payment_amount;
-
-                                // Record the transaction in the payments table.
-                                $payment = new Payment;
-                                $payment->miner_id = $recipient->eve_id;
-                                $payment->ref_id = $ref_id;
-                                $payment->amount_received = $payment_amount;
-                                $payment->save();
-                                Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id . ' on behalf of miner ' . $recipient->eve_id . ' for ' . $payment_amount);
-
-                                // Deduct the amount from the recipient's outstanding balance.
-                                $recipient->amount_owed -= $payment_amount;
-                                $recipient->save();
-                            }
-                        }
-                    }
-
-                    // If there is any money left to apply to the donator's balance after paying other recipients.
-                    if ($transaction->amount > 1)
-                    {
-                        // Record this transaction in the payments table.
-                        $payment = new Payment;
-                        $payment->miner_id = $transaction->first_party_id;
-                        $payment->ref_id = $ref_id;
-                        $payment->amount_received = $transaction->amount;
-                        $payment->save();
-
-                        Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id . ' for ' . $transaction->amount);
-
-                        // Deduct the amount from their outstanding balance.
-                        $miner->amount_owed -= $transaction->amount;
-                        $miner->save();
-                    }
-
-                    // Send a receipt.
-                    $template = Template::where('name', 'receipt')->first();
-
-                    // Replace placeholder elements in email template.
-                    $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
-                    $template->subject = str_replace('{name}', $miner->name, $template->subject);
-                    $template->subject = str_replace('{amount}', $transaction->amount, $template->subject);
-                    $template->subject = str_replace('{amount_owed}', $miner->amount_owed, $template->subject);
-                    $template->body = str_replace('{date}', date('Y-m-d'), $template->body);
-                    $template->body = str_replace('{name}', $miner->name, $template->body);
-                    $template->body = str_replace('{amount}', $transaction->amount, $template->body);
-                    $template->body = str_replace('{amount_owed}', $miner->amount_owed, $template->body);
-                    $mail = array(
-                        'body' => $template->body,
-                        'recipients' => array(
-                            array(
-                                'recipient_id' => $miner->eve_id,
-                                'recipient_type' => 'character'
-                            )
-                        ),
-                        'subject' => $template->subject,
-                    );
-        
-                    // Queue sending the evemail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
-                    SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($delay_counter));
-                    Log::info('PollWallet: queued job to send tax receipt evemail in ' . $delay_counter . ' minutes');
-                    $delay_counter++;
-
+                    $this->processTaxes($transaction, $miner, $date, $ref_id);
                 }
             }
 
         }
 
-        /* FIX SCRIPT FOR UNPROCESSED WALLET TRANSACTIONS, IF NEEDED UPDATE THE DATE TO THE LAST WORKING WALLET IMPORT. 
+        if ($pollNextPage) {
+            Log::info(
+                'PollWallet: queued job to poll page ' . ($this->page + 1) .
+                ' in ' . $this->delay_counter . ' minutes'
+            );
+            PollWallet::dispatch($this->userId, $this->page + 1)
+                ->delay(Carbon::now()->addMinutes($this->delay_counter));
+        }
+
+        /* FIX SCRIPT FOR UNPROCESSED WALLET TRANSACTIONS, IF NEEDED UPDATE THE DATE TO THE LAST WORKING WALLET IMPORT.
 
         // If the last transaction date is not earlier than a specified date, request the next page of wallet results.
         if (isset($date) && $date > '2018-04-25')
@@ -265,4 +150,189 @@ class PollWallet implements ShouldQueue
 
     }
 
+    /**
+     * @param \stdClass $transaction
+     * @param Renter $renter
+     * @param int $ref_id
+     * @throws \Seat\Eseye\Exceptions\EsiScopeAccessDeniedException
+     * @throws \Seat\Eseye\Exceptions\InvalidContainerDataException
+     * @throws \Seat\Eseye\Exceptions\UriDataMissingException
+     */
+    private function processRents($transaction, Renter $renter, $ref_id)
+    {
+        // Record this transaction in the rental_payments table.
+        $payment = new RentalPayment;
+        $payment->renter_id = $transaction->first_party_id;
+        $payment->refinery_id = $renter->refinery_id;
+        $payment->ref_id = $ref_id;
+        $payment->amount_received = $transaction->amount;
+        $payment->save();
+
+        // Clear their outstanding debt.
+        $renter->amount_owed = 0;
+        $renter->save();
+        Log::info('PollWallet: saved a new payment from renter ' . $renter->character_id .
+            ' at refinery ' . $renter->refinery_id . ' for ' . $transaction->amount);
+
+        // Retrieve the name of the character.
+        $character = $this->conn->invoke('get', '/characters/{character_id}/', [
+            'character_id' => $renter->character_id,
+        ]);
+
+        // Send a receipt.
+        $template = Template::where('name', 'receipt')->first();
+
+        // Replace placeholder elements in email template.
+        $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
+        $template->subject = str_replace('{name}', $character->name, $template->subject);
+        $template->subject = str_replace('{amount}', $transaction->amount, $template->subject);
+        $template->subject = str_replace('{amount_owed}', $renter->amount_owed, $template->subject);
+        $template->body = str_replace('{date}', date('Y-m-d'), $template->body);
+        $template->body = str_replace('{name}', $character->name, $template->body);
+        $template->body = str_replace('{amount}', $transaction->amount, $template->body);
+        $template->body = str_replace('{amount_owed}', $renter->amount_owed, $template->body);
+        $mail = array(
+            'body' => $template->body,
+            'recipients' => array(
+                array(
+                    'recipient_id' => $renter->character_id,
+                    'recipient_type' => 'character'
+                )
+            ),
+            'subject' => $template->subject,
+            'approved_cost' => 5000,
+        );
+
+        // Queue sending the eve mail, spaced at 1-minute intervals to avoid triggering the mail spam limiter (4/min).
+        SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->delay_counter));
+        $this->delay_counter++;
+        Log::info('PollWallet: queued job to send rental receipt eve mail');
+    }
+
+    /**
+     * @param \stdClass $transaction
+     * @param Miner $miner
+     * @param string $date
+     * @param int $ref_id
+     */
+    private function processTaxes($transaction, Miner $miner, $date, $ref_id)
+    {
+        Log::info('PollWallet: found a player donation of ' . $transaction->amount .
+            ' ISK from a recognised miner ' . $miner->eve_id . ' on ' . $date . ', reference ' . $ref_id);
+
+        // Parse the 'reason' entered by the player to see if they want to pay off other players/alts bills.
+        if (isset($transaction->reason))
+        {
+            $reason = $transaction->reason;
+        }
+        if (isset($reason) && strlen($reason) > 0)
+        {
+            // Split by commas.
+            $elements = explode(',', $reason);
+            $recipients = [];
+
+            // For each element found, test it to see if it is a character ID or name, and find a
+            // reference to the relevant miner.
+            foreach ($elements as $element)
+            {
+                if (preg_match('/^\d+$/', trim($element)))
+                {
+                    $recipient_miner = Miner::where('eve_id', trim($element))->first();
+                }
+                else
+                {
+                    $recipient_miner = Miner::where('name', trim($element))->first();
+                }
+                if (isset($recipient_miner))
+                {
+                    $recipients[] = $recipient_miner;
+                }
+            }
+            Log::info(
+                'PollWallet: detected player-entered reason for payment, parsed for alternative recipients of payment, found ' .
+                    count($recipients) . ' additional valid recipients',
+                ['recipients' => $recipients]
+            );
+
+            // If any valid recipients were found, create payments to them.
+            if (count($recipients) > 0)
+            {
+                foreach ($recipients as $recipient)
+                {
+                    // Calculate how much to pay off for this recipient - either the full amount, or whatever
+                    // is left of the balance.
+                    if ($transaction->amount >= $recipient->amount_owed)
+                    {
+                        $payment_amount = $recipient->amount_owed;
+                    }
+                    else
+                    {
+                        $payment_amount = $transaction->amount;
+                    }
+
+                    // Update the remaining balance of what was sent.
+                    $transaction->amount = $transaction->amount - $payment_amount;
+
+                    // Record the transaction in the payments table.
+                    $payment = new Payment;
+                    $payment->miner_id = $recipient->eve_id;
+                    $payment->ref_id = $ref_id;
+                    $payment->amount_received = $payment_amount;
+                    $payment->save();
+                    Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id .
+                        ' on behalf of miner ' . $recipient->eve_id . ' for ' . $payment_amount);
+
+                    // Deduct the amount from the recipient's outstanding balance.
+                    $recipient->amount_owed -= $payment_amount;
+                    $recipient->save();
+                }
+            }
+        }
+
+        // If there is any money left to apply to the donator's balance after paying other recipients.
+        if ($transaction->amount > 1)
+        {
+            // Record this transaction in the payments table.
+            $payment = new Payment;
+            $payment->miner_id = $transaction->first_party_id;
+            $payment->ref_id = $ref_id;
+            $payment->amount_received = $transaction->amount;
+            $payment->save();
+
+            Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id . ' for ' . $transaction->amount);
+
+            // Deduct the amount from their outstanding balance.
+            $miner->amount_owed -= $transaction->amount;
+            $miner->save();
+        }
+
+        // Send a receipt.
+        $template = Template::where('name', 'receipt')->first();
+
+        // Replace placeholder elements in email template.
+        $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
+        $template->subject = str_replace('{name}', $miner->name, $template->subject);
+        $template->subject = str_replace('{amount}', $transaction->amount, $template->subject);
+        $template->subject = str_replace('{amount_owed}', $miner->amount_owed, $template->subject);
+        $template->body = str_replace('{date}', date('Y-m-d'), $template->body);
+        $template->body = str_replace('{name}', $miner->name, $template->body);
+        $template->body = str_replace('{amount}', $transaction->amount, $template->body);
+        $template->body = str_replace('{amount_owed}', $miner->amount_owed, $template->body);
+        $mail = array(
+            'body' => $template->body,
+            'recipients' => array(
+                array(
+                    'recipient_id' => $miner->eve_id,
+                    'recipient_type' => 'character'
+                )
+            ),
+            'subject' => $template->subject,
+        );
+
+        // Queue sending the eve mail, spaced at 1 minute intervals to avoid triggering the mail spam limiter (4/min).
+        SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->delay_counter));
+        Log::info('PollWallet: queued job to send tax receipt eve mail in ' . $this->delay_counter . ' minutes');
+        $this->delay_counter++;
+
+    }
 }

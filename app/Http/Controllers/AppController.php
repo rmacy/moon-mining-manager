@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\SolarSystem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Whitelist;
@@ -10,8 +10,6 @@ use App\User;
 use App\Miner;
 use App\Refinery;
 use App\Payment;
-use App\SolarSystem;
-use App\MiningActivity;
 
 class AppController extends Controller
 {
@@ -20,7 +18,7 @@ class AppController extends Controller
      * App homepage. Check if the user is currently signed in, and either show
      * a signin prompt or the homepage.
      *
-     * @return Response
+     * @return \Illuminate\View\View
      */
     public function home()
     {
@@ -57,7 +55,7 @@ class AppController extends Controller
         }
         $top_refinery = Refinery::orderBy('income', 'desc')->first();
         $top_refinery_system = Refinery::select(DB::raw('solar_system_id, SUM(income) AS total'))->groupBy('solar_system_id')->orderBy('total', 'desc')->first();
-        if (isset($top_refinery_system))
+        if (isset($top_refinery_system) && $top_refinery_system->solar_system_id > 0)
         {
             $top_system = SolarSystem::find($top_refinery_system->solar_system_id);
             $top_system->total = $top_refinery_system->total;
@@ -73,14 +71,13 @@ class AppController extends Controller
             'refineries' => Refinery::orderBy('income', 'desc')->get(),
             'total_income' => $total_income->total,
         ]);
-
     }
 
     /**
      * Access management user list. List all the current whitelisted users, together
      * with the person that authorised them.
-     * 
-     * @return Response
+     *
+     * @return \Illuminate\View\View
      */
     public function showAuthorisedUsers()
     {
@@ -92,7 +89,7 @@ class AppController extends Controller
                 $q->select('eve_id')->from('whitelist');
             })->get(),
         ]);
-        
+
     }
 
     /**
@@ -137,6 +134,8 @@ class AppController extends Controller
 
     /**
      * Blacklist a new user. (Well, it's not really a blacklist, just de-whitelist them.)
+	 *
+	 * @throws \Exception
      */
     public function blacklistUser($id = NULL)
     {
@@ -149,10 +148,21 @@ class AppController extends Controller
         return redirect('/access');
     }
 
+    public function toggleFormMail($id)
+    {
+        $user = Whitelist::where('eve_id', $id)->first();
+        if ($user) {
+            $user->form_mail = ! $user->form_mail;
+        $user->save();
+        }
+
+        return redirect('/access');
+    }
+
     /**
      * Logout the currently authenticated user.
      *
-     * @return Response
+     * @return \Illuminate\View\View
      */
     public function logout()
     {

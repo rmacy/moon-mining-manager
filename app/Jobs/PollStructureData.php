@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Corporation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -16,30 +17,42 @@ class PollStructureData implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 10;
+
+    /**
+     * @var int
+     */
     private $structure_id;
+
+    /**
+     * @var int
+     */
+    private $user_id;
 
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param int $structure_id
+     * @param int $user_id
      */
-    public function __construct($id)
+    public function __construct($structure_id, $user_id)
     {
-        $this->structure_id = $id;
+        $this->structure_id = $structure_id;
+        $this->user_id = $user_id;
     }
 
     /**
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
-
         $esi = new EsiConnection;
+        $conn = $esi->getConnection($this->user_id);
 
         // Pull down additional information about this structure.
-        $structure = $esi->esi->invoke('get', '/universe/structures/{structure_id}/', [
+        $structure = $conn->invoke('get', '/universe/structures/{structure_id}/', [
             'structure_id' => $this->structure_id,
         ]);
 
@@ -47,10 +60,25 @@ class PollStructureData implements ShouldQueue
         $refinery = Refinery::where('observer_id', $this->structure_id)->first();
         $refinery->name = $structure->name;
         $refinery->solar_system_id = $structure->solar_system_id;
+        $refinery->corporation_id = $structure->owner_id;
         $refinery->save();
 
         Log::info('PollStructureData: updated stored information about refinery ' . $this->structure_id);
 
-    }
+        // Check if we know the corporation already.
+        $existingCorporation = Corporation::where('corporation_id', $refinery->corporation_id)->first();
+        if ($existingCorporation === null) {
 
+            // This is a new corporation, retrieve all of the relevant details.
+            $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
+                'corporation_id' => $refinery->corporation_id,
+            ]);
+            $new_corporation = new Corporation;
+            $new_corporation->corporation_id = $refinery->corporation_id;
+            $new_corporation->name = $corporation->name;
+            $new_corporation->save();
+
+            Log::info('PollStructureData: stored new corporation ' . $corporation->name);
+        }
+    }
 }

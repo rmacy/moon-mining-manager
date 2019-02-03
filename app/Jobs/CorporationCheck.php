@@ -23,7 +23,7 @@ class CorporationCheck implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param int $id
      */
     public function __construct($id)
     {
@@ -34,16 +34,18 @@ class CorporationCheck implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
 
         $esi = new EsiConnection;
+        $conn = $esi->getConnection();
 
         // Check if the miner already exists.
         $miner = Miner::where('eve_id', $this->miner_id)->first();
         Log::info('CorporationCheck: checking miner ' . $this->miner_id);
-        $character = $esi->esi->invoke('get', '/characters/{character_id}/', [
+        $character = $conn->invoke('get', '/characters/{character_id}/', [
             'character_id' => $this->miner_id,
         ]);
 
@@ -65,7 +67,7 @@ class CorporationCheck implements ShouldQueue
             {
 
                 // This is a new corporation, retrieve all of the relevant details.
-                $corporation = $esi->esi->invoke('get', '/corporations/{corporation_id}/', [
+                $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
                     'corporation_id' => $character->corporation_id,
                 ]);
                 $new_corporation = new Corporation;
@@ -84,7 +86,7 @@ class CorporationCheck implements ShouldQueue
                         // This is a new alliance, save the details.
                         $new_alliance = new Alliance;
                         $new_alliance->alliance_id = $corporation->alliance_id;
-                        $alliance = $esi->esi->invoke('get', '/alliances/{alliance_id}/', [
+                        $alliance = $conn->invoke('get', '/alliances/{alliance_id}/', [
                             'alliance_id' => $corporation->alliance_id,
                         ]);
                         $new_alliance->name = $alliance->name;
@@ -92,7 +94,7 @@ class CorporationCheck implements ShouldQueue
                         Log::info('CorporationCheck: stored new alliance ' . $alliance->name);
                     }
                 }
-    
+
             }
 
             // Save the updated miner record.

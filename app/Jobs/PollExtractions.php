@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -18,14 +19,35 @@ class PollExtractions implements ShouldQueue
     public $tries = 3;
 
     /**
+     * @var int
+     */
+    private $user_id;
+
+    /**
+     * @var int
+     */
+    private $page;
+
+    /**
+     * @param int $user_id
+     * @param int $page
+     */
+    public function __construct($user_id, $page = 1)
+    {
+        $this->user_id = $user_id;
+        $this->page = $page;
+    }
+
+    /**
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
         $esi = new EsiConnection;
-        
+
         Log::info('PollExtractions: clearing all extraction data more than 2 days old');
 
         // Delete any extraction data that relates to periods that have already passed (the field natural decay time + 2 days).
@@ -37,19 +59,34 @@ class PollExtractions implements ShouldQueue
         ]);
 
         // Request all active extraction cycle information for the prime user's corporation.
-        $structures = $esi->esi->invoke('get', '/corporation/{corporation_id}/mining/extractions/', [
-            'corporation_id' => $esi->corporation_id,
-        ]);
+        $timers = $esi->getConnection($this->user_id)
+            ->setQueryString(['page' => $this->page])
+            ->invoke('get', '/corporation/{corporation_id}/mining/extractions/', [
+                'corporation_id' => $esi->getCorporationId($this->user_id),
+            ]);
+
+        // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
+        if ($this->page == 1 && $timers->pages > 1) {
+            Log::info(
+                'PollExtractions: found more than 1 page of timers, queuing additional jobs for ' .
+                $timers->pages . ' total pages'
+            );
+            $delayCounter = 1;
+            for ($i = 2; $i <= $timers->pages; $i++) {
+                PollExtractions::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delayCounter));
+                $delayCounter++;
+            }
+        }
 
         // Loop through all the extraction data, updating the current status and time remaining for any active extraction cycles.
-        foreach ($structures as $structure)
+        foreach ($timers as $timer)
         {
-            $refinery = Refinery::where('observer_id', $structure->structure_id)->first();
-            $refinery->extraction_start_time = $this->convertTimestampFormat($structure->extraction_start_time);
-            $refinery->chunk_arrival_time = $this->convertTimestampFormat($structure->chunk_arrival_time);
-            $refinery->natural_decay_time = $this->convertTimestampFormat($structure->natural_decay_time);
+            $refinery = Refinery::where('observer_id', $timer->structure_id)->first();
+            $refinery->extraction_start_time = $this->convertTimestampFormat($timer->extraction_start_time);
+            $refinery->chunk_arrival_time = $this->convertTimestampFormat($timer->chunk_arrival_time);
+            $refinery->natural_decay_time = $this->convertTimestampFormat($timer->natural_decay_time);
             $refinery->save();
-            Log::info('PollExtractions: saved current extraction timestamps for ' . $structure->structure_id);
+            Log::info('PollExtractions: saved current extraction timestamps for ' . $timer->structure_id);
         }
 
     }
