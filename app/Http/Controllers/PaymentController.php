@@ -64,10 +64,10 @@ class PaymentController extends Controller
 
         $miner_id = $request->input('miner_id');
         $rental_id = $request->input('rental_id');
-        $amount = $request->input('amount');
+        $amount = (int) $request->input('amount');
         $user = Auth::user(); /* @var $user \App\User */
 
-        if (isset($miner_id) && isset($amount))
+        if (isset($miner_id) && $amount !== 0)
         {
 
             // Create a record of the new payment.
@@ -88,7 +88,7 @@ class PaymentController extends Controller
 
         }
 
-        else if (isset($rental_id) && isset($amount))
+        else if (isset($rental_id) && $amount !== 0)
         {
 
             // Grab a reference to the rental record.
