@@ -43,13 +43,20 @@ class PollWallet implements ShouldQueue
     private $delay_counter;
 
     /**
+     * @var string yyyy-mm-dd
+     */
+    private $date = '';
+
+    /**
      * @param int $userId
      * @param int $page
+     * @param string $date
      */
-    public function __construct($userId, $page = 1)
+    public function __construct($userId, $page = 1, $date = null)
     {
         $this->userId = $userId;
         $this->page = $page;
+        $this->date = (string) $date;
     }
 
     /**
@@ -118,36 +125,33 @@ class PollWallet implements ShouldQueue
                 elseif ($this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner) && !isset($payment))
                 {
                     $this->processTaxes($transaction, $miner, $date, $ref_id);
+                } else {
+                    Log::debug('skipping ' . json_encode($transaction));
                 }
             }
 
         }
 
+        // poll next page?
         if ($pollNextPage) {
             Log::info(
                 'PollWallet: queued job to poll page ' . ($this->page + 1) .
                 ' in ' . $this->delay_counter . ' minutes'
             );
-            PollWallet::dispatch($this->userId, $this->page + 1)
+            PollWallet::dispatch($this->userId, $this->page + 1, $this->date, $this->debug)
                 ->delay(Carbon::now()->addMinutes($this->delay_counter));
         }
 
-        /* FIX SCRIPT FOR UNPROCESSED WALLET TRANSACTIONS, IF NEEDED UPDATE THE DATE TO THE LAST WORKING WALLET IMPORT.
-
-        // If the last transaction date is not earlier than a specified date, request the next page of wallet results.
-        if (isset($date) && $date > '2018-04-25')
-        {
-            Log::info('PollWallet: Date ' . $date . ' is greater than 2018-04-25, repolling for any earlier transactions');
-            $next_page = $this->page + 1;
-            PollWallet::dispatch($next_page);
+        // If the last transaction date is not earlier than a specified date, request the next page of wallet results,
+        // but never go back further than 2019-01-01.
+        elseif ($this->date !== '' && $date !== null && $date >= $this->date && $date >= '2019-01-01') {
+            Log::info(
+                'PollWallet: Date ' . $date . ' is greater than ' . $this->date .
+                ', repolling for any earlier transactions'
+            );
+            PollWallet::dispatch($this->userId, $this->page + 1, $this->date, $this->debug)
+                ->delay(Carbon::now()->addMinutes($this->delay_counter));
         }
-        else
-        {
-            Log::info('PollWallet: No more wallet transactions to be found or date reached');
-        }
-
-        // ENDFIX */
-
     }
 
     /**
