@@ -126,7 +126,7 @@ class PollWallet implements ShouldQueue
                 {
                     $this->processTaxes($transaction, $miner, $date, $ref_id);
                 } else {
-                    Log::debug('skipping ' . json_encode($transaction));
+                    Log::info('skipping ' . json_encode($transaction));
                 }
             }
 
@@ -138,7 +138,7 @@ class PollWallet implements ShouldQueue
                 'PollWallet: queued job to poll page ' . ($this->page + 1) .
                 ' in ' . $this->delay_counter . ' minutes'
             );
-            PollWallet::dispatch($this->userId, $this->page + 1, $this->date, $this->debug)
+            PollWallet::dispatch($this->userId, $this->page + 1, $this->date)
                 ->delay(Carbon::now()->addMinutes($this->delay_counter));
         }
 
@@ -149,7 +149,7 @@ class PollWallet implements ShouldQueue
                 'PollWallet: Date ' . $date . ' is greater than ' . $this->date .
                 ', repolling for any earlier transactions'
             );
-            PollWallet::dispatch($this->userId, $this->page + 1, $this->date, $this->debug)
+            PollWallet::dispatch($this->userId, $this->page + 1, $this->date)
                 ->delay(Carbon::now()->addMinutes($this->delay_counter));
         }
     }
