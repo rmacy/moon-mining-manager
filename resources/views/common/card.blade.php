@@ -4,7 +4,7 @@
     <div class="card card-{{ (isset($size)) ? $size : 'regular' }}{{ (isset($is_active)) ? ' refinery-active' : '' }}"{!! (isset($is_active)) ? ' title="Mining cycle due to complete on ' . date('H:i, l jS F', strtotime($is_active)) . '"' : '' !!}>
 @endif
 <img src="{{ $avatar }}" class="avatar" alt="">
-<div class="primary">{!! $name !!}</div>
+<div class="primary" title="{{ $name }}">{!! $name !!}</div>
 @if (isset($sub))
     <div class="secondary">{{ $sub }}</div>
 @endif
