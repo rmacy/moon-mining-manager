@@ -62,8 +62,9 @@ class GenerateRentalInvoice implements ShouldQueue
         $start_year = date('Y', strtotime($renter->start_date));
         $invoice_amount = $renter->monthly_rental_fee;
 
-        if (($this_month == $start_month + 1 && $this_year == $start_year) || ($this_month == 1 && $start_month == 12 && $this_year == $start_year + 1))
-        {
+        if (($this_month == $start_month + 1 && $this_year == $start_year) ||
+            ($this_month == 1 && $start_month == 12 && $this_year == $start_year + 1)
+        ) {
             // Rental contract started last month, we need to add on a proportion of the monthly fee to this month's invoice.
             $start_date = date('j', strtotime($renter->start_date));
             $days_in_month = date('t', strtotime($renter->start_date));

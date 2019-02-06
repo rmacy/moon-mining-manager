@@ -24,12 +24,17 @@ class GenerateRentalInvoices implements ShouldQueue
      */
     public function handle()
     {
-
-        // Grab all the renters with active agreements that were not yet updated this month.
+        // Grab all the renters with active agreements
+        // that started before the beginning of month
+        // and will end after or on the first day of this month
+        // and were not yet updated this month
         $renters = Renter::whereRaw(
             'refinery_id IS NOT NULL AND 
-            start_date <= CURDATE() AND 
-            (end_date IS NULL OR end_date >= CURDATE()) AND
+            start_date < DATE_SUB(CURDATE(), INTERVAL DAYOFMONTH(CURDATE()) - 1 DAY) AND
+            (
+                end_date IS NULL OR 
+                end_date >= DATE_SUB(CURDATE(), INTERVAL DAYOFMONTH(CURDATE()) - 1 DAY)
+            ) AND
             (
                 generate_invoices_job_run IS NULL OR
                 generate_invoices_job_run < CONCAT(LAST_DAY(DATE_SUB(NOW(), INTERVAL 1 MONTH)), " 23:59:59")
