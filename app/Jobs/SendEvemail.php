@@ -105,6 +105,10 @@ class SendEvemail implements ShouldQueue
             SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes($delay));
             Log::info('SendEvemail: bounceback due to MailStopSpamming, re-queued job to send mail in 2-3 hours');
         }
+        elseif (stripos($exception->getEsiResponse()->error, 'ContactOwnerUnreachable') !== false)
+        {
+            Log::info('SendEvemail: ContactOwnerUnreachable (receiver blocked sender), dumping email job.');
+        }
         else
         {
             // Send failed for some other reason (for example downtime), try again in a while.
