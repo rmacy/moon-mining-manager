@@ -29,8 +29,10 @@
                         <option value="">Select an active renter:</option>
                         @foreach ($renters as $renter)
                             @if (!isset($renter->end_date) || strtotime($renter->end_date) >= time())
-                                <option value="{{ $renter->id }}">{{ $renter->character->name }} ({{ $renter->refinery->name }})</option>
-                                </tr>
+                                <option value="{{ $renter->id }}">
+                                    {{ $renter->character ? $renter->character->name : '' }}
+                                    ({{ $renter->refinery ? $renter->refinery->name : '' }})
+                                </option>
                             @endif
                         @endforeach
                     </select>
