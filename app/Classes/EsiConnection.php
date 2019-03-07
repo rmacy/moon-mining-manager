@@ -89,6 +89,7 @@ class EsiConnection
         $configuration = Configuration::getInstance();
         $configuration->datasource = env('ESEYE_DATASOURCE', 'tranquility');
         $configuration->logfile_location = storage_path() . '/logs';
+        $configuration->file_cache_location = storage_path() . '/framework/cache';
 
         $authentication = null;
         if ($userId > 0) {
