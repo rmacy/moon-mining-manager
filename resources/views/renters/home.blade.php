@@ -22,6 +22,8 @@
                         <th class="numeric">Start date</th>
                         <th class="numeric">End date</th>
                         <th>Edit</th>
+                        <th>Last edited by</th>
+                        <th>Last edited at</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,7 +56,13 @@
                                         -
                                     @endif
                                 </td>
-                                <td><a href="/renters/{{ $renter->id }}">Edit details</td>
+                                <td><a href="/renters/{{ $renter->id }}">Edit details</a></td>
+                                <td>
+                                    {{ $renter->updatedBy ? $renter->updatedBy->name : '' }}
+                                </td>
+                                <td>
+                                    {{ $renter->updated_at }}
+                                </td>
                             </tr>
                         @endif
                     @endforeach
@@ -83,6 +91,8 @@
                             <th class="numeric">Start date</th>
                             <th class="numeric">End date</th>
                             <th>Edit</th>
+                            <th>Last edited by</th>
+                            <th>Last edited at</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -116,6 +126,12 @@
                                         @endif
                                     </td>
                                     <td><a href="/renters/{{ $renter->id }}">Edit details</td>
+                                    <td>
+                                        {{ $renter->updatedBy ? $renter->updatedBy->name : '' }}
+                                    </td>
+                                    <td>
+                                        {{ $renter->updated_at }}
+                                    </td>
                                 </tr>
                             @endif
                         @endforeach

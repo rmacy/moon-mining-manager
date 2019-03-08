@@ -24,6 +24,8 @@ class Renter extends Model
         return $this->hasOne('App\Moon', 'id', 'moon_id');
     }
 
-
-
+    public function updatedBy()
+    {
+        return $this->belongsTo('App\User', 'updated_by', 'eve_id');
+    }
 }

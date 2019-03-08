@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Renter;
 use App\Refinery;
@@ -229,6 +230,8 @@ class RenterController extends Controller
             'start_date' => 'required|date',
         ]);
 
+        $user = Auth::user(); /* @var $user \App\User */
+
         // If validation rules pass, then create the new Renter object.
         $renter = new Renter;
         $renter->type = $request->type;
@@ -238,6 +241,7 @@ class RenterController extends Controller
         $renter->notes = $request->notes;
         $renter->monthly_rental_fee = $request->monthly_rental_fee;
         $renter->start_date = $request->start_date;
+        $renter->updated_by = $user->eve_id;
         $renter->save();
 
         return redirect('/renters');
@@ -258,6 +262,8 @@ class RenterController extends Controller
             'end_date' => 'nullable|date',
         ]);
 
+        $user = Auth::user(); /* @var $user \App\User */
+
         // If validation rules pass, then update the existing Renter record.
         $renter = Renter::find($id);
         $renter->type = $request->type;
@@ -268,6 +274,7 @@ class RenterController extends Controller
         $renter->monthly_rental_fee = $request->monthly_rental_fee;
         $renter->start_date = $request->start_date;
         $renter->end_date = $request->end_date;
+        $renter->updated_by = $user->eve_id;
         $renter->save();
 
         return redirect('/renters');
