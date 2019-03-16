@@ -90,7 +90,7 @@ class PollWallet implements ShouldQueue
 
         $this->delay_counter = 1;
         $date = NULL;
-        $pollNextPage = $transactions->pages < $this->page;
+        $pollNextPage = $transactions->pages > $this->page;
 
         foreach ($transactions as $transaction)
         {
@@ -133,7 +133,7 @@ class PollWallet implements ShouldQueue
         }
 
         // poll next page?
-        if ($pollNextPage) {
+        if ($pollNextPage && $date !== null && $date >= '2019-01-01') {
             Log::info(
                 'PollWallet: queued job to poll page ' . ($this->page + 1) .
                 ' in ' . $this->delay_counter . ' minutes'
