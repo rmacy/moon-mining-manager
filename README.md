@@ -18,6 +18,7 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 ## Operation instructions
 
 * Run `php artisan queue:work` to start the job queue process. See the [Laravel documentation on Queues](https://laravel.com/docs/5.5/queues) for more information on how to use Supervisor to manage job queues.
+* Add a Cron for the [Task Scheduler](https://laravel.com/docs/5.5/scheduling)
 * Have your primary users login to the application. They must have director roles within the corporation that owns your refineries in order to retrieve citadel information.
 * Manually add the primary user's ID to the `whitelist` table. They can now log in to view the application and authorise any other users.
 
