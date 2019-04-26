@@ -73,13 +73,9 @@ class ProcessMiningActivity implements ShouldQueue
 
             // Save the tax amount for the specific mining entry.
             $entry->tax_amount = $tax_amount;
+            $entry->processed = 1;
             $entry->save();
         }
-
-        // Set processed = 1 for all the records we just processed.
-        MiningActivity::where('processed', 0)->update([
-            'processed' => 1,
-        ]);
 
         // Loop through all of the miner data and update the database records.
         if (count($miner_data))
