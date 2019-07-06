@@ -3,11 +3,11 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Miner;
-use App\Payment;
-use App\RentalPayment;
-use App\Renter;
-use App\Template;
+use App\Models\Miner;
+use App\Models\Payment;
+use App\Models\RentalPayment;
+use App\Models\Renter;
+use App\Models\Template;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Miner;
-use App\Invoice;
-use App\MiningActivity;
-use App\Payment;
+use App\Models\Miner;
+use App\Models\Invoice;
+use App\Models\MiningActivity;
+use App\Models\Payment;
 
 class MinerController extends Controller
 {

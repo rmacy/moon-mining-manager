@@ -9,7 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
-use App\Refinery;
+use App\Models\Refinery;
 use Illuminate\Support\Facades\Log;
 
 class PollExtractions implements ShouldQueue

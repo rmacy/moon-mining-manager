@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Refinery;
-use App\Renter;
+use App\Models\Refinery;
+use App\Models\Renter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

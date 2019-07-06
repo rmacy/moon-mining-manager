@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\ReprocessedMaterial;
-use App\ReprocessedMaterialsHistory;
+use App\Models\ReprocessedMaterial;
+use App\Models\ReprocessedMaterialsHistory;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

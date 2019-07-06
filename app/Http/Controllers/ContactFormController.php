@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\PostSlackMessage;
 use App\Jobs\SendEvemail;
-use App\Whitelist;
+use App\Models\Whitelist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;

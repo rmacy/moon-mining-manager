@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
-use App\Invoice;
-use App\Miner;
-use App\Template;
+use App\Models\Invoice;
+use App\Models\Miner;
+use App\Models\Template;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

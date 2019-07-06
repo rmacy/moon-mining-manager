@@ -8,9 +8,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
-use App\Miner;
-use App\Corporation;
-use App\Alliance;
+use App\Models\Miner;
+use App\Models\Corporation;
+use App\Models\Alliance;
 use Illuminate\Support\Facades\Log;
 
 class MinerCheck implements ShouldQueue

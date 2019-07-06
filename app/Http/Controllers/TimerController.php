@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Invoice;
-use App\Miner;
-use App\MiningActivity;
-use App\Payment;
-use App\Refinery;
-use App\Whitelist;
+use App\Models\Invoice;
+use App\Models\Miner;
+use App\Models\MiningActivity;
+use App\Models\Payment;
+use App\Models\Refinery;
+use App\Models\Whitelist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;

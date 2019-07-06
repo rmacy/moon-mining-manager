@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Moon;
+use App\Models\Moon;
 
 class MoonController extends Controller
 {

@@ -123,7 +123,7 @@
                         @endif
                         @if (isset($event->quantity))
                             @php
-                                $refinery = App\Refinery::where('observer_id', $event->refinery_id)->first();
+                                $refinery = \App\Models\Refinery::where('observer_id', $event->refinery_id)->first();
                             @endphp
                             Mining recorded in {{ $refinery->system->solarSystemName }} ({{ number_format($event->quantity, 0) }} units)
                             @if (isset($event->tax_amount))

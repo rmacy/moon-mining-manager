@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Miner;
-use App\Renter;
-use App\Payment;
-use App\RentalPayment;
+use App\Models\Miner;
+use App\Models\Renter;
+use App\Models\Payment;
+use App\Models\RentalPayment;
 use App\Classes\EsiConnection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;

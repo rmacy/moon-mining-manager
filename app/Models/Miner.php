@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 /**
- * App\Miner
+ * App\Models\Miner
  *
  * @property int $id
  * @property int $eve_id
@@ -17,27 +17,27 @@ use Illuminate\Support\Facades\DB;
  * @property float $amount_owed
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Alliance|null $alliance
- * @property-read \App\Corporation $corporation
+ * @property-read \App\Models\Alliance|null $alliance
+ * @property-read \App\Models\Corporation $corporation
  * @property-read mixed $latest_invoice
  * @property-read mixed $latest_mining_activity
  * @property-read mixed $latest_payment
  * @property-read mixed $total_payments
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Invoice[] $invoices
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\MiningActivity[] $mining_activity
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereAllianceId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereAmountOwed($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereAvatar($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereCorporationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereEveId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereUpdatedAt($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Invoice[] $invoices
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\MiningActivity[] $mining_activity
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Payment[] $payments
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereAllianceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereAmountOwed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereAvatar($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereCorporationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereEveId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class Miner extends Model
@@ -48,7 +48,7 @@ class Miner extends Model
      */
     public function invoices()
     {
-        return $this->hasMany('App\Invoice');
+        return $this->hasMany('App\Models\Invoice');
     }
 
     /**
@@ -56,7 +56,7 @@ class Miner extends Model
      */
     public function payments()
     {
-        return $this->hasMany('App\Payment');
+        return $this->hasMany('App\Models\Payment');
     }
 
     /**
@@ -64,7 +64,7 @@ class Miner extends Model
      */
     public function mining_activity()
     {
-        return $this->hasMany('App\MiningActivity');
+        return $this->hasMany('App\Models\MiningActivity');
     }
 
     /**
@@ -72,7 +72,7 @@ class Miner extends Model
      */
     public function alliance()
     {
-        return $this->belongsTo('App\Alliance', 'alliance_id', 'alliance_id')->withDefault([
+        return $this->belongsTo('App\Models\Alliance', 'alliance_id', 'alliance_id')->withDefault([
             'name' => 'no alliance',
         ]);
     }
@@ -82,7 +82,7 @@ class Miner extends Model
      */
     public function corporation()
     {
-        return $this->belongsTo('App\Corporation', 'corporation_id', 'corporation_id');
+        return $this->belongsTo('App\Models\Corporation', 'corporation_id', 'corporation_id');
     }
 
     /**

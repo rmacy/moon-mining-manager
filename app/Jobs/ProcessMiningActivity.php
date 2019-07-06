@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Miner;
-use App\MiningActivity;
-use App\Refinery;
-use App\TaxRate;
+use App\Models\Miner;
+use App\Models\MiningActivity;
+use App\Models\Refinery;
+use App\Models\TaxRate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

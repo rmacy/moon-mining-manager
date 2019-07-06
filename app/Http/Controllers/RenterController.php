@@ -7,11 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Renter;
-use App\Refinery;
-use App\RentalInvoice;
-use App\RentalPayment;
-use App\Moon;
+use App\Models\Renter;
+use App\Models\Refinery;
+use App\Models\RentalInvoice;
+use App\Models\RentalPayment;
+use App\Models\Moon;
 use App\Classes\EsiConnection;
 
 class RenterController extends Controller

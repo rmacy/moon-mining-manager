@@ -1,7 +1,7 @@
 <?php
 // Retrieve the current user's whitelisted status.
 $user = Auth::user();
-$whitelist = \App\Whitelist::where('eve_id', $user->eve_id)->first();
+$whitelist = \App\Models\Whitelist::where('eve_id', $user->eve_id)->first();
 $isAdmin = $whitelist && $whitelist->is_admin;
 ?>
 

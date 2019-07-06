@@ -3,9 +3,9 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Miner;
-use App\MiningActivity;
-use App\TaxRate;
+use App\Models\Miner;
+use App\Models\MiningActivity;
+use App\Models\TaxRate;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

@@ -3,9 +3,9 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Refinery;
-use App\Renter;
-use App\Template;
+use App\Models\Refinery;
+use App\Models\Renter;
+use App\Models\Template;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

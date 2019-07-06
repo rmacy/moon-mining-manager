@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\ReprocessedMaterial;
-use App\TaxRate;
+use App\Models\ReprocessedMaterial;
+use App\Models\TaxRate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

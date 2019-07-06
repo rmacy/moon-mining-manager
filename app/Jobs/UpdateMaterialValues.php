@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\ReprocessedMaterial;
+use App\Models\ReprocessedMaterial;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

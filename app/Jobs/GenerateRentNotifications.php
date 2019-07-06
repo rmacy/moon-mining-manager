@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Renter;
+use App\Models\Renter;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

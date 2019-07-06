@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Alliance;
+use App\Models\Alliance;
 use App\Classes\EsiConnection;
-use App\Corporation;
-use App\Miner;
+use App\Models\Corporation;
+use App\Models\Miner;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

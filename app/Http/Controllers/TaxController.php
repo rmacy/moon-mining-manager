@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\ReprocessedMaterial;
-use App\ReprocessedMaterialsHistory;
-use App\TaxRate;
+use App\Models\ReprocessedMaterial;
+use App\Models\ReprocessedMaterialsHistory;
+use App\Models\TaxRate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Classes\EsiConnection;
 use App\Http\Controllers\Controller;
-use App\User;
-use App\Whitelist;
+use App\Models\User;
+use App\Models\Whitelist;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Socialite;

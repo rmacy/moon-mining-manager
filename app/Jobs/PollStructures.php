@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Refinery;
+use App\Models\Refinery;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

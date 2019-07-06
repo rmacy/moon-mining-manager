@@ -7,8 +7,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\TaxRate;
-use App\ReprocessedMaterial;
+use App\Models\TaxRate;
+use App\Models\ReprocessedMaterial;
 use Illuminate\Support\Facades\Log;
 
 class UpdateOreValues implements ShouldQueue

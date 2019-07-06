@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Miner;
-use App\Payment;
-use App\Refinery;
-use App\SolarSystem;
-use App\User;
-use App\Whitelist;
+use App\Models\Miner;
+use App\Models\Payment;
+use App\Models\Refinery;
+use App\Models\SolarSystem;
+use App\Models\User;
+use App\Models\Whitelist;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;

@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Miner;
+use App\Models\Miner;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

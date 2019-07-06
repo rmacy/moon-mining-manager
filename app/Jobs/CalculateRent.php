@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Moon;
-use App\SolarSystem;
-use App\TaxRate;
-use App\Type;
+use App\Models\Moon;
+use App\Models\SolarSystem;
+use App\Models\TaxRate;
+use App\Models\Type;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

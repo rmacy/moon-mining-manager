@@ -6,7 +6,7 @@ use Ixudra\Curl\Facades\Curl;
 use Seat\Eseye\Configuration;
 use Seat\Eseye\Containers\EsiAuthentication;
 use Seat\Eseye\Eseye;
-use App\User;
+use App\Models\User;
 
 /**
  * Generic class for use by controllers or queued jobs that need to request information

@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Classes\EsiConnection;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Moon;
-use App\Region;
-use App\SolarSystem;
-use App\Type;
-use App\TaxRate;
+use App\Models\Moon;
+use App\Models\Region;
+use App\Models\SolarSystem;
+use App\Models\Type;
+use App\Models\TaxRate;
 use App\Jobs\UpdateReprocessedMaterials;
 use App\Jobs\UpdateMaterialValues;
 use Illuminate\Support\Facades\Log;
@@ -166,7 +166,7 @@ class MoonImportController extends Controller
         ];
 
         foreach (Moon::all()->sortBy('id') as $moon) {
-            /* @var $moon Moon */
+            /* @var $moon \App\Models\Moon */
 
             // get renter name from DB if available, otherwise from ESI
             $renterCharId = $moon->getActiveRenterAttribute() ? $moon->getActiveRenterAttribute()->character_id : null;

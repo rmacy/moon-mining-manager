@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\RegenerateInvoices;
-use App\Miner;
-use App\MiningActivity;
-use App\Payment;
+use App\Models\Miner;
+use App\Models\MiningActivity;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
 
 class ReportsController extends Controller
