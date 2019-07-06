@@ -2,16 +2,16 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use App\Template;
+use App\Classes\EsiConnection;
 use App\Refinery;
 use App\Renter;
+use App\Template;
 use Carbon\Carbon;
-use App\Classes\EsiConnection;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class GenerateRentNotification implements ShouldQueue
@@ -25,6 +25,7 @@ class GenerateRentNotification implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param int $id
      * @return void
      */
     public function __construct($id, $mail_delay = 20)

@@ -22,7 +22,7 @@ class PaymentController extends Controller
         $esi = new EsiConnection;
 
         $rentalPayments = RentalPayment::whereNotNull('created_by')->orderByDesc('created_at')->get();
-        foreach ($rentalPayments as $rentalPayment){
+        foreach ($rentalPayments as $rentalPayment) {
             $rentalPayment->character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $rentalPayment->renter_id,
             ]);
@@ -45,8 +45,7 @@ class PaymentController extends Controller
 
         // For all contact character IDs, pull the character information via ESI.
         $esi = new EsiConnection;
-        foreach ($renters as $renter)
-        {
+        foreach ($renters as $renter) {
             $renter->character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $renter->character_id,
             ]);
@@ -64,11 +63,10 @@ class PaymentController extends Controller
 
         $miner_id = $request->input('miner_id');
         $rental_id = $request->input('rental_id');
-        $amount = (int) $request->input('amount');
-        $user = Auth::user(); /* @var $user \App\User */
+        $amount = (int)$request->input('amount');
+        $user = Auth::user();
 
-        if (isset($miner_id) && $amount !== 0)
-        {
+        if (isset($miner_id) && $amount !== 0) {
 
             // Create a record of the new payment.
             $payment = new Payment;
@@ -86,10 +84,7 @@ class PaymentController extends Controller
             Log::info('PaymentController: payment of ' . number_format($amount) .
                 ' ISK manually submitted for miner ' . $miner_id . ' by ' . $user->eve_id);
 
-        }
-
-        else if (isset($rental_id) && $amount !== 0)
-        {
+        } else if (isset($rental_id) && $amount !== 0) {
 
             // Grab a reference to the rental record.
             $renter = Renter::find($rental_id);

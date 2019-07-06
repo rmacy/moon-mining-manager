@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Classes\EsiConnection;
-use Socialite;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 use App\User;
 use App\Whitelist;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Socialite;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
@@ -18,13 +19,14 @@ class AuthController extends Controller
     public function __construct()
     {
         // Set the Socialite driver to use based on whether we are working with TQ or Sisi.
-        $this->socialite_driver = (env('ESEYE_DATASOURCE', 'tranquility') != 'singularity') ? 'eveonline' : 'eveonline-sisi';
+        $this->socialite_driver = (env('ESEYE_DATASOURCE', 'tranquility') != 'singularity') ?
+            'eveonline' : 'eveonline-sisi';
     }
 
     /**
      * Redirect the user to the EVE Online SSO page.
      *
-     * @return Response
+     * @return Response;
      */
     public function redirectToProvider()
     {
@@ -55,7 +57,6 @@ class AuthController extends Controller
      */
     public function handleProviderCallback()
     {
-
         // Find or create the user.
         $user = Socialite::driver($this->socialite_driver)->user();
         $authUser = $this->findOrCreateUser($user);
@@ -70,8 +71,7 @@ class AuthController extends Controller
         ]);
 
         // If this is a new login, save the corporation ID.
-        if (!isset($authUser->corporation_id))
-        {
+        if (!isset($authUser->corporation_id)) {
             $authUser->corporation_id = $character->corporation_id;
             $authUser->save();
         }
@@ -81,26 +81,22 @@ class AuthController extends Controller
         ]);
 
         // If an alliance is set, it must match the stored environment variable.
-        if (isset($corporation->alliance_id) && $corporation->alliance_id && $corporation->alliance_id == env('EVE_ALLIANCE_ID', NULL))
-        {
+        if (isset($corporation->alliance_id) && $corporation->alliance_id &&
+            $corporation->alliance_id == env('EVE_ALLIANCE_ID', NULL)
+        ) {
             Auth::login($authUser, true);
             Log::info('AuthController: successful login by ' . $authUser->name);
-        }
-        else
-        {
+        } else {
             Log::info('AuthController: unsuccessful login by ' . $authUser->name . ', alliance match failed');
             return redirect()->route('login');
         }
 
         // Check if the user is whitelisted to access the administrator area.
         $whitelist = Whitelist::where('eve_id', $authUser->eve_id)->first();
-        if (isset($whitelist))
-        {
+        if (isset($whitelist)) {
             Log::info('AuthController: successful administrator login by ' . $authUser->name);
             return redirect('/');
-        }
-        else
-        {
+        } else {
             return redirect('/timers');
         }
     }
@@ -111,24 +107,23 @@ class AuthController extends Controller
      * @param $user
      * @return User
      */
-     private function findOrCreateUser($user)
-     {
-         if ($authUser = User::where('eve_id', $user->id)->first())
-         {
-             $authUser->token = $user->token;
-             $authUser->refresh_token = $user->refreshToken;
-             $authUser->save();
-             return $authUser;
-         }
+    private function findOrCreateUser($user)
+    {
+        if ($authUser = User::where('eve_id', $user->id)->first()) {
+            $authUser->token = $user->token;
+            $authUser->refresh_token = $user->refreshToken;
+            $authUser->save();
+            return $authUser;
+        }
 
-         return User::create([
-             'eve_id' => $user->id,
-             'corporation_id' => NULL,
-             'name' => $user->name,
-             'avatar' => $user->avatar,
-             'token' => $user->token,
-             'refresh_token' => $user->refreshToken,
-         ]);
-     }
+        return User::create([
+            'eve_id' => $user->id,
+            'corporation_id' => NULL,
+            'name' => $user->name,
+            'avatar' => $user->avatar,
+            'token' => $user->token,
+            'refresh_token' => $user->refreshToken,
+        ]);
+    }
 
 }

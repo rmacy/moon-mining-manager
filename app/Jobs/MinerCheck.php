@@ -23,6 +23,7 @@ class MinerCheck implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param int $id
      * @return void
      */
     public function __construct($id)
@@ -46,8 +47,7 @@ class MinerCheck implements ShouldQueue
         $existing_miner = Miner::where('eve_id', $this->miner_id)->first();
 
         // If not, create a new entry, including pulling additional information.
-        if (!isset($existing_miner))
-        {
+        if (!isset($existing_miner)) {
             Log::info('MinerCheck: new miner ' . $this->miner_id . ' found, creating new record');
             $miner = new Miner;
             $miner->eve_id = $this->miner_id;
@@ -63,27 +63,23 @@ class MinerCheck implements ShouldQueue
             $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
                 'corporation_id' => $character->corporation_id,
             ]);
-            if (isset($corporation->alliance_id))
-            {
+            if (isset($corporation->alliance_id)) {
                 $miner->alliance_id = $corporation->alliance_id;
             }
             $miner->save();
             Log::info('MinerCheck: saved new miner ' . $miner->eve_id . ' from corporation ' . $miner->corporation_id);
             // Also retrieve the corporation and alliance names for use in reporting.
             $existing_corporation = Corporation::where('corporation_id', $character->corporation_id)->first();
-            if (!isset($existing_corporation))
-            {
+            if (!isset($existing_corporation)) {
                 $new_corporation = new Corporation;
                 $new_corporation->corporation_id = $character->corporation_id;
                 $new_corporation->name = $corporation->name;
                 $new_corporation->save();
                 Log::info('MinerCheck: stored new corporation ' . $character->corporation_id);
             }
-            if (isset($corporation->alliance_id))
-            {
+            if (isset($corporation->alliance_id)) {
                 $existing_alliance = Alliance::where('alliance_id', $corporation->alliance_id)->first();
-                if (!isset($existing_alliance))
-                {
+                if (!isset($existing_alliance)) {
                     $new_alliance = new Alliance;
                     $new_alliance->alliance_id = $corporation->alliance_id;
                     $alliance = $conn->invoke('get', '/alliances/{alliance_id}/', [

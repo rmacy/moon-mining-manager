@@ -2,13 +2,13 @@
 
 namespace App\Jobs;
 
+use App\ReprocessedMaterial;
+use App\TaxRate;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\TaxRate;
-use App\ReprocessedMaterial;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class UpdateReprocessedMaterials implements ShouldQueue
@@ -27,15 +27,13 @@ class UpdateReprocessedMaterials implements ShouldQueue
         // Find any tax rates (i.e. ore types) that need to have their reprocessed materials checked.
         $tax_rates = TaxRate::where('check_materials', 1)->get();
         Log::info('UpdateReprocessedMaterials: found ' . count($tax_rates) . ' rates needing materials');
-        foreach ($tax_rates as $rate)
-        {
-            // Pull the reprocessed material components for this item and store them in the table if they don't already exist.
+        foreach ($tax_rates as $rate) {
+            // Pull the reprocessed material components for this item and store them in the
+            // table if they don't already exist.
             $materials = $rate->reprocessed_materials;
-            foreach ($materials as $material)
-            {
+            foreach ($materials as $material) {
                 $existing_reprocessed_material = ReprocessedMaterial::find($material->materialTypeID);
-                if (!isset($existing_reprocessed_material))
-                {
+                if (!isset($existing_reprocessed_material)) {
                     $x = new ReprocessedMaterial;
                     $x->materialTypeID = $material->materialTypeID;
                     $x->average_price = 0;

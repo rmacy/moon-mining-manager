@@ -2,13 +2,13 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Refinery;
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class PollMiningObservers implements ShouldQueue
@@ -31,8 +31,7 @@ class PollMiningObservers implements ShouldQueue
         Log::info('PollMiningObservers: creating jobs to poll ' . count($refineries) . ' refineries');
 
         // For each refinery create a new job in the queue to poll the API.
-        foreach ($refineries as $refinery)
-        {
+        foreach ($refineries as $refinery) {
             PollRefinery::dispatch($refinery->observer_id, $refinery->corporation_id)
                 ->delay(Carbon::now()->addSecond(20 * $delay_counter));
             $delay_counter++;

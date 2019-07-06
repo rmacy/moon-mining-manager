@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Miner;
 use App\Invoice;
 use App\MiningActivity;
@@ -11,7 +9,7 @@ use App\Payment;
 
 class MinerController extends Controller
 {
-    
+
     /**
      * List all miners together with their total payments.
      */
@@ -21,7 +19,7 @@ class MinerController extends Controller
         return view('miners.all', [
             'miners' => Miner::orderBy('name')->get(),
         ]);
-        
+
     }
 
     /**
@@ -31,8 +29,7 @@ class MinerController extends Controller
     {
 
         // If no user id supplied, redirect to the miners list.
-        if ($id == NULL)
-        {
+        if ($id == NULL) {
             return redirect('/miners');
         }
 
@@ -43,16 +40,13 @@ class MinerController extends Controller
 
         // Loop through each collection and add them to a master array.
         $activity_log = [];
-        foreach ($mining_activities as $mining_activity)
-        {
+        foreach ($mining_activities as $mining_activity) {
             $activity_log[] = $mining_activity;
         }
-        foreach ($invoices as $invoice)
-        {
+        foreach ($invoices as $invoice) {
             $activity_log[] = $invoice;
         }
-        foreach ($payments as $payment)
-        {
+        foreach ($payments as $payment) {
             $activity_log[] = $payment;
         }
 
@@ -68,8 +62,7 @@ class MinerController extends Controller
 
     private function sortByDate($a, $b)
     {
-        if ($a->created_at == $b->created_at)
-        {
+        if ($a->created_at == $b->created_at) {
             return 0;
         }
         return ($a->created_at > $b->created_at) ? -1 : 1;

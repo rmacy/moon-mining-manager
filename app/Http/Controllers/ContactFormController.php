@@ -20,7 +20,7 @@ class ContactFormController extends Controller
     public function send(Request $request)
     {
         $user = Auth::user();
-        if (! $user) {
+        if (!$user) {
             return view('/contact-form');
         }
 

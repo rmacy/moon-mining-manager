@@ -2,15 +2,15 @@
 
 namespace App\Jobs;
 
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
 use App\Refinery;
+use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PollRefineries implements ShouldQueue
@@ -51,10 +51,15 @@ class PollRefineries implements ShouldQueue
 
         // Clear out all claim details for refinery detonations that have happened in the last 24 hours.
         $previous_detonations = DB::update(
-            'UPDATE refineries SET claimed_by_primary = NULL, claimed_by_secondary = NULL, updated_at = \'' . date('Y-m-d H:i:s') .
-            '\' WHERE natural_decay_time < NOW() - INTERVAL 1 DAY AND (claimed_by_primary IS NOT NULL OR claimed_by_secondary IS NOT NULL)'
+            'UPDATE refineries SET claimed_by_primary = NULL, claimed_by_secondary = NULL, ' .
+                'updated_at = \'' . date('Y-m-d H:i:s') . '\' ' .
+            'WHERE natural_decay_time < NOW() - INTERVAL 1 DAY ' .
+                'AND (claimed_by_primary IS NOT NULL OR claimed_by_secondary IS NOT NULL)'
         );
-        Log::info('PollRefineries: cleared ' . $previous_detonations . ' claimed refinery detonations from the previous 24 hours');
+        Log::info(
+            'PollRefineries: cleared ' . $previous_detonations .
+            ' claimed refinery detonations from the previous 24 hours'
+        );
 
         // Request a list of all of the active mining observers belonging to the corporation.
         $corporation_id = $esi->getCorporationId($this->user_id);
@@ -82,11 +87,9 @@ class PollRefineries implements ShouldQueue
         // Process the refineries list. For each entry, we want to check and see if it already exists
         // in the database. If it doesn't, we create a new database entry for it.
         // Updates, such as the owner, are performed regularly in PollStructures.
-        foreach ($mining_observers as $observer)
-        {
+        foreach ($mining_observers as $observer) {
             $refinery = Refinery::where('observer_id', $observer->observer_id)->first();
-            if (!isset($refinery))
-            {
+            if (!isset($refinery)) {
                 $refinery = new Refinery;
                 $refinery->observer_id = $observer->observer_id;
                 $refinery->observer_type = $observer->observer_type;

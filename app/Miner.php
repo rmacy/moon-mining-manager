@@ -5,6 +5,41 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * App\Miner
+ *
+ * @property int $id
+ * @property int $eve_id
+ * @property int $corporation_id
+ * @property int|null $alliance_id
+ * @property string $name
+ * @property string $avatar
+ * @property float $amount_owed
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Alliance|null $alliance
+ * @property-read \App\Corporation $corporation
+ * @property-read mixed $latest_invoice
+ * @property-read mixed $latest_mining_activity
+ * @property-read mixed $latest_payment
+ * @property-read mixed $total_payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Invoice[] $invoices
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\MiningActivity[] $mining_activity
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereAllianceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereAmountOwed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereAvatar($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereCorporationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereEveId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Miner whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Miner extends Model
 {
     
@@ -55,7 +90,8 @@ class Miner extends Model
      */
     public function getTotalPaymentsAttribute()
     {
-        return DB::table('payments')->select('amount_received')->where('miner_id', $this->eve_id)->sum('amount_received');
+        return DB::table('payments')->select('amount_received')->where('miner_id', $this->eve_id)
+            ->sum('amount_received');
     }
 
     /**
@@ -63,7 +99,8 @@ class Miner extends Model
      */
     public function getLatestPaymentAttribute()
     {
-        $latest_payment = DB::table('payments')->where('miner_id', $this->eve_id)->select('updated_at')->orderBy('updated_at', 'desc')->first();
+        $latest_payment = DB::table('payments')->where('miner_id', $this->eve_id)->select('updated_at')
+            ->orderBy('updated_at', 'desc')->first();
         return (isset($latest_payment)) ? $latest_payment->updated_at : NULL;
     }
 
@@ -72,7 +109,8 @@ class Miner extends Model
      */
     public function getLatestInvoiceAttribute()
     {
-        $latest_invoice = DB::table('invoices')->where('miner_id', $this->eve_id)->select('updated_at')->orderBy('updated_at', 'desc')->first();
+        $latest_invoice = DB::table('invoices')->where('miner_id', $this->eve_id)->select('updated_at')
+            ->orderBy('updated_at', 'desc')->first();
         return (isset($latest_invoice)) ? $latest_invoice->updated_at : NULL;
     }
 
@@ -81,7 +119,8 @@ class Miner extends Model
      */
     public function getLatestMiningActivityAttribute()
     {
-        $latest_mining_activity = DB::table('mining_activities')->where('miner_id', $this->eve_id)->select('created_at')->orderBy('created_at', 'desc')->first();
+        $latest_mining_activity = DB::table('mining_activities')->where('miner_id', $this->eve_id)
+            ->select('created_at')->orderBy('created_at', 'desc')->first();
         return (isset($latest_mining_activity)) ? $latest_mining_activity->created_at : NULL;
     }
 

@@ -49,14 +49,12 @@ class MoonImportController extends Controller
         // Convert the dump of spreadsheet data into a structured array.
         $data = [];
         $lines = explode("\n", $request->input('data'));
-        foreach ($lines as $line)
-        {
+        foreach ($lines as $line) {
             $data[] = explode("\t", $line);
         }
 
         // Loop through each row and process it into the database.
-        foreach ($data as $row)
-        {
+        foreach ($data as $row) {
             $moon = new Moon;
             $moon->region_id = Region::where('regionName', $row[0])->first()->regionID;
             $moon->solar_system_id = SolarSystem::where('solarSystemName', $row[1])->first()->solarSystemID;
@@ -72,13 +70,11 @@ class MoonImportController extends Controller
             $moon->mineral_1_percent = str_replace(',', '.', $row[6]);
             $moon->mineral_2_type_id = Type::where('typeName', $row[7])->first()->typeID;
             $moon->mineral_2_percent = str_replace(',', '.', $row[8]);
-            if ($row[9])
-            {
+            if ($row[9]) {
                 $moon->mineral_3_type_id = Type::where('typeName', $row[9])->first()->typeID;
                 $moon->mineral_3_percent = str_replace(',', '.', $row[10]);
             }
-            if ($row[11])
-            {
+            if ($row[11]) {
                 $moon->mineral_4_type_id = Type::where('typeName', $row[11])->first()->typeID;
                 $moon->mineral_4_percent = str_replace(',', '.', $row[12]);
             }
@@ -124,11 +120,11 @@ class MoonImportController extends Controller
             }
 
             // moon data
-            $num ++;
+            $num++;
             $moon->solar_system_id = trim($cols[4]);
             $moon->region_id = SolarSystem::where('solarSystemID', trim($cols[4]))->first()->regionID;
-            $moon->{'mineral_'.$num.'_type_id'} = trim($cols[3]);
-            $moon->{'mineral_'.$num.'_percent'} = trim($cols[2]) * 100;
+            $moon->{'mineral_' . $num . '_type_id'} = trim($cols[3]);
+            $moon->{'mineral_' . $num . '_percent'} = trim($cols[2]) * 100;
         }
 
         // save last moon
@@ -169,14 +165,15 @@ class MoonImportController extends Controller
             '% 4',
         ];
 
-        foreach (Moon::all()->sortBy('id') as $moon) { /* @var $moon Moon */
+        foreach (Moon::all()->sortBy('id') as $moon) {
+            /* @var $moon Moon */
 
             // get renter name from DB if available, otherwise from ESI
             $renterCharId = $moon->getActiveRenterAttribute() ? $moon->getActiveRenterAttribute()->character_id : null;
             $renterName = '';
             if ($renterCharId) {
                 $user = User::where('eve_id', '=', $renterCharId)->first();
-                if ($user){
+                if ($user) {
                     $renterName = $user->name;
                 } else {
                     $renterName = $conn->invoke('get', '/characters/{character_id}/', [
@@ -197,13 +194,13 @@ class MoonImportController extends Controller
                 '', // status
                 '', //
                 $moon->mineral_1->typeName,
-                $moon->mineral_1_percent .'%',
+                $moon->mineral_1_percent . '%',
                 $moon->mineral_2->typeName,
-                $moon->mineral_2_percent .'%',
+                $moon->mineral_2_percent . '%',
                 $moon->mineral_3 ? $moon->mineral_3->typeName : '',
-                $moon->mineral_3_percent ? $moon->mineral_3_percent .'%' : '',
+                $moon->mineral_3_percent ? $moon->mineral_3_percent . '%' : '',
                 $moon->mineral_4 ? $moon->mineral_4->typeName : '',
-                $moon->mineral_4_percent ? $moon->mineral_4_percent .'%' : '',
+                $moon->mineral_4_percent ? $moon->mineral_4_percent . '%' : '',
             ];
             $rows[] = $cols;
         }
@@ -222,20 +219,25 @@ class MoonImportController extends Controller
 
         // Grab all of the moon records and loop through them.
         $moons = Moon::all();
-        foreach ($moons as $moon)
-        {
+        foreach ($moons as $moon) {
             // Set the monthly rental value to zero.
             $monthly_rental_fee = 0;
 
-            $monthly_rental_fee += $this->calculateOreTaxValue($moon->mineral_1_type_id, $moon->mineral_1_percent, $moon->solar_system_id);
-            $monthly_rental_fee += $this->calculateOreTaxValue($moon->mineral_2_type_id, $moon->mineral_2_percent, $moon->solar_system_id);
-            if ($moon->mineral_3_type_id)
-            {
-                $monthly_rental_fee += $this->calculateOreTaxValue($moon->mineral_3_type_id, $moon->mineral_3_percent, $moon->solar_system_id);
+            $monthly_rental_fee += $this->calculateOreTaxValue(
+                $moon->mineral_1_type_id, $moon->mineral_1_percent, $moon->solar_system_id
+            );
+            $monthly_rental_fee += $this->calculateOreTaxValue(
+                $moon->mineral_2_type_id, $moon->mineral_2_percent, $moon->solar_system_id
+            );
+            if ($moon->mineral_3_type_id) {
+                $monthly_rental_fee += $this->calculateOreTaxValue(
+                    $moon->mineral_3_type_id, $moon->mineral_3_percent, $moon->solar_system_id
+                );
             }
-            if ($moon->mineral_4_type_id)
-            {
-                $monthly_rental_fee += $this->calculateOreTaxValue($moon->mineral_4_type_id, $moon->mineral_4_percent, $moon->solar_system_id);
+            if ($moon->mineral_4_type_id) {
+                $monthly_rental_fee += $this->calculateOreTaxValue(
+                    $moon->mineral_4_type_id, $moon->mineral_4_percent, $moon->solar_system_id
+                );
             }
 
             // Save the updated rental fee.
@@ -254,8 +256,7 @@ class MoonImportController extends Controller
         $tax_rate = TaxRate::where('type_id', $type_id)->first();
 
         // If we don't have a stored tax rate for this ore type, queue a job to calculate it.
-        if (isset($tax_rate))
-        {
+        if (isset($tax_rate)) {
             // Grab the stored value of this ore.
             $ore_value = $tax_rate->value;
 
@@ -274,9 +275,7 @@ class MoonImportController extends Controller
 
             // Calculate the tax value to be charged for the volume of this ore that can be mined.
             return $ore_value * $units * $tax_rate / 100 * $discount;
-        }
-        else
-        {
+        } else {
             // Add a new record for this unknown ore type.
             $tax_rate = new TaxRate;
             $tax_rate->type_id = $type_id;

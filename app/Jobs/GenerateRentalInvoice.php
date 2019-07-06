@@ -2,17 +2,17 @@
 
 namespace App\Jobs;
 
+use App\Classes\EsiConnection;
+use App\Refinery;
+use App\RentalInvoice;
+use App\Renter;
+use App\Template;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Template;
-use App\Refinery;
-use App\Renter;
-use App\RentalInvoice;
-use Carbon\Carbon;
-use App\Classes\EsiConnection;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class GenerateRentalInvoice implements ShouldQueue
@@ -26,6 +26,7 @@ class GenerateRentalInvoice implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param int $id
      * @return void
      */
     public function __construct($id, $mail_delay = 20)
@@ -65,7 +66,8 @@ class GenerateRentalInvoice implements ShouldQueue
         if (($this_month == $start_month + 1 && $this_year == $start_year) ||
             ($this_month == 1 && $start_month == 12 && $this_year == $start_year + 1)
         ) {
-            // Rental contract started last month, we need to add on a proportion of the monthly fee to this month's invoice.
+            // Rental contract started last month, we need to add on a proportion of the monthly
+            // fee to this month's invoice.
             $start_date = date('j', strtotime($renter->start_date));
             $days_in_month = date('t', strtotime($renter->start_date));
             $extra_days_to_invoice = $days_in_month - $start_date + 1;

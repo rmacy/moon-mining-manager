@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Renter;
@@ -28,8 +30,7 @@ class RenterController extends Controller
 
         // For all contact character IDs, pull the character information via ESI.
         $esi = new EsiConnection;
-        foreach ($renters as $renter)
-        {
+        foreach ($renters as $renter) {
             $renter->character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $renter->character_id,
             ]);
@@ -46,14 +47,13 @@ class RenterController extends Controller
      * Show a summary of invoices and payments for a specific refinery.
      *
      * @param $id
-     * @throws \Exception
      * @return mixed
+     * @throws \Exception
      */
     public function refineryDetails($id = NULL)
     {
 
-        if ($id == NULL)
-        {
+        if ($id == NULL) {
             return redirect('/renters');
         }
 
@@ -81,12 +81,10 @@ class RenterController extends Controller
 
         // Loop through each collection and add them to a master array.
         $activity_log = [];
-        foreach ($invoices as $invoice)
-        {
+        foreach ($invoices as $invoice) {
             $activity_log[] = $invoice;
         }
-        foreach ($payments as $payment)
-        {
+        foreach ($payments as $payment) {
             $activity_log[] = $payment;
         }
 
@@ -111,8 +109,7 @@ class RenterController extends Controller
     public function renterDetails($id = NULL)
     {
 
-        if ($id == NULL)
-        {
+        if ($id == NULL) {
             return redirect('/renters');
         }
 
@@ -135,12 +132,10 @@ class RenterController extends Controller
 
         // Loop through each collection and add them to a master array.
         $activity_log = [];
-        foreach ($invoices as $invoice)
-        {
+        foreach ($invoices as $invoice) {
             $activity_log[] = $invoice;
         }
-        foreach ($payments as $payment)
-        {
+        foreach ($payments as $payment) {
             $activity_log[] = $payment;
         }
 
@@ -230,7 +225,7 @@ class RenterController extends Controller
             'start_date' => 'required|date',
         ]);
 
-        $user = Auth::user(); /* @var $user \App\User */
+        $user = Auth::user();
 
         // If validation rules pass, then create the new Renter object.
         $renter = new Renter;
@@ -249,8 +244,11 @@ class RenterController extends Controller
 
     /**
      * Save updated information on an existing renter.
+     * @param mixed $id
+     * @param Request $request
+     * @return RedirectResponse|Redirector
      */
-    public function updateRenter($id = NULL, Request $request)
+    public function updateRenter($id, Request $request)
     {
         $validatedData = $request->validate([
             'type' => 'required',
@@ -262,7 +260,7 @@ class RenterController extends Controller
             'end_date' => 'nullable|date',
         ]);
 
-        $user = Auth::user(); /* @var $user \App\User */
+        $user = Auth::user();
 
         // If validation rules pass, then update the existing Renter record.
         $renter = Renter::find($id);
@@ -282,8 +280,7 @@ class RenterController extends Controller
 
     private function sortByDate($a, $b)
     {
-        if ($a->created_at == $b->created_at)
-        {
+        if ($a->created_at == $b->created_at) {
             return 0;
         }
         return ($a->created_at > $b->created_at) ? -1 : 1;

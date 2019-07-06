@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\TaxRate;
-use App\Type;
 use App\ReprocessedMaterial;
 use App\ReprocessedMaterialsHistory;
-use Ixudra\Curl\Facades\Curl;
+use App\TaxRate;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TaxController extends Controller
 {
-    
+
     public function showTaxRates()
     {
         return view('taxes', [
@@ -27,9 +25,10 @@ class TaxController extends Controller
     {
         $materials = ReprocessedMaterial::orderBy('MaterialTypeID')->get();
         $history = [];
-        foreach ($materials as $material)
-        {
-            $history[$material->materialTypeID] = ReprocessedMaterialsHistory::where('type_id', $material->materialTypeID)->orderBy('updated_at', 'asc')->get();
+        foreach ($materials as $material) {
+            $history[$material->materialTypeID] = ReprocessedMaterialsHistory::where(
+                'type_id', $material->materialTypeID
+            )->orderBy('updated_at', 'asc')->get();
         }
 
         return view('taxes.history', [
@@ -43,8 +42,7 @@ class TaxController extends Controller
      */
     public function updateValue(Request $request, $type_id = NULL)
     {
-        if ($type_id == NULL)
-        {
+        if ($type_id == NULL) {
             return redirect('/taxes');
         }
         $rate = TaxRate::where('type_id', $type_id)->first();
@@ -59,8 +57,7 @@ class TaxController extends Controller
      */
     public function updateTaxRate(Request $request, $type_id = NULL)
     {
-        if ($type_id == NULL)
-        {
+        if ($type_id == NULL) {
             return redirect('/taxes');
         }
         $rate = TaxRate::where('type_id', $type_id)->first();
@@ -75,8 +72,7 @@ class TaxController extends Controller
      */
     public function updateMasterTaxRate(Request $request)
     {
-        if (!is_numeric($request->input('new_tax_rate')))
-        {
+        if (!is_numeric($request->input('new_tax_rate'))) {
             return redirect('/taxes');
         }
         TaxRate::query()->update([

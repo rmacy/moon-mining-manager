@@ -16,7 +16,7 @@ class UpdateOreValues implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
-    
+
     /**
      * Execute the job.
      *
@@ -26,17 +26,17 @@ class UpdateOreValues implements ShouldQueue
     {
         // Grab all tax rate records, and all stored current values for materials (keyed by id).
         $tax_rates = TaxRate::all();
-        $material_values = ReprocessedMaterial::select('materialTypeID', 'average_price')->get()->keyBy('materialTypeID');
+        $material_values = ReprocessedMaterial::select(['materialTypeID', 'average_price'])
+            ->get()->keyBy('materialTypeID');
 
         // Loop through the rates, calculating the total value per unit of ore.
-        foreach ($tax_rates as $rate)
-        {
+        foreach ($tax_rates as $rate) {
             $total_unit_cost = 0;
             $materials = $rate->reprocessed_materials;
-            
-            foreach ($materials as $material)
-            {
-                $total_unit_cost += $material_values[$material->materialTypeID]->average_price * ($material->quantity * 0.86);
+
+            foreach ($materials as $material) {
+                $total_unit_cost += $material_values[$material->materialTypeID]->average_price *
+                    ($material->quantity * 0.86);
             }
             $rate->value = $total_unit_cost / 100;
             $rate->save();

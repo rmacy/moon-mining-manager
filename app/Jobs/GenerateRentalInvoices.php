@@ -2,13 +2,13 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Renter;
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class GenerateRentalInvoices implements ShouldQueue
@@ -41,13 +41,17 @@ class GenerateRentalInvoices implements ShouldQueue
             )'
         )->get();
 
-        // Loop through all the renters and send an invoice for the appropriate amount (taking into account partial months).
+        // Loop through all the renters and send an invoice for the appropriate amount
+        // (taking into account partial months).
         $delay_counter = 1;
-        foreach ($renters as $renter)
-        {
+        foreach ($renters as $renter) {
             // Queue jobs to create and send the individual invoices.
-            GenerateRentalInvoice::dispatch($renter->id, $delay_counter)->delay(Carbon::now()->addSeconds($delay_counter * 10));
-            Log::info('GenerateRentalInvoices: dispatched job to generate invoice for renter ' . $renter->character_id . ' and send mail in ' . $delay_counter . ' minutes');
+            GenerateRentalInvoice::dispatch($renter->id, $delay_counter)
+                ->delay(Carbon::now()->addSeconds($delay_counter * 10));
+            Log::info(
+                'GenerateRentalInvoices: dispatched job to generate invoice for renter ' .
+                $renter->character_id . ' and send mail in ' . $delay_counter . ' minutes'
+            );
             $delay_counter++;
         }
 

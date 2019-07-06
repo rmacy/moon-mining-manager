@@ -2,16 +2,15 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
+use App\Invoice;
 use App\Miner;
 use App\Template;
-use App\Invoice;
-use App\Jobs\SendEvemail;
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class GenerateInvoice implements ShouldQueue
@@ -25,6 +24,7 @@ class GenerateInvoice implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param int $id
      * @return void
      */
     public function __construct($id, $mail_delay = 20)
@@ -43,14 +43,14 @@ class GenerateInvoice implements ShouldQueue
 
         // Retrieve the miner record.
         $miner = Miner::where('eve_id', $this->id)->first();
-        
+
         // Pick up the invoice template to apply text substitutions.
         $template = Template::where('name', 'weekly_invoice')->first();
-        
+
         // Grab the template subject and body.
         $subject = $template->subject;
         $body = $template->body;
-        
+
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
         $subject = str_replace('{name}', $miner->name, $subject);
@@ -70,7 +70,8 @@ class GenerateInvoice implements ShouldQueue
             'approved_cost' => 5000,
         );
 
-        // Queue sending the evemail, spaced at 1-minute intervals to avoid triggering the mailspam limiter (4/min) or database lockups.
+        // Queue sending the eve mail, spaced at 1-minute intervals to avoid triggering the
+        // mail spam limiter (4/min) or database lockups.
         SendEvemail::dispatch($mail)->delay(Carbon::now()->addSeconds($this->mail_delay * 60));
         Log::info('GenerateInvoice: dispatched job to send mail in ' . $this->mail_delay . ' minutes', [
             'mail' => $mail,
@@ -82,7 +83,10 @@ class GenerateInvoice implements ShouldQueue
         $invoice->amount = $miner->amount_owed;
         $invoice->save();
 
-        Log::info('GenerateInvoice: saved new invoice for miner ' . $miner->eve_id . ' for amount ' . $miner->amount_owed);
+        Log::info(
+            'GenerateInvoice: saved new invoice for miner ' . $miner->eve_id .
+            ' for amount ' . $miner->amount_owed
+        );
 
     }
 

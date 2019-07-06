@@ -2,15 +2,15 @@
 
 namespace App\Jobs;
 
+use App\Alliance;
+use App\Classes\EsiConnection;
+use App\Corporation;
+use App\Miner;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Classes\EsiConnection;
-use App\Miner;
-use App\Corporation;
-use App\Alliance;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class CorporationCheck implements ShouldQueue
@@ -50,21 +50,23 @@ class CorporationCheck implements ShouldQueue
         ]);
 
         // Check if they are still in the same corporation as last time we checked.
-        if ($miner->corporation_id == $character->corporation_id)
-        {
-            Log::info('CorporationCheck: miner ' . $this->miner_id . ' is still in the same corporation ' . $character->corporation_id);
-        }
-        else
-        {
+        if ($miner->corporation_id == $character->corporation_id) {
+            Log::info(
+                'CorporationCheck: miner ' . $this->miner_id . ' is still in the same corporation ' .
+                $character->corporation_id
+            );
+        } else {
 
             // Update the miner's stored corporation ID.
             $miner->corporation_id = $character->corporation_id;
-            Log::info('CorporationCheck: miner ' . $this->miner_id . ' has moved to corporation ' . $character->corporation_id);
+            Log::info(
+                'CorporationCheck: miner ' . $this->miner_id . ' has moved to corporation ' .
+                $character->corporation_id
+            );
 
             // Check if they have moved to another corporation we know about already.
             $existing_corporation = Corporation::where('corporation_id', $character->corporation_id)->first();
-            if (!isset($existing_corporation))
-            {
+            if (!isset($existing_corporation)) {
 
                 // This is a new corporation, retrieve all of the relevant details.
                 $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
@@ -77,12 +79,10 @@ class CorporationCheck implements ShouldQueue
                 Log::info('CorporationCheck: stored new corporation ' . $corporation->name);
 
                 // Check if their new corporation is a different alliance.
-                if (isset($corporation->alliance_id))
-                {
+                if (isset($corporation->alliance_id)) {
                     $miner->alliance_id = $corporation->alliance_id;
                     $existing_alliance = Alliance::where('alliance_id', $corporation->alliance_id)->first();
-                    if (!isset($existing_alliance))
-                    {
+                    if (!isset($existing_alliance)) {
                         // This is a new alliance, save the details.
                         $new_alliance = new Alliance;
                         $new_alliance->alliance_id = $corporation->alliance_id;

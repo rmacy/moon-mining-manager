@@ -31,7 +31,6 @@ db-dump.sql
 .idea
 .phpstorm.meta.php
 _ide_helper.php
-_ide_helper_models.php
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

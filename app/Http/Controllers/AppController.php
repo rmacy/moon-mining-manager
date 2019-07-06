@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\SolarSystem;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use App\Whitelist;
-use App\User;
 use App\Miner;
-use App\Refinery;
 use App\Payment;
+use App\Refinery;
+use App\SolarSystem;
+use App\User;
+use App\Whitelist;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class AppController extends Controller
 {
@@ -18,45 +19,42 @@ class AppController extends Controller
      * App homepage. Check if the user is currently signed in, and either show
      * a signin prompt or the homepage.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function home()
     {
-
         // Build the WHERE clause to filter by alliance and/or corporation membership.
         $whitelist_where = [];
         $blacklist_where = [];
-        if (env('EVE_ALLIANCES_WHITELIST'))
-        {
+        if (env('EVE_ALLIANCES_WHITELIST')) {
             $whitelist_where[] = 'alliance_id IN (' . env('EVE_ALLIANCES_WHITELIST') . ')';
             $blacklist_where[] = '(alliance_id NOT IN (' . env('EVE_ALLIANCES_WHITELIST') . ') OR alliance_id IS NULL)';
         }
-        if (env('EVE_CORPORATIONS_WHITELIST'))
-        {
+        if (env('EVE_CORPORATIONS_WHITELIST')) {
             $whitelist_where[] = 'corporation_id IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
             $blacklist_where[] = 'corporation_id NOT IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
         }
-        if (count($whitelist_where))
-        {
+        if (count($whitelist_where)) {
             $whitelist_whereRaw = '(' . implode(' OR ', $whitelist_where) . ')';
             $blacklist_whereRaw = '(' . implode(' AND ', $blacklist_where) . ')';
         }
 
         // Calculate the total currently owed and total income generated.
-        $total_amount_owed = DB::table('miners')->select(DB::raw('SUM(amount_owed) AS total'))->where('amount_owed', '>', 0)->whereRaw($whitelist_whereRaw)->first();
+        $total_amount_owed = DB::table('miners')->select(DB::raw('SUM(amount_owed) AS total'))
+            ->where('amount_owed', '>', 0)->whereRaw($whitelist_whereRaw)->first();
         $total_income = DB::table('payments')->select(DB::raw('SUM(amount_received) AS total'))->first();
 
         // Grab the top miner, refinery and system.
-        $top_payer = Payment::select(DB::raw('miner_id, SUM(amount_received) AS total'))->groupBy('miner_id')->orderBy('total', 'desc')->first();
-        if (isset($top_payer))
-        {
+        $top_payer = Payment::select(DB::raw('miner_id, SUM(amount_received) AS total'))
+            ->groupBy('miner_id')->orderBy('total', 'desc')->first();
+        if (isset($top_payer)) {
             $top_miner = Miner::where('eve_id', $top_payer->miner_id)->first();
             $top_miner->total = $top_payer->total;
         }
         $top_refinery = Refinery::orderBy('income', 'desc')->first();
-        $top_refinery_system = Refinery::select(DB::raw('solar_system_id, SUM(income) AS total'))->groupBy('solar_system_id')->orderBy('total', 'desc')->first();
-        if (isset($top_refinery_system) && $top_refinery_system->solar_system_id > 0)
-        {
+        $top_refinery_system = Refinery::select(DB::raw('solar_system_id, SUM(income) AS total'))
+            ->groupBy('solar_system_id')->orderBy('total', 'desc')->first();
+        if (isset($top_refinery_system) && $top_refinery_system->solar_system_id > 0) {
             $top_system = SolarSystem::find($top_refinery_system->solar_system_id);
             $top_system->total = $top_refinery_system->total;
         }
@@ -65,7 +63,8 @@ class AppController extends Controller
             'top_miner' => (isset($top_miner)) ? $top_miner : null,
             'top_refinery' => (isset($top_refinery)) ? $top_refinery : null,
             'top_system' => (isset($top_system)) ? $top_system : null,
-            'miners' => Miner::where('amount_owed', '>=', 1)->whereRaw($whitelist_whereRaw)->orderBy('amount_owed', 'desc')->get(),
+            'miners' => Miner::where('amount_owed', '>=', 1)->whereRaw($whitelist_whereRaw)
+                ->orderBy('amount_owed', 'desc')->get(),
             'ninjas' => Miner::whereRaw($blacklist_whereRaw)->get(),
             'total_amount_owed' => $total_amount_owed->total,
             'refineries' => Refinery::orderBy('income', 'desc')->get(),
@@ -77,7 +76,7 @@ class AppController extends Controller
      * Access management user list. List all the current whitelisted users, together
      * with the person that authorised them.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showAuthorisedUsers()
     {
@@ -97,15 +96,13 @@ class AppController extends Controller
      */
     public function makeUserAdmin($id = NULL)
     {
-        if ($id == NULL)
-        {
+        if ($id == NULL) {
             return redirect('/access');
         }
         $user = Auth::user();
         // Check if this user is already in the whitelist table.
         $whitelist = Whitelist::where('eve_id', $id)->first();
-        if (!isset($whitelist))
-        {
+        if (!isset($whitelist)) {
             $whitelist = new Whitelist;
             $whitelist->eve_id = $id;
         }
@@ -120,8 +117,7 @@ class AppController extends Controller
      */
     public function whitelistUser($id = NULL)
     {
-        if ($id == NULL)
-        {
+        if ($id == NULL) {
             return redirect('/access');
         }
         $user = Auth::user();
@@ -134,13 +130,12 @@ class AppController extends Controller
 
     /**
      * Blacklist a new user. (Well, it's not really a blacklist, just de-whitelist them.)
-	 *
-	 * @throws \Exception
+     *
+     * @throws \Exception
      */
     public function blacklistUser($id = NULL)
     {
-        if ($id == NULL)
-        {
+        if ($id == NULL) {
             return redirect('/access');
         }
         $user = Whitelist::where('eve_id', $id);
@@ -152,8 +147,8 @@ class AppController extends Controller
     {
         $user = Whitelist::where('eve_id', $id)->first();
         if ($user) {
-            $user->form_mail = ! $user->form_mail;
-        $user->save();
+            $user->form_mail = !$user->form_mail;
+            $user->save();
         }
 
         return redirect('/access');
@@ -162,7 +157,7 @@ class AppController extends Controller
     /**
      * Logout the currently authenticated user.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function logout()
     {

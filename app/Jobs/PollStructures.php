@@ -2,14 +2,14 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
 use App\Refinery;
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class PollStructures implements ShouldQueue
@@ -60,15 +60,13 @@ class PollStructures implements ShouldQueue
         ]);
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
-        if ($this->page == 1 && $structures->pages > 1)
-        {
+        if ($this->page == 1 && $structures->pages > 1) {
             Log::info(
                 'PollStructures: found more than 1 page of corporation structures, queuing additional jobs for ' .
                 $structures->pages . ' total pages'
             );
             $delay_counter = 1;
-            for ($i = 2; $i <= $structures->pages; $i++)
-            {
+            for ($i = 2; $i <= $structures->pages; $i++) {
                 PollStructures::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delay_counter));
                 $delay_counter++;
             }
@@ -80,14 +78,11 @@ class PollStructures implements ShouldQueue
             35836, // Tatara
         );
         $delay_counter = 1;
-        foreach ($structures as $structure)
-        {
-            if (in_array($structure->type_id, $refineries))
-            {
+        foreach ($structures as $structure) {
+            if (in_array($structure->type_id, $refineries)) {
                 // Found a refinery. If it doesn't already exist, create a record for it.
                 $refinery = Refinery::where('observer_id', $structure->structure_id)->first();
-                if (!isset($refinery))
-                {
+                if (!isset($refinery)) {
                     $refinery = new Refinery;
                     $refinery->observer_id = $structure->structure_id;
                     $refinery->observer_type = 'structure';

@@ -2,14 +2,14 @@
 
 namespace App\Jobs;
 
-use Exception;
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Seat\Eseye\Exceptions\RequestFailedException;
 
@@ -42,7 +42,7 @@ class SendEvemail implements ShouldQueue
         if ($userId <= 0) {
             Log::info(
                 'SendEvemail: cannot send mail to character ' .
-                $this->mail['recipients'][0]['recipient_id']. ', MAIL_USER_ID not set'
+                $this->mail['recipients'][0]['recipient_id'] . ', MAIL_USER_ID not set'
             );
             return;
         }
@@ -55,7 +55,7 @@ class SendEvemail implements ShouldQueue
         ]);
         Log::info(
             'SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id'] .
-            (count($this->mail['recipients']) > 1 ? ' and ' . (count($this->mail['recipients'])-1) . ' more.' : '')
+            (count($this->mail['recipients']) > 1 ? ' and ' . (count($this->mail['recipients']) - 1) . ' more.' : '')
         );
     }
 
@@ -64,7 +64,7 @@ class SendEvemail implements ShouldQueue
      */
     public function failed(Exception $exception)
     {
-        if (! $exception instanceof RequestFailedException) {
+        if (!$exception instanceof RequestFailedException) {
             // e. g. EsiScopeAccessDeniedException or something else
             Log::error('SendEvemail: ' . $exception->getMessage());
             return;
@@ -84,33 +84,27 @@ class SendEvemail implements ShouldQueue
                 )
             )
         ) {
-            // We somehow have triggered the error rate limiter, stop requeueing jobs until we can figure out what broke. :(
+            // We somehow have triggered the error rate limiter,
+            // stop requeueing jobs until we can figure out what broke. :(
             Log::info('SendEvemail: bounceback due to hitting the error rate limiter, dumping email job');
             mail(
                 env('ADMIN_EMAIL'),
                 'Mining Manager rate limiter alert',
-                date('Y-m-d H:i:s') . ' - SendEvemail: bounceback due to hitting the error rate limiter, dumping email job',
+                date('Y-m-d H:i:s') .
+                    ' - SendEvemail: bounceback due to hitting the error rate limiter, dumping email job',
                 'From: ' . env('MAIL_FROM_NAME') . ' <' . env('MAIL_FROM_ADDRESS') . '>'
             );
-        }
-        elseif (stristr($exception->getEsiResponse()->error, 'ContactCostNotApproved'))
-        {
+        } elseif (stristr($exception->getEsiResponse()->error, 'ContactCostNotApproved')) {
             // We want to ignore CSPA charge related errors, since they will never send successfully.
             Log::info('SendEvemail: bounceback due to ContactCostNotApproved, dumping email job');
-        }
-        elseif (stristr($exception->getEsiResponse()->error, 'MailStopSpamming'))
-        {
+        } elseif (stristr($exception->getEsiResponse()->error, 'MailStopSpamming')) {
             // If we triggered the anti-spam rate limiter, we want to try again in a few hours.
             $delay = rand(120, 180);
             SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes($delay));
             Log::info('SendEvemail: bounceback due to MailStopSpamming, re-queued job to send mail in 2-3 hours');
-        }
-        elseif (stripos($exception->getEsiResponse()->error, 'ContactOwnerUnreachable') !== false)
-        {
+        } elseif (stripos($exception->getEsiResponse()->error, 'ContactOwnerUnreachable') !== false) {
             Log::info('SendEvemail: ContactOwnerUnreachable (receiver blocked sender), dumping email job.');
-        }
-        else
-        {
+        } else {
             // Send failed for some other reason (for example downtime), try again in a while.
             SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes(15));
             Log::info('SendEvemail: re-queued job to send mail in 15 minutes');

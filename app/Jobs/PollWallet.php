@@ -2,19 +2,23 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
 use App\Miner;
-use App\Renter;
 use App\Payment;
 use App\RentalPayment;
+use App\Renter;
 use App\Template;
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Seat\Eseye\Eseye;
+use Seat\Eseye\Exceptions\EsiScopeAccessDeniedException;
+use Seat\Eseye\Exceptions\InvalidContainerDataException;
+use Seat\Eseye\Exceptions\UriDataMissingException;
 
 class PollWallet implements ShouldQueue
 {
@@ -33,7 +37,7 @@ class PollWallet implements ShouldQueue
     private $page;
 
     /**
-     * @var \Seat\Eseye\Eseye
+     * @var Eseye
      */
     private $conn;
 
@@ -56,7 +60,7 @@ class PollWallet implements ShouldQueue
     {
         $this->userId = $userId;
         $this->page = $page;
-        $this->date = (string) $date;
+        $this->date = (string)$date;
     }
 
     /**
@@ -92,12 +96,10 @@ class PollWallet implements ShouldQueue
         $date = NULL;
         $pollNextPage = $transactions->pages > $this->page;
 
-        foreach ($transactions as $transaction)
-        {
+        foreach ($transactions as $transaction) {
             $ref_id = $transaction->id;
             $date = date('Y-m-d', strtotime($transaction->date));
-            if ($transaction->ref_type == 'player_donation')
-            {
+            if ($transaction->ref_type == 'player_donation') {
 
                 // Checks to see if this donation was already processed.
                 $payment = Payment::where('ref_id', $ref_id)->first();
@@ -117,13 +119,12 @@ class PollWallet implements ShouldQueue
                 // First check if the payment comes from a recognised renter and is exactly
                 // the right amount for an outstanding refinery balance
                 // (and wasn't already processed).
-                if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') && isset($renter) && !isset($rental_payment))
-                {
+                if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') &&
+                    isset($renter) && !isset($rental_payment)
+                ) {
                     $this->processRents($transaction, $renter, $ref_id);
-                }
-                // Next, if this donation is actually from a recognised miner (and wasn't already processed).
-                elseif ($this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner) && !isset($payment))
-                {
+                } // Next, if this donation is actually from a recognised miner (and wasn't already processed).
+                elseif ($this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner) && !isset($payment)) {
                     $this->processTaxes($transaction, $miner, $date, $ref_id);
                 } else {
                     Log::info('skipping ' . json_encode($transaction));
@@ -158,9 +159,9 @@ class PollWallet implements ShouldQueue
      * @param \stdClass $transaction
      * @param Renter $renter
      * @param int $ref_id
-     * @throws \Seat\Eseye\Exceptions\EsiScopeAccessDeniedException
-     * @throws \Seat\Eseye\Exceptions\InvalidContainerDataException
-     * @throws \Seat\Eseye\Exceptions\UriDataMissingException
+     * @throws EsiScopeAccessDeniedException
+     * @throws InvalidContainerDataException
+     * @throws UriDataMissingException
      */
     private function processRents($transaction, Renter $renter, $ref_id)
     {
@@ -225,52 +226,41 @@ class PollWallet implements ShouldQueue
             ' ISK from a recognised miner ' . $miner->eve_id . ' on ' . $date . ', reference ' . $ref_id);
 
         // Parse the 'reason' entered by the player to see if they want to pay off other players/alts bills.
-        if (isset($transaction->reason))
-        {
+        if (isset($transaction->reason)) {
             $reason = $transaction->reason;
         }
-        if (isset($reason) && strlen($reason) > 0)
-        {
+        if (isset($reason) && strlen($reason) > 0) {
             // Split by commas.
             $elements = explode(',', $reason);
             $recipients = [];
 
             // For each element found, test it to see if it is a character ID or name, and find a
             // reference to the relevant miner.
-            foreach ($elements as $element)
-            {
-                if (preg_match('/^\d+$/', trim($element)))
-                {
+            foreach ($elements as $element) {
+                if (preg_match('/^\d+$/', trim($element))) {
                     $recipient_miner = Miner::where('eve_id', trim($element))->first();
-                }
-                else
-                {
+                } else {
                     $recipient_miner = Miner::where('name', trim($element))->first();
                 }
-                if (isset($recipient_miner))
-                {
+                if (isset($recipient_miner)) {
                     $recipients[] = $recipient_miner;
                 }
             }
             Log::info(
-                'PollWallet: detected player-entered reason for payment, parsed for alternative recipients of payment, found ' .
+                'PollWallet: detected player-entered reason for payment, ' .
+                    'parsed for alternative recipients of payment, found ' .
                     count($recipients) . ' additional valid recipients',
                 ['recipients' => $recipients]
             );
 
             // If any valid recipients were found, create payments to them.
-            if (count($recipients) > 0)
-            {
-                foreach ($recipients as $recipient)
-                {
+            if (count($recipients) > 0) {
+                foreach ($recipients as $recipient) {
                     // Calculate how much to pay off for this recipient - either the full amount, or whatever
                     // is left of the balance.
-                    if ($transaction->amount >= $recipient->amount_owed)
-                    {
+                    if ($transaction->amount >= $recipient->amount_owed) {
                         $payment_amount = $recipient->amount_owed;
-                    }
-                    else
-                    {
+                    } else {
                         $payment_amount = $transaction->amount;
                     }
 
@@ -294,8 +284,7 @@ class PollWallet implements ShouldQueue
         }
 
         // If there is any money left to apply to the donator's balance after paying other recipients.
-        if ($transaction->amount > 1)
-        {
+        if ($transaction->amount > 1) {
             // Record this transaction in the payments table.
             $payment = new Payment;
             $payment->miner_id = $transaction->first_party_id;

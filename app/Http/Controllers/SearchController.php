@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Classes\EsiConnection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class SearchController extends Controller
@@ -27,8 +27,7 @@ class SearchController extends Controller
         ]);
 
         // If there are more than ten matching results, we want them to keep typing.
-        if (isset($result) && isset($result->character))
-        {
+        if (isset($result) && isset($result->character)) {
             $character_id = $result->character[0];
             $character = $conn->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $character_id,
@@ -43,9 +42,7 @@ class SearchController extends Controller
             ]);
             $character->corporation = $corporation->name;
             return $character;
-        }
-        else
-        {
+        } else {
             return 'No matches returned, API may be unreachable...';
         }
 

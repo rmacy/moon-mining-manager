@@ -2,14 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Classes\EsiConnection;
+use App\Refinery;
+use App\Renter;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Renter;
-use App\Refinery;
-use App\Classes\EsiConnection;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class SendRenterDelinquencyList implements ShouldQueue
@@ -30,13 +30,15 @@ class SendRenterDelinquencyList implements ShouldQueue
         $esi = new EsiConnection;
 
         // Grab all the renters with active agreements where they currently have an outstanding balance.
-        $renters = Renter::whereRaw('refinery_id IS NOT NULL && start_date <= CURDATE() AND (end_date IS NULL OR end_date >= CURDATE()) AND amount_owed > 0')->get();
+        $renters = Renter::whereRaw(
+            'refinery_id IS NOT NULL && start_date <= CURDATE() ' .
+            'AND (end_date IS NULL OR end_date >= CURDATE()) AND amount_owed > 0'
+        )->get();
 
         // Generate the email to send to the administrator.
         $subject = 'Moon Rental Delinquency Report for ' . date('Y-m-d');
         $body = "The following renters have not paid off their outstanding rental balance yet:\n\n";
-        foreach ($renters as $renter)
-        {
+        foreach ($renters as $renter) {
             // Request the character name for this rental agreement.
             $character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $renter->character_id,
@@ -46,7 +48,8 @@ class SendRenterDelinquencyList implements ShouldQueue
             // Output the details of this renter to the email body.
             $body .= 'Renter: <url=showinfo:1376//93533671>' . $character->name . '</url>';
             $body .= "\n";
-            $body .= 'Refinery: <loc><url=https://moons.bravecollective.com/renters/refinery/' . $renter->refinery_id . '>' . $refinery->name . '</url></loc>';
+            $body .= 'Refinery: <loc><url=https://moons.bravecollective.com/renters/refinery/' .
+                $renter->refinery_id . '>' . $refinery->name . '</url></loc>';
             $body .= "\n";
             $body .= 'Balance: ' . number_format($renter->amount_owed, 0) . ' ISK';
             $body .= "\n\n";

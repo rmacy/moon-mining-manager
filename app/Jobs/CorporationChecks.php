@@ -2,13 +2,13 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Miner;
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class CorporationChecks implements ShouldQueue
@@ -23,13 +23,13 @@ class CorporationChecks implements ShouldQueue
     public function handle()
     {
 
-        // Grab all of the miner records we have, and loop through them all to queue jobs to check their corporation membership.
+        // Grab all of the miner records we have, and loop through them all to queue jobs
+        // to check their corporation membership.
         $miners = Miner::all();
         Log::info('CorporationChecks: found ' . count($miners) . ' miners in the database');
         $delay_counter = 1;
 
-        foreach ($miners as $miner)
-        {
+        foreach ($miners as $miner) {
             CorporationCheck::dispatch($miner->eve_id)->delay(Carbon::now()->addSecond(15 * $delay_counter));
             Log::info('CorporationChecks: dispatched job to check the corporation for miner ' .
                 $miner->eve_id . ' in ' . (15 * $delay_counter) . ' seconds');

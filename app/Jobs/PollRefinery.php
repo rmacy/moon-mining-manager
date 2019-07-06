@@ -2,16 +2,16 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Classes\EsiConnection;
+use App\Miner;
 use App\MiningActivity;
 use App\TaxRate;
-use App\Miner;
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class PollRefinery implements ShouldQueue
@@ -82,13 +82,11 @@ class PollRefinery implements ShouldQueue
         ]);
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
-        if ($this->page == 1 && $activity_log->pages > 1)
-        {
+        if ($this->page == 1 && $activity_log->pages > 1) {
             Log::info('PollRefinery: found more than 1 page of mining data, queuing additional jobs for ' .
                 $activity_log->pages . ' total pages');
             $delay_counter = 1;
-            for ($i = 2; $i <= $activity_log->pages; $i++)
-            {
+            for ($i = 2; $i <= $activity_log->pages; $i++) {
                 PollRefinery::dispatch($this->observer_id, $this->corporation_id, $i)
                     ->delay(Carbon::now()->addSecond(20 * $delay_counter));
                 $delay_counter++;
@@ -101,8 +99,7 @@ class PollRefinery implements ShouldQueue
         $miner_ids = array();
         $type_ids = array();
 
-        foreach ($activity_log as $log_entry)
-        {
+        foreach ($activity_log as $log_entry) {
             if ($log_entry->last_updated >= date('Y-m-d')) {
                 continue; // ignore entries from today, they may still change
             }
@@ -110,7 +107,7 @@ class PollRefinery implements ShouldQueue
             $hash = hash(
                 'sha1',
                 $log_entry->character_id . $this->observer_id . $log_entry->type_id .
-                    $log_entry->quantity . $log_entry->last_updated
+                $log_entry->quantity . $log_entry->last_updated
             );
 
             // Add a new mining activity array to the list.
@@ -125,14 +122,12 @@ class PollRefinery implements ShouldQueue
             ];
 
             // Store the miner.
-            if (!in_array($log_entry->character_id, $miner_ids))
-            {
+            if (!in_array($log_entry->character_id, $miner_ids)) {
                 $miner_ids[] = $log_entry->character_id;
             }
 
             // Store the ore type.
-            if (!in_array($log_entry->type_id, $type_ids))
-            {
+            if (!in_array($log_entry->type_id, $type_ids)) {
                 $type_ids[] = $log_entry->type_id;
             }
         }
@@ -140,16 +135,16 @@ class PollRefinery implements ShouldQueue
         // Insert all of the new mining activity records to the database.
         MiningActivity::insertIgnore($new_mining_activity_records);
 
-        Log::info('PollRefinery: inserted up to ' . count($new_mining_activity_records) . ' new mining activity records');
+        Log::info(
+            'PollRefinery: inserted up to ' . count($new_mining_activity_records) . ' new mining activity records'
+        );
 
         // Check if this miner is already known.
         $delay_counter = 1;
-        foreach ($miner_ids as $miner_id)
-        {
+        foreach ($miner_ids as $miner_id) {
             $miner = Miner::where('eve_id', $miner_id)->first();
             // If not, create a job to add the new miner entry.
-            if (!isset($miner))
-            {
+            if (!isset($miner)) {
                 Log::info('PollRefinery: unknown miner found, queuing job to retrieve details');
                 MinerCheck::dispatch($miner_id)->delay(Carbon::now()->addSeconds($delay_counter * 5));
                 $delay_counter++;
@@ -157,12 +152,10 @@ class PollRefinery implements ShouldQueue
         }
 
         // Check if this ore type exists in the taxes table.
-        foreach ($type_ids as $type_id)
-        {
+        foreach ($type_ids as $type_id) {
             $tax_rate = TaxRate::where('type_id', $type_id)->first();
             // If not, create and insert it with zero values.
-            if (!isset($tax_rate))
-            {
+            if (!isset($tax_rate)) {
                 $tax_rate = new TaxRate;
                 $tax_rate->type_id = $type_id;
                 $tax_rate->check_materials = 1;

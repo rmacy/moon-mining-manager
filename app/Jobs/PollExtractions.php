@@ -50,7 +50,8 @@ class PollExtractions implements ShouldQueue
 
         Log::info('PollExtractions: clearing all extraction data more than 2 days old');
 
-        // Delete any extraction data that relates to periods that have already passed (the field natural decay time + 2 days).
+        // Delete any extraction data that relates to periods that have already passed
+        // (the field natural decay time + 2 days).
         $cutoff = date('Y-m-d H:m:s', time() - (2 * 24 * 60 * 60));
         Refinery::where('natural_decay_time', '<', $cutoff)->update([
             'extraction_start_time' => NULL,
@@ -78,9 +79,9 @@ class PollExtractions implements ShouldQueue
             }
         }
 
-        // Loop through all the extraction data, updating the current status and time remaining for any active extraction cycles.
-        foreach ($timers as $timer)
-        {
+        // Loop through all the extraction data, updating the current status and time remaining
+        // for any active extraction cycles.
+        foreach ($timers as $timer) {
             $refinery = Refinery::where('observer_id', $timer->structure_id)->first();
             $refinery->extraction_start_time = $this->convertTimestampFormat($timer->extraction_start_time);
             $refinery->chunk_arrival_time = $this->convertTimestampFormat($timer->chunk_arrival_time);
@@ -93,6 +94,9 @@ class PollExtractions implements ShouldQueue
 
     /**
      * Convert from ISO 8601 timestamp format to MySQL TIMESTAMP format.
+     *
+     * @param string $timestamp
+     * @return string
      */
     private function convertTimestampFormat($timestamp)
     {
