@@ -17,8 +17,7 @@
         "laravel/socialite": "^3.0",
         "laravel/tinker": "~1.0",
         "matthewpennell/eveonline-socialite-sisi": "dev-master",
-        "nullx27/eveonline-socialite": "^0.5.0",
-        "squareboat/sneaker": "^4.0"
+        "nullx27/eveonline-socialite": "^0.5.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.5",
