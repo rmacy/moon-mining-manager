@@ -228,7 +228,7 @@
 
     <body class="@yield('body-class')">
         @include('common.public-nav', ['page' => $page])
-        <img src="https://wiki.bravecollective.com/lib/tpl/vector/user/logo.png" alt="Brave Collective" class="logo">
+        <img src="/images/logo.png" alt="Brave Collective" class="logo">
 
         @yield('content')
 
