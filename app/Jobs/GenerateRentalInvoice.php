@@ -101,6 +101,7 @@ class GenerateRentalInvoice implements ShouldQueue
         $body = str_replace('{name}', $character->name, $body);
         $body = str_replace('{refinery}', $refinery->name, $body);
         $body = str_replace('{amount_owed}', number_format($renter->amount_owed, 0), $body);
+        $body = str_replace('{monthly_rental_fee}', number_format($invoice_amount, 0), $body);
         $mail = array(
             'body' => $body,
             'recipients' => array(
