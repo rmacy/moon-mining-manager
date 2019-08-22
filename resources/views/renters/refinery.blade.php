@@ -92,6 +92,15 @@
 
         </div>
 
+        <div class="col-4">
+            <div class="card-heading">Last edited</div>
+            <div class="card card-regular">
+                by: {{ $renter->updatedBy ? $renter->updatedBy->name : '' }}
+                <br>
+                at: {{ $renter->updated_at }}
+            </div>
+        </div>
+
     </div>
 
 @endsection
