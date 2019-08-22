@@ -15,7 +15,7 @@
                     'P' . $renter->moon->planet . '-M' .
                         $renter->moon->moon . ', ' .
                         $renter->refinery->system->solarSystemName . ', ' .
-                        $renter->moon->region->regionName :
+                        $renter->moon->region->regionName . ', ID: ' . $renter->moon_id :
                     $refinery->name,
                 'sub2' => $refinery->corporation ? $refinery->corporation->name : ''
             ])

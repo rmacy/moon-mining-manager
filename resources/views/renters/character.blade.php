@@ -87,8 +87,11 @@
                             <td>
                                 <a href="/renters/refinery/{{$rental->refinery_id }}">{{ $rental->refinery->name }}</a>
                                 @if (isset($rental->moon_id))
+                                    Moon ID: {{ $rental->moon_id }}
                                     <br>
-                                    P{{ $rental->moon->planet }}-M{{ $rental->moon->moon }}, {{ $rental->moon->system->solarSystemName }}, {{ $rental->moon->region->regionName }}
+                                    P{{ $rental->moon->planet }}-M{{ $rental->moon->moon }},
+                                    {{ $rental->moon->system->solarSystemName }},
+                                    {{ $rental->moon->region->regionName }}
                                 @endif
                             </td>
                         </tr>

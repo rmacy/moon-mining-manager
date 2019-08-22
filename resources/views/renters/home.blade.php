@@ -14,6 +14,7 @@
                 <thead>
                     <tr>
                         <th>Location</th>
+                        <th>ID</th>
                         <th>Refinery name</th>
                         <th>Rental contact</th>
                         <th>Notes</th>
@@ -32,19 +33,29 @@
                             <tr>
                                 <td>
                                     @if (isset($renter->moon_id))
-                                        {{ $renter->moon->system->solarSystemName }} - Planet {{ $renter->moon->planet }}, Moon {{ $renter->moon->moon }}
+                                        {{ $renter->moon->system->solarSystemName }} -
+                                        Planet {{ $renter->moon->planet }},
+                                        Moon {{ $renter->moon->moon }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
+                                <td>{{ $renter ? $renter->moon_id : '' }}</td>
+                                <td>
+                                    @if (isset($renter->refinery_id))
+                                        <a href="/renters/refinery/{{ $renter->refinery_id }}">
+                                            {{ $renter->refinery->name }}
+                                            ({{ $renter->refinery->system->solarSystemName }})
+                                        </a>
                                     @else
                                         N/A
                                     @endif
                                 </td>
                                 <td>
-                                    @if (isset($renter->refinery_id))
-                                        <a href="/renters/refinery/{{ $renter->refinery_id }}">{{ $renter->refinery->name }} ({{ $renter->refinery->system->solarSystemName }})</a>
-                                    @else
-                                        N/A
-                                    @endif
+                                    <a href="/renters/character/{{ $renter->character_id }}">
+                                        {{ $renter->character->name }}
+                                    </a>
                                 </td>
-                                <td><a href="/renters/character/{{ $renter->character_id }}">{{ $renter->character->name }}</a></td>
                                 <td>{{ $renter->notes }}</td>
                                 <td class="numeric">{{ number_format($renter->monthly_rental_fee, 0) }}</td>
                                 <td class="numeric">{{ number_format($renter->amount_owed, 0) }}</td>
@@ -101,19 +112,29 @@
                                 <tr>
                                     <td>
                                         @if (isset($renter->moon_id))
-                                            {{ $renter->moon->system->solarSystemName }} - Planet {{ $renter->moon->planet }}, Moon {{ $renter->moon->moon }}
+                                            {{ $renter->moon->system->solarSystemName }} -
+                                            Planet {{ $renter->moon->planet }},
+                                            Moon {{ $renter->moon->moon }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                    <td>{{ $renter ? $renter->moon_id : '' }}</td>
+                                    <td>
+                                        @if (isset($renter->refinery_id))
+                                            <a href="/renters/refinery/{{ $renter->refinery_id }}">
+                                                {{ $renter->refinery->name }}
+                                                ({{ $renter->refinery->system->solarSystemName }})
+                                            </a>
                                         @else
                                             N/A
                                         @endif
                                     </td>
                                     <td>
-                                        @if (isset($renter->refinery_id))
-                                            <a href="/renters/refinery/{{ $renter->refinery_id }}">{{ $renter->refinery->name }} ({{ $renter->refinery->system->solarSystemName }})</a>
-                                        @else
-                                            N/A
-                                        @endif
+                                        <a href="/renters/character/{{ $renter->character_id }}">
+                                            {{ $renter->character->name }}
+                                        </a>
                                     </td>
-                                    <td><a href="/renters/character/{{ $renter->character_id }}">{{ $renter->character->name }}</a></td>
                                     <td>{{ $renter->notes }}</td>
                                     <td class="numeric">{{ number_format($renter->monthly_rental_fee, 0) }}</td>
                                     <td class="numeric">{{ number_format($renter->amount_owed, 0) }}</td>
