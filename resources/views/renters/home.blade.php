@@ -94,6 +94,7 @@
                     <thead>
                         <tr>
                             <th>Location</th>
+                            <th>ID</th>
                             <th>Refinery name</th>
                             <th>Rental contact</th>
                             <th>Notes</th>
