@@ -8,6 +8,7 @@ table {
     color: $text;
 }
 
+#miningActivity tr:hover td,
 #miners tr:hover td {
     background: $highlight;
     color: #fff;

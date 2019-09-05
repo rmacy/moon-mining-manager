@@ -33,17 +33,18 @@
 
     <div class="row">
 
-        <div class="col-8">
+        <div class="col-12">
 
             <div class="card-heading">Activity Log (<a href="/payment/new">Payment received</a>)</div>
 
-            <table>
+            <table id="miningActivity">
                 <thead>
                     <tr>
                         <th>Activity</th>
                         <th>Location</th>
                         <th class="numeric">Amount</th>
                         <th>Date</th>
+                        <th>Updated</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -84,9 +85,16 @@
                             </td>
                             <td>
                                 @if (isset($activity->quantity))
-                                    {{ date('jS F Y', strtotime($activity->created_at)) }}
+                                    {{ date('M j, Y', strtotime($activity->created_at)) }}
                                 @else
-                                    {{ date('g:ia, jS F Y', strtotime($activity->created_at)) }}
+                                    {{ date('M j, Y g:ia', strtotime($activity->created_at)) }}
+                                @endif
+                            </td>
+                            <td>
+                                @if (isset($activity->quantity))
+                                    {{ date('M j, Y', strtotime($activity->updated_at)) }}
+                                @else
+                                    {{ date('M j, Y g:ia', strtotime($activity->updated_at)) }}
                                 @endif
                             </td>
                         </tr>
@@ -97,5 +105,11 @@
         </div>
 
     </div>
+
+    <script>
+        window.addEventListener('load', function () {
+            $('#miningActivity').tablesorter();
+        });
+    </script>
 
 @endsection
