@@ -39,6 +39,7 @@ class ProcessMiningActivity implements ShouldQueue
         $tax_rates = TaxRate::select(['type_id', 'value', 'tax_rate'])->get()->keyBy('type_id');
 
         // Grab all of the unprocessed mining activity records from the last day and loop through them.
+        /** @var MiningActivity[] $activity */
         $activity = MiningActivity::where('processed', 0)->get();
 
         Log::info('ProcessMiningActivity: found ' . count($activity) . ' mining activity entries to process');
@@ -77,6 +78,7 @@ class ProcessMiningActivity implements ShouldQueue
             foreach ($miner_data as $key => $value) {
                 // We don't need to check if this miner exists, since they will all have been
                 // created during the PollRefinery job.
+                /** @var Miner $miner */
                 $miner = Miner::where('eve_id', $key)->first();
                 $miner->amount_owed += $value;
                 $miner->save();
