@@ -83,19 +83,11 @@
                                     @endif
                                 @endif
                             </td>
-                            <td>
-                                @if (isset($activity->quantity))
-                                    {{ date('M j, Y', strtotime($activity->created_at)) }}
-                                @else
-                                    {{ date('M j, Y g:ia', strtotime($activity->created_at)) }}
-                                @endif
+                            <td title="@if (! isset($activity->quantity)) {{ date('g:ia', strtotime($activity->created_at)) }} @endif">
+                                {{ date('M j, Y', strtotime($activity->created_at)) }}
                             </td>
-                            <td>
-                                @if (isset($activity->quantity))
-                                    {{ date('M j, Y', strtotime($activity->updated_at)) }}
-                                @else
-                                    {{ date('M j, Y g:ia', strtotime($activity->updated_at)) }}
-                                @endif
+                            <td title="@if (! isset($activity->quantity)) {{ date('g:ia', strtotime($activity->updated_at)) }} @endif">
+                                {{ date('M j, Y', strtotime($activity->updated_at)) }}
                             </td>
                         </tr>
                     @endforeach
