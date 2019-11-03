@@ -81,13 +81,19 @@ class AuthController extends Controller
         ]);
 
         // If an alliance is set, it must match the stored environment variable.
-        if (isset($corporation->alliance_id) && $corporation->alliance_id &&
-            $corporation->alliance_id == env('EVE_ALLIANCE_ID', NULL)
+        $allowedAlliances = explode(',', env('EVE_ALLIANCES_LOGIN'));
+        $allowedCorporations = explode(',', env('EVE_CORPORATIONS_LOGIN'));
+        if (($character->corporation_id > 0 && in_array($character->corporation_id, $allowedCorporations))
+            ||
+            (
+                isset($corporation->alliance_id) && $corporation->alliance_id > 0
+                && in_array($corporation->alliance_id, $allowedAlliances)
+            )
         ) {
             Auth::login($authUser, true);
             Log::info('AuthController: successful login by ' . $authUser->name);
         } else {
-            Log::info('AuthController: unsuccessful login by ' . $authUser->name . ', alliance match failed');
+            Log::info('AuthController: unsuccessful login by ' . $authUser->name . ', alliance/corp match failed');
             return redirect()->route('login');
         }
 
