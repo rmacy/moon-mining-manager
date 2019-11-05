@@ -18,6 +18,7 @@ class CorporationCheck implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 10;
+
     private $miner_id;
 
     /**
@@ -38,15 +39,21 @@ class CorporationCheck implements ShouldQueue
      */
     public function handle()
     {
-
         $esi = new EsiConnection;
         $conn = $esi->getConnection();
 
         // Check if the miner already exists.
+        /* @var Miner $miner */
         $miner = Miner::where('eve_id', $this->miner_id)->first();
+        $changed = false;
         Log::info('CorporationCheck: checking miner ' . $this->miner_id);
         $character = $conn->invoke('get', '/characters/{character_id}/', [
             'character_id' => $this->miner_id,
+        ]);
+
+        // Retrieve all of the relevant details for the corporation.
+        $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
+            'corporation_id' => $character->corporation_id,
         ]);
 
         // Check if they are still in the same corporation as last time we checked.
@@ -56,7 +63,6 @@ class CorporationCheck implements ShouldQueue
                 $character->corporation_id
             );
         } else {
-
             // Update the miner's stored corporation ID.
             $miner->corporation_id = $character->corporation_id;
             Log::info(
@@ -67,11 +73,6 @@ class CorporationCheck implements ShouldQueue
             // Check if they have moved to another corporation we know about already.
             $existing_corporation = Corporation::where('corporation_id', $character->corporation_id)->first();
             if (!isset($existing_corporation)) {
-
-                // This is a new corporation, retrieve all of the relevant details.
-                $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
-                    'corporation_id' => $character->corporation_id,
-                ]);
                 $new_corporation = new Corporation;
                 $new_corporation->corporation_id = $character->corporation_id;
                 $new_corporation->name = $corporation->name;
@@ -97,11 +98,21 @@ class CorporationCheck implements ShouldQueue
 
             }
 
-            // Save the updated miner record.
-            $miner->save();
-
+            $changed = true;
         }
 
-    }
+        if (isset($corporation->alliance_id) && $miner->alliance_id != $corporation->alliance_id) {
+            $miner->alliance_id = $corporation->alliance_id;
+            $changed = true;
+            Log::info(
+                'CorporationCheck: updated alliance ' . $corporation->alliance_id .
+                ' for miner ' . $this->miner_id
+            );
+        }
 
+        if ($changed) {
+            // Save the updated miner record.
+            $miner->save();
+        }
+    }
 }
