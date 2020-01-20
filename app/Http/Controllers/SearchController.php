@@ -32,7 +32,6 @@ class SearchController extends Controller
             $characterId = $this->esiSearch($query);
         }
 
-        // If there are more than ten matching results, we want them to keep typing.
         if ($characterId > 0) {
             return $this->buildResult($characterId);
         } else {
