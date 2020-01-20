@@ -38,9 +38,15 @@
                     <div>
                         <label for="character">Character</label>
                         <div class="character-search" style="display: flex;">
-                            <input type="text" id="character" placeholder="Start typing to search by character name..." value="{{ $renter->character->name }}">
+                            <input type="text" id="character" value="{{ $renter->character->name }}"
+                                   placeholder="Start typing to search by character name...">
                             <button class="search">Find character</button>
                         </div>
+                        <small>
+                            If the search returns the wrong character you can also search by character ID,
+                            which can be found on <a href="https://evewho.com/" target="_blank">EveWho</a>
+                            for example.
+                        </small>
                         <input type="hidden" id="character_id" name="character_id" value="{{ $renter->character_id }}">
                         <div class="search-response"></div>
                         <div class="character-card">
