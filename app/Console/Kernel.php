@@ -78,7 +78,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new GenerateInvoices)->weekly()->mondays()->at('07:00');
 
         // Send monthly rental invoices.
-        $schedule->job(new GenerateRentalInvoices)->monthlyOn(1, '09:00');
+        #$schedule->job(new GenerateRentalInvoices)->monthlyOn(1, '09:00');
 
         // Monthly check of miner corporation membership.
         $schedule->job(new CorporationChecks)->monthlyOn(15, '20:00');
