@@ -14,7 +14,7 @@ use App\Jobs\UpdateReprocessedMaterials;
 use App\Jobs\UpdateMaterialValues;
 use Illuminate\Support\Facades\Log;
 
-class MoonImportController extends Controller
+class MoonAdminController extends Controller
 {
 
     protected $total_ore_volume = 14000000; // 14m m3 represents a thirty day mining cycle, approximately
@@ -38,9 +38,14 @@ class MoonImportController extends Controller
     public function index()
     {
         $moons = Moon::orderBy('region_id')->orderBy('solar_system_id')->orderBy('planet')->orderBy('moon')->get();
-        return view('moons.import', [
+        return view('moons.list', [
             'moons' => $moons,
         ]);
+    }
+
+    public function admin()
+    {
+        return view('moons.admin');
     }
 
     public function import(Request $request)
@@ -83,46 +88,69 @@ class MoonImportController extends Controller
             $moon->save();
         }
 
-        // Redirect back to the list.
-        return redirect('/moonadmin');
+        // Redirect back to admin.
+        return redirect('/moons/admin')->with('message', 'Import done.');
 
     }
 
+    /** @noinspection PhpUnused */
     public function importSurveyData(Request $request)
     {
+        $added = 0;
+        $updated = 0;
+
         $moon = null;
+        $newMoon = false;
         $num = 0;
+        $planet = null;
+        $moonNumber = null;
+
         foreach (explode("\n", $request->input('data')) as $row) {
             $cols = explode("\t", $row);
 
             // new moon?
             $matches = [];
             if (preg_match('/([A-Z0-9-]{6}) ([XVI]{1,4}) - Moon ([0-9]{1,2})/', trim($cols[0]), $matches)) {
-
                 // save previous moon
                 if ($moon instanceof Moon) {
                     $moon->save();
                 }
 
+                $newMoon = true;
                 $num = 0;
-                $moon = new Moon;
-                $moon->planet = $this->romanNumberToInteger($matches[2]);
-                $moon->moon = $matches[3]; // moon number
+                $planet = $this->romanNumberToInteger($matches[2]);
+                $moonNumber = $matches[3];
+
+                continue;
+            }
+
+            if ($newMoon) {
+                $newMoon = false;
+                $solarSystem = trim($cols[4]);
+                $moon = Moon::where([
+                    ['solar_system_id', $solarSystem],
+                    ['planet', $planet],
+                    ['moon', $moonNumber],
+                ])->first();
+                if (! $moon) {
+                    $moon = new Moon();
+                    $added ++;
+                } else {
+                    $updated ++;
+                }
+                $moon->solar_system_id = $solarSystem;
+                $moon->planet = $planet;
+                $moon->moon = $moonNumber;
                 $moon->monthly_rental_fee = 0;
                 $moon->previous_monthly_rental_fee = 0;
-
+            } elseif ($moon === null) {
+                // skip the headline
                 continue;
             }
 
-            // skip the headline
-            if ($moon === null) {
-                continue;
-            }
-
-            // moon data
-            $num++;
-            $moon->solar_system_id = trim($cols[4]);
-            $moon->region_id = SolarSystem::where('solarSystemID', trim($cols[4]))->first()->regionID;
+            // moon ore data
+            $num ++;
+            $moon->region_id = SolarSystem::where('solarSystemID', $moon->solar_system_id)->first()->regionID;
             $moon->{'mineral_' . $num . '_type_id'} = trim($cols[3]);
             $moon->{'mineral_' . $num . '_percent'} = trim($cols[2]) * 100;
         }
@@ -132,8 +160,11 @@ class MoonImportController extends Controller
             $moon->save();
         }
 
-        // Redirect back to the list.
-        return redirect('/moonadmin');
+        // Redirect back to admin.
+        return redirect('/moons/admin')->with(
+            'message',
+            "Import done: $added moons added, $updated moons updated."
+        );
     }
 
     /**
@@ -166,7 +197,7 @@ class MoonImportController extends Controller
         ];
 
         foreach (Moon::all()->sortBy('id') as $moon) {
-            /* @var $moon \App\Models\Moon */
+            /* @var $moon Moon */
 
             // get renter name from DB if available, otherwise from ESI
             $renterCharId = $moon->getActiveRenterAttribute() ? $moon->getActiveRenterAttribute()->character_id : null;
@@ -245,8 +276,8 @@ class MoonImportController extends Controller
             $moon->save();
         }
 
-        // Redirect back to the moon list.
-        return redirect('/moonadmin');
+        // Redirect back to admin.
+        return redirect('/moons/admin')->with('message', 'Calculation done.');
 
     }
 
@@ -284,7 +315,7 @@ class MoonImportController extends Controller
             $tax_rate->tax_rate = 7;
             $tax_rate->updated_by = 0;
             $tax_rate->save();
-            Log::info('MoonImportController: unknown ore ' . $type_id . ' found, new tax rate record created');
+            Log::info('MoonAdminController: unknown ore ' . $type_id . ' found, new tax rate record created');
             // Queue the jobs to update the ore values rather than waiting for the next scheduled job.
             UpdateReprocessedMaterials::dispatch();
             UpdateMaterialValues::dispatch();

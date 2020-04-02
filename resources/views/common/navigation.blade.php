@@ -5,64 +5,15 @@
 </div>
 
 <ul>
-    <li>
-        <a href="/">
-            <i class="icon-home"></i>
-            Home
-        </a>
-    </li>
-    <li>
-        <a href="/miners">
-            <i class="icon-users"></i>
-            Miners
-        </a>
-    </li>
-    <li>
-        <a href="/moonadmin">
-            <i class="icon-">&#9789;</i>
-            Moons
-        </a>
-    </li>
-    <li>
-        <a href="/renters">
-            <i class="icon-rocket"></i>
-            Renters
-        </a>
-    </li>
-    <li>
-        <a href="/reports">
-            <i class="icon-stats-dots"></i>
-            Reports
-        </a>
-    </li>
-    <li>
-        <a href="/timers">
-            <i class="icon-calendar"></i>
-            Timers
-        </a>
-    </li>
-    <li>
-        <a href="/taxes">
-            <i class="icon-coin-dollar"></i>
-            Taxes
-        </a>
-    </li>
-    <li>
-        <a href="/emails">
-            <i class="icon-envelop"></i>
-            Manage Emails
-        </a>
-    </li>
-    <li>
-        <a href="/access">
-            <i class="icon-cog"></i>
-            Settings
-        </a>
-    </li>
-    <li>
-        <a href="/payment">
-            <i class="icon-credit-card"></i>
-            Manual Payment
-        </a>
-    </li>
+    <li><a href="/"><i class="icon-home"></i> Home</a></li>
+    <li><a href="/miners"><i class="icon-users"></i>Miners</a></li>
+    <li><a href="/moons"><i class="icon-">&#9789;</i>Moons</a><br></li>
+    <li><a href="/moons/admin">&nbsp; &nbsp; &nbsp; Moon Admin</a><br></li>
+    <li><a href="/renters"><i class="icon-rocket"></i>Renters</a> </li>
+    <li><a href="/reports"><i class="icon-stats-dots"></i>Reports</a></li>
+    <li><a href="/timers"><i class="icon-calendar"></i>Timers</a></li>
+    <li><a href="/taxes"><i class="icon-coin-dollar"></i>Taxes</a></li>
+    <li><a href="/emails"><i class="icon-envelop"></i>Manage Emails</a></li>
+    <li><a href="/access"><i class="icon-cog"></i>Settings</a></li>
+    <li><a href="/payment"><i class="icon-credit-card"></i>Manual Payment</a></li>
 </ul>
