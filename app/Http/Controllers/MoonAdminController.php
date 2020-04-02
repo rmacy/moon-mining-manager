@@ -89,7 +89,7 @@ class MoonAdminController extends Controller
         }
 
         // Redirect back to admin.
-        return redirect('/moons/admin')->with('message', 'Import done.');
+        return redirect('/moon-admin')->with('message', 'Import done.');
 
     }
 
@@ -161,7 +161,7 @@ class MoonAdminController extends Controller
         }
 
         // Redirect back to admin.
-        return redirect('/moons/admin')->with(
+        return redirect('/moon-admin')->with(
             'message',
             "Import done: $added moons added, $updated moons updated."
         );
@@ -277,7 +277,7 @@ class MoonAdminController extends Controller
         }
 
         // Redirect back to admin.
-        return redirect('/moons/admin')->with('message', 'Calculation done.');
+        return redirect('/moon-admin')->with('message', 'Calculation done.');
 
     }
 

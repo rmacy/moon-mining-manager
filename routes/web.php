@@ -82,13 +82,13 @@ Route::middleware(['login'])->prefix('contact-form')->group(function () {
 });
 
 // Moon composition importer.
-Route::middleware(['admin'])->prefix('moons')->group(function () {
-    Route::get('/', 'MoonAdminController@index');
-    Route::get('/admin', 'MoonAdminController@admin');
-    Route::post('/admin/import', 'MoonAdminController@import');
-    Route::post('/admin/import_survey_data', 'MoonAdminController@importSurveyData');
-    Route::get('/admin/export', 'MoonAdminController@export');
-    Route::get('/admin/calculate', 'MoonAdminController@calculate');
+Route::middleware(['admin'])->prefix('moon-admin')->group(function () {
+    Route::get('/list', 'MoonAdminController@index');
+    Route::get('/', 'MoonAdminController@admin');
+    Route::post('/import', 'MoonAdminController@import');
+    Route::post('/import_survey_data', 'MoonAdminController@importSurveyData');
+    Route::get('/export', 'MoonAdminController@export');
+    Route::get('/calculate', 'MoonAdminController@calculate');
 });
 
 // Payment management.

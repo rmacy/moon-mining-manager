@@ -45,6 +45,7 @@
                     @endforeach
                 </tbody>
             </table>
+            Total: {{ count($miners) }} miners.
         </div>
 
     </div>

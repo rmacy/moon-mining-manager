@@ -19,8 +19,8 @@
                 Existing Moon Data
             </div>
             <div class="card">
-                <a href="/moons/admin/calculate">Calculate monthly rents</a><br>
-                <a href="/moons/admin/export">Export</a>
+                <a href="/moon-admin/calculate">Calculate monthly rents</a><br>
+                <a href="/moon-admin/export">Export</a>
             </div>
         </div>
     </div>
@@ -30,7 +30,7 @@
             <div class="card-heading">Import Moon Survey Data</div>
             <div class="card">
                 This import will update existing moons and add new moons.
-                <form action="/moons/admin/import_survey_data" method="post">
+                <form action="/moon-admin/import_survey_data" method="post">
                     {{ csrf_field() }}
                     <textarea name="data" rows="50" cols="200" placeholder="copy paste from game"></textarea>
                     <a href="#" onclick="moonAdminImportToggleExample(event)">example data</a>
@@ -58,7 +58,7 @@ KBP7-G VII - Moon 4
             <div class="card-heading">Import Moon Data</div>
             <div class="card">
                 This import will add a new moon for every row, it <em>cannot</em> update existing moons.
-                <form action="/moons/admin/import" method="post">
+                <form action="/moon-admin/import" method="post">
                     {{ csrf_field() }}
                     <textarea name="data" rows="50" cols="200" placeholder="Paste raw moon data here from spreadsheet in the following format (columns): Region name, System name, Planet number, Moon number, Renter name, Mineral 1 name, Mineral 1 %, Mineral 2 name, Mineral 2 %, [Mineral 3 name, Mineral 3 %, [Mineral 4 name, Mineral 4 %]]"></textarea>
                     <div class="form-actions">
