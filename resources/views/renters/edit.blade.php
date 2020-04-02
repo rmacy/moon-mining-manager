@@ -38,7 +38,7 @@
                     <div>
                         <label for="character">Character</label>
                         <div class="character-search" style="display: flex;">
-                            <input type="text" id="character" value="{{ $renter->character->name }}"
+                            <input type="text" id="character" value="{{ $character->name }}"
                                    placeholder="Start typing to search by character name...">
                             <button class="search">Find character</button>
                         </div>
@@ -50,9 +50,9 @@
                         <input type="hidden" id="character_id" name="character_id" value="{{ $renter->character_id }}">
                         <div class="search-response"></div>
                         <div class="character-card">
-                            <img src="{{ $renter->character->portrait }}" alt="">
-                            <div class="character-name">{{ $renter->character->name }}</div>
-                            <div class="character-corporation">{{ $renter->character->corporation }}</div>
+                            <img src="{{ $character->portrait }}" alt="">
+                            <div class="character-name">{{ $character->name }}</div>
+                            <div class="character-corporation">{{ $character->corporation }}</div>
                         </div>
                     </div>
                     <div>

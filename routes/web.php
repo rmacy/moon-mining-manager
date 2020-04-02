@@ -61,6 +61,7 @@ Route::middleware(['admin'])->prefix('miners')->group(function () {
 // Renter management.
 Route::middleware(['admin'])->prefix('renters')->group(function () {
     Route::get('/', 'RenterController@showRenters');
+    Route::get('/expired', 'RenterController@showExpiredRenters');
     Route::get('/new', 'RenterController@addNewRenter');
     Route::post('/new', 'RenterController@saveNewRenter');
     Route::get('/{id}', 'RenterController@editRenter');

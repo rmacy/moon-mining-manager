@@ -10,6 +10,7 @@
     <li><a href="/moons"><i class="icon-">&#9789;</i>Moons</a><br></li>
     <li><a href="/moons/admin">&nbsp; &nbsp; &nbsp; Moon Admin</a><br></li>
     <li><a href="/renters"><i class="icon-rocket"></i>Renters</a> </li>
+    <li><a href="/renters/expired">&nbsp; &nbsp; &nbsp; &nbsp;Expired contracts</a> </li>
     <li><a href="/reports"><i class="icon-stats-dots"></i>Reports</a></li>
     <li><a href="/timers"><i class="icon-calendar"></i>Timers</a></li>
     <li><a href="/taxes"><i class="icon-coin-dollar"></i>Taxes</a></li>

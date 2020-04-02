@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Renter;
@@ -16,31 +17,38 @@ use App\Classes\EsiConnection;
 
 class RenterController extends Controller
 {
-
     /**
      * List all current renting individuals and corporations.
      *
      * @throws \Exception
+     * @noinspection PhpUnused
      */
     public function showRenters()
     {
-
-        // Retrieve all renter records.
-        $renters = Renter::all();
-
-        // For all contact character IDs, pull the character information via ESI.
-        $esi = new EsiConnection;
-        foreach ($renters as $renter) {
-            $renter->character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
-                'character_id' => $renter->character_id,
-            ]);
-        }
+        // Retrieve records.
+        $renters = Renter::whereRaw('end_date IS NULL OR end_date >= CURDATE()')->get();
+        $renters = $this->addMissingNames($renters);
 
         // Load the renter report.
         return view('renters.home', [
             'renters' => $renters,
+            'type' => 'current',
         ]);
 
+    }
+
+    /**
+     * @noinspection PhpUnused
+     */
+    public function showExpiredRenters()
+    {
+        $renters = Renter::whereRaw('end_date IS NOT NULL AND end_date < CURDATE()')->get();
+        $renters = $this->addMissingNames($renters);
+
+        return view('renters.home', [
+            'renters' => $renters,
+            'type' => 'expired',
+        ]);
     }
 
     /**
@@ -49,6 +57,7 @@ class RenterController extends Controller
      * @param $id
      * @return mixed
      * @throws \Exception
+     * @noinspection PhpUnused
      */
     public function refineryDetails($id = NULL)
     {
@@ -105,6 +114,7 @@ class RenterController extends Controller
      * @param null|int $id
      * @return mixed
      * @throws \Exception
+     * @noinspection PhpUnused
      */
     public function renterDetails($id = NULL)
     {
@@ -160,6 +170,7 @@ class RenterController extends Controller
      * @param null|int $id
      * @return mixed
      * @throws \Exception
+     * @noinspection PhpUnused
      */
     public function editRenter($id = NULL)
     {
@@ -185,13 +196,13 @@ class RenterController extends Controller
             'corporation_id' => $character->corporation_id,
         ]);
         $character->corporation = $corporation->name;
-        $renter->character = $character;
 
         // Pull all the moon data.
         $moons = Moon::orderBy('region_id')->orderBy('solar_system_id')->orderBy('planet')->orderBy('moon')->get();
 
         return view('renters.edit', [
             'renter' => $renter,
+            'character' => $character,
             'refineries' => Refinery::orderBy('name')->get(),
             'moons' => $moons,
         ]);
@@ -199,6 +210,8 @@ class RenterController extends Controller
 
     /**
      * Form to create a new renter record.
+     *
+     * @noinspection PhpUnused
      */
     public function addNewRenter()
     {
@@ -213,10 +226,12 @@ class RenterController extends Controller
 
     /**
      * Handle new renter form submission.
+     *
+     * @noinspection PhpUnused
      */
     public function saveNewRenter(Request $request)
     {
-        $validatedData = $request->validate([
+        $request->validate([
             'type' => 'required',
             'character_id' => 'required|numeric',
             'refinery_id' => 'nullable|numeric',
@@ -225,19 +240,9 @@ class RenterController extends Controller
             'start_date' => 'required|date',
         ]);
 
-        $user = Auth::user();
-
         // If validation rules pass, then create the new Renter object.
         $renter = new Renter;
-        $renter->type = $request->type;
-        $renter->character_id = $request->character_id;
-        $renter->refinery_id = $request->refinery_id;
-        $renter->moon_id = $request->moon_id;
-        $renter->notes = $request->notes;
-        $renter->monthly_rental_fee = $request->monthly_rental_fee;
-        $renter->start_date = $request->start_date;
-        $renter->updated_by = $user->eve_id;
-        $renter->save();
+        $this->populateDataAndSave($renter, $request);
 
         return redirect('/renters');
     }
@@ -247,10 +252,11 @@ class RenterController extends Controller
      * @param mixed $id
      * @param Request $request
      * @return RedirectResponse|Redirector
+     * @noinspection PhpUnused
      */
     public function updateRenter($id, Request $request)
     {
-        $validatedData = $request->validate([
+        $request->validate([
             'type' => 'required',
             'character_id' => 'required|numeric',
             'refinery_id' => 'nullable|numeric',
@@ -260,22 +266,27 @@ class RenterController extends Controller
             'end_date' => 'nullable|date',
         ]);
 
-        $user = Auth::user();
-
         // If validation rules pass, then update the existing Renter record.
         $renter = Renter::find($id);
+        $this->populateDataAndSave($renter, $request);
+
+        return redirect('/renters');
+    }
+
+    private function populateDataAndSave(Renter $renter, $request)
+    {
         $renter->type = $request->type;
         $renter->character_id = $request->character_id;
+        $renter->character_name = $this->getName($renter->character_id);
         $renter->refinery_id = $request->refinery_id;
         $renter->moon_id = $request->moon_id;
         $renter->notes = $request->notes;
         $renter->monthly_rental_fee = $request->monthly_rental_fee;
         $renter->start_date = $request->start_date;
-        $renter->end_date = $request->end_date;
-        $renter->updated_by = $user->eve_id;
-        $renter->save();
+        $renter->end_date = $request->end_date ? $request->end_date : null;
+        $renter->updated_by = Auth::user()->eve_id;
 
-        return redirect('/renters');
+        $renter->save();
     }
 
     private function sortByDate($a, $b)
@@ -286,4 +297,45 @@ class RenterController extends Controller
         return ($a->created_at > $b->created_at) ? -1 : 1;
     }
 
+    private function getName($characterId)
+    {
+        $esi = new EsiConnection;
+        try {
+            $character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
+                'character_id' => $characterId,
+            ]);
+        } catch (\Exception $e) {
+            return '';
+        }
+
+        return $character->name;
+    }
+
+    /**
+     * @param Collection|Renter[] $renters
+     * @return Renter[]
+     */
+    private function addMissingNames($renters)
+    {
+        $esi = new EsiConnection;
+        foreach ($renters as $key => $renter) {
+            if (! empty($renter->character_name)) {
+                continue;
+            }
+
+            $character = null;
+            try {
+                $character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
+                    'character_id' => $renter->character_id,
+                ]);
+            } catch (\Exception $e) {
+            }
+            if ($character) {
+                $renter->character_name = $character->name;
+                $renter->save();
+            }
+        }
+
+        return $renters;
+    }
 }

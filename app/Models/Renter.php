@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $type
  * @property int $character_id
+ * @property string|null $character_name
  * @property int|null $refinery_id
  * @property int|null $moon_id
  * @property string|null $notes
