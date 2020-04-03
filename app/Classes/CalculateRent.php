@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class CalculateRent
 {
-    protected $total_ore_volume = 14000000; // 14m m3 represents a thirty day mining cycle, approximately
+    protected $total_ore_volume = 14400000; // 14.4m m3 represents a 30 day mining cycle, approximately
 
     /**
      * @param Moon $moon
@@ -65,13 +65,13 @@ class CalculateRent
             $units = $ore_volume / $type->volume;
 
             // Calculate the tax rate to apply (premium applied in the Impass pocket).
-            $tax_rate = (SolarSystem::find($solar_system_id)->constellationID == 20000383) ? 10 : 7;
+            $taxRate = (SolarSystem::find($solar_system_id)->constellationID == 20000383) ? 10 : 7;
 
             // For non-moon ores, apply a 50% discount.
             $discount = (in_array($type->groupID, [1884, 1920, 1921, 1922, 1923])) ? 1 : 0.5;
 
             // Calculate the tax value to be charged for the volume of this ore that can be mined.
-            return $ore_value * $units * $tax_rate / 100 * $discount;
+            return $ore_value * $units * $taxRate / 100 * $discount;
         } else {
             // Add a new record for this unknown ore type.
             $tax_rate = new TaxRate;
@@ -81,7 +81,9 @@ class CalculateRent
             $tax_rate->tax_rate = 7;
             $tax_rate->updated_by = 0;
             $tax_rate->save();
+
             Log::info('CalculateRent: unknown ore ' . $type_id . ' found, new tax rate record created');
+
             // Queue the jobs to update the ore values rather than waiting for the next scheduled job.
             UpdateReprocessedMaterials::dispatch();
             UpdateMaterialValues::dispatch();
