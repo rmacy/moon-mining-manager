@@ -66,16 +66,16 @@ class MoonAdminController extends Controller
             }
             */
             $moon->mineral_1_type_id = Type::where('typeName', $row[5])->first()->typeID;
-            $moon->mineral_1_percent = str_replace(',', '.', $row[6]);
+            $moon->mineral_1_percent = round(str_replace(',', '.', $row[6]), 3);
             $moon->mineral_2_type_id = Type::where('typeName', $row[7])->first()->typeID;
-            $moon->mineral_2_percent = str_replace(',', '.', $row[8]);
+            $moon->mineral_2_percent = round(str_replace(',', '.', $row[8]), 3);
             if ($row[9]) {
                 $moon->mineral_3_type_id = Type::where('typeName', $row[9])->first()->typeID;
-                $moon->mineral_3_percent = str_replace(',', '.', $row[10]);
+                $moon->mineral_3_percent = round(str_replace(',', '.', $row[10]), 3);
             }
             if ($row[11]) {
                 $moon->mineral_4_type_id = Type::where('typeName', $row[11])->first()->typeID;
-                $moon->mineral_4_percent = str_replace(',', '.', $row[12]);
+                $moon->mineral_4_percent = round(str_replace(',', '.', $row[12]), 3);
             }
             $moon->monthly_rental_fee = 0;
             $moon->previous_monthly_rental_fee = 0;
@@ -146,7 +146,7 @@ class MoonAdminController extends Controller
             $num ++;
             $moon->region_id = SolarSystem::where('solarSystemID', $moon->solar_system_id)->first()->regionID;
             $moon->{'mineral_' . $num . '_type_id'} = trim($cols[3]);
-            $moon->{'mineral_' . $num . '_percent'} = trim($cols[2]) * 100;
+            $moon->{'mineral_' . $num . '_percent'} = round(trim($cols[2]) * 100, 3);
         }
 
         // save last moon

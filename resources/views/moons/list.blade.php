@@ -16,6 +16,7 @@
                         <th>P</th>
                         <th>M</th>
                         <th>Mineral composition</th>
+                        <th>Total %</th>
                         <th class="numeric">Monthly fee</th>
                         <th class="numeric">Last month</th>
                         <th>updated</th>
@@ -34,14 +35,21 @@
                             <td>{{ $moon->planet }}</td>
                             <td>{{ $moon->moon }}</td>
                             <td>
-                                {{ $moon->mineral_1->typeName }} ({{ $moon->mineral_1_percent }}%)
-                                &#0183; {{ $moon->mineral_2->typeName }} ({{ $moon->mineral_2_percent }}%)
+                                {{ $moon->mineral_1->typeName }} ({{ round($moon->mineral_1_percent, 2) }}%)
+                                &#0183; {{ $moon->mineral_2->typeName }} ({{ round($moon->mineral_2_percent, 2) }}%)
                                 @if ($moon->mineral_3_type_id)
-                                &#0183; {{ $moon->mineral_3->typeName }} ({{ $moon->mineral_3_percent }}%)
-                                    @if ($moon->mineral_4_type_id)
-                                        &#0183; {{ $moon->mineral_4->typeName }} ({{ $moon->mineral_4_percent }}%)
-                                    @endif
+                                    &#0183; {{ $moon->mineral_3->typeName }} ({{ round($moon->mineral_3_percent, 2) }}%)
                                 @endif
+                                @if ($moon->mineral_4_type_id)
+                                    &#0183; {{ $moon->mineral_4->typeName }} ({{ round($moon->mineral_4_percent, 2) }}%)
+                                @endif
+                            </td>
+                            <td>
+                                {{ round(
+                                    $moon->mineral_1_percent + $moon->mineral_2_percent +
+                                        $moon->mineral_3_percent + $moon->mineral_4_percent,
+                                    2
+                                ) }}%
                             </td>
                             <td class="numeric">{{ number_format($moon->monthly_rental_fee, 0) }}</td>
                             <td class="numeric">{{ number_format($moon->previous_monthly_rental_fee, 0) }}</td>

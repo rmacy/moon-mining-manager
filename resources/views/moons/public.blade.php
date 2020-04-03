@@ -32,6 +32,7 @@
                     <th>Mineral #2</th>
                     <th>Mineral #3</th>
                     <th>Mineral #4</th>
+                    <th>Total %</th>
                     <th class="numeric">Rent</th>
                 </tr>
             </thead>
@@ -45,17 +46,24 @@
                         <td>{{ $moon->id }}</td>
                         <td>{{ $moon->region->regionName }}</td>
                         <td class="nobreak">{{ $moon->system->solarSystemName }}</td>
-                        <td>{{ $moon->mineral_1->typeName }} ({{ $moon->mineral_1_percent }}%)</td>
-                        <td>{{ $moon->mineral_2->typeName }} ({{ $moon->mineral_2_percent }}%)</td>
+                        <td>{{ $moon->mineral_1->typeName }} ({{ round($moon->mineral_1_percent, 2) }}%)</td>
+                        <td>{{ $moon->mineral_2->typeName }} ({{ round($moon->mineral_2_percent, 2) }}%)</td>
                         <td>
                             @if ($moon->mineral_3_type_id)
-                                {{ $moon->mineral_3->typeName }} ({{ $moon->mineral_3_percent }}%)
+                                {{ $moon->mineral_3->typeName }} ({{ round($moon->mineral_3_percent, 2) }}%)
                             @endif
                         </td>
                         <td>
                             @if ($moon->mineral_4_type_id)
-                                {{ $moon->mineral_4->typeName }} ({{ $moon->mineral_4_percent }}%)
+                                {{ $moon->mineral_4->typeName }} ({{ round($moon->mineral_4_percent,2 ) }}%)
                             @endif
+                        </td>
+                        <td>
+                            {{ round(
+                                $moon->mineral_1_percent + $moon->mineral_2_percent +
+                                    $moon->mineral_3_percent + $moon->mineral_4_percent,
+                                2
+                            ) }}%
                         </td>
                         <td class="numeric">{{ number_format($moon->monthly_rental_fee, 0) }}</td>
                     </tr>
