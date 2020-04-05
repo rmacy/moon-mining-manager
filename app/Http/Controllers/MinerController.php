@@ -15,11 +15,9 @@ class MinerController extends Controller
      */
     public function showMiners()
     {
-
         return view('miners.all', [
-            'miners' => Miner::orderBy('name')->get(),
+            'miners' => Miner::with('corporation')->orderBy('name')->get(),
         ]);
-
     }
 
     /**

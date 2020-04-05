@@ -31,10 +31,14 @@ class MoonAdminController extends Controller
 
     public function index()
     {
-        $moons = Moon::orderBy('region_id')->orderBy('solar_system_id')->orderBy('planet')->orderBy('moon')->get();
-        return view('moons.list', [
-            'moons' => $moons,
-        ]);
+        $moons = Moon::with(['region', 'system', 'renter'])
+            ->orderBy('region_id')
+            ->orderBy('solar_system_id')
+            ->orderBy('planet')
+            ->orderBy('moon')
+            ->get();
+
+        return view('moons.list', ['moons' => $moons]);
     }
 
     public function admin()

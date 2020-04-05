@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Renter;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -78,15 +77,30 @@ class Moon extends Model
     }
 
     /**
+     * Get the renters of this moon.
+     */
+    public function renter()
+    {
+        return $this->hasMany('App\Models\Renter', 'moon_id', 'id');
+    }
+
+    /**
      * Find any active renter.
      */
-    public function getActiveRenterAttribute() {
-        $active_renter = Renter::whereRaw(
-            'moon_id = ' . $this->id .
-            ' AND refinery_id IS NOT NULL AND start_date <= CURDATE() ' .
-            'AND (end_date IS NULL OR end_date >= CURDATE())'
-        )->first();
-        return (isset($active_renter)) ? $active_renter : NULL;
+    public function getActiveRenterAttribute()
+    {
+        $today = gmdate('Y-m-d');
+        foreach ($this->renter as $renter) {
+            if (
+                $renter->refinery_id &&
+                $renter->start_date <= $today &&
+                (! $renter->end_date || $renter->end_date >= $today)
+            ) {
+                return $renter;
+            }
+        }
+
+        return null;
     }
 
     /**
