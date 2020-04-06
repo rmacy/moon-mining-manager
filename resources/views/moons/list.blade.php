@@ -19,6 +19,7 @@
                         <th>Total %</th>
                         <th class="numeric">Monthly fee</th>
                         <th class="numeric">Last month</th>
+                        <th>Renter</th>
                         <th>updated</th>
                     </tr>
                 </thead>
@@ -53,6 +54,10 @@
                             </td>
                             <td class="numeric">{{ number_format($moon->monthly_rental_fee, 0) }}</td>
                             <td class="numeric">{{ number_format($moon->previous_monthly_rental_fee, 0) }}</td>
+                            <td>
+                                {{ $moon->active_renter ? $moon->active_renter->character_name : '' }}
+                                {{ $moon->alliance_owned ? 'Alliance' : '' }}
+                            </td>
                             <td>{{ $moon->updated_at }}</td>
                         </tr>
                     @endforeach
