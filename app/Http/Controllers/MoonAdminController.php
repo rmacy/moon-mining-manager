@@ -207,18 +207,12 @@ class MoonAdminController extends Controller
         foreach (Moon::all()->sortBy('id') as $moon) {
             /* @var $moon Moon */
 
-            // get renter name from DB if available, otherwise from ESI
-            $renterCharId = $moon->getActiveRenterAttribute() ? $moon->getActiveRenterAttribute()->character_id : null;
+            // get renter name
             $renterName = '';
-            if ($renterCharId) {
-                $user = User::where('eve_id', '=', $renterCharId)->first();
-                if ($user) {
-                    $renterName = $user->name;
-                } else {
-                    $renterName = $conn->invoke('get', '/characters/{character_id}/', [
-                        'character_id' => $renterCharId,
-                    ])->name;
-                }
+            if (isset($moon->renter[0])) {
+                $renterName = $moon->renter[0]->character_name;
+            } elseif ($moon->alliance_owned == 1) {
+                $renterName = 'Alliance';
             }
 
             $cols = [
@@ -228,8 +222,8 @@ class MoonAdminController extends Controller
                 $this->integerToRomanNumber($moon->planet) . ' - M ' . $moon->moon,
                 $moon->planet,
                 $moon->moon,
-                $renterCharId,
-                $renterName, //
+                isset($moon->renter[0]) ? $moon->renter[0]->character_id : '',
+                $renterName,
                 '', // status
                 '', //
                 $moon->mineral_1->typeName,

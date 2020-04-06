@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\Models\Type|null $mineral_3
  * @property-read \App\Models\Type|null $mineral_4
  * @property-read \App\Models\Region $region
+ * @property-read \App\Models\Renter[] $renter
  * @property-read \App\Models\SolarSystem $system
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Moon newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Moon newQuery()
