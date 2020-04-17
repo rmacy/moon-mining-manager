@@ -28,6 +28,8 @@
                     <th>ID</th>
                     <th>Region</th>
                     <th>System</th>
+                    <th>P</th>
+                    <th>M</th>
                     <th>Mineral #1</th>
                     <th>Mineral #2</th>
                     <th>Mineral #3</th>
@@ -46,6 +48,8 @@
                         <td>{{ $moon->id }}</td>
                         <td>{{ $moon->region->regionName }}</td>
                         <td class="nobreak">{{ $moon->system->solarSystemName }}</td>
+                        <td>{{ $moon->planet }}</td>
+                        <td>{{ $moon->moon }}</td>
                         <td>{{ $moon->mineral_1->typeName }} ({{ round($moon->mineral_1_percent, 2) }}%)</td>
                         <td>{{ $moon->mineral_2->typeName }} ({{ round($moon->mineral_2_percent, 2) }}%)</td>
                         <td>
