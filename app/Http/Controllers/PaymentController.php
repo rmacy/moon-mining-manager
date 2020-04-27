@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnused */
 
 namespace App\Http\Controllers;
 
@@ -7,30 +8,19 @@ use App\Models\Miner;
 use App\Models\Renter;
 use App\Models\Payment;
 use App\Models\RentalPayment;
-use App\Classes\EsiConnection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-
     /**
      * @throws \Exception
      */
     public function listManualPayments()
     {
-        $esi = new EsiConnection;
-
-        $rentalPayments = RentalPayment::whereNotNull('created_by')->orderByDesc('created_at')->get();
-        foreach ($rentalPayments as $rentalPayment) {
-            $rentalPayment->character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
-                'character_id' => $rentalPayment->renter_id,
-            ]);
-        }
-
         return view('payment.list', [
             'minerPayments' => Payment::whereNotNull('created_by')->orderByDesc('created_at')->get(),
-            'rentalPayments' => $rentalPayments,
+            'rentalPayments' => RentalPayment::whereNotNull('created_by')->orderByDesc('created_at')->get(),
         ]);
     }
 
@@ -39,34 +29,25 @@ class PaymentController extends Controller
      */
     public function addNewPayment()
     {
-
-        // Retrieve all renter records.
-        $renters = Renter::all();
-
-        // For all contact character IDs, pull the character information via ESI.
-        $esi = new EsiConnection;
-        foreach ($renters as $renter) {
-            $renter->character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
-                'character_id' => $renter->character_id,
-            ]);
-        }
-
         return view('payment.new', [
             'miners' => Miner::orderBy('name', 'asc')->get(),
-            'renters' => $renters,
+            'renters' => Renter::orderBy('character_name', 'asc')->get(),
         ]);
-
     }
 
     public function insertNewPayment(Request $request)
     {
-
-        $miner_id = $request->input('miner_id');
-        $rental_id = $request->input('rental_id');
-        $amount = (int)$request->input('amount');
+        $miner_id = (int) $request->input('miner_id');
+        $rental_id = (int) $request->input('rental_id');
+        $amount = (int) $request->input('amount');
         $user = Auth::user();
 
-        if (isset($miner_id) && $amount !== 0) {
+        if (($miner_id > 0 && $rental_id > 0) || $amount === 0) {
+            return redirect('/payment/new')
+                ->with('message', 'Please choose a miner OR renter and add an amount <> 0.');
+        }
+
+        if ($miner_id > 0 && $amount !== 0) {
 
             // Create a record of the new payment.
             $payment = new Payment;
@@ -84,7 +65,7 @@ class PaymentController extends Controller
             Log::info('PaymentController: payment of ' . number_format($amount) .
                 ' ISK manually submitted for miner ' . $miner_id . ' by ' . $user->eve_id);
 
-        } else if (isset($rental_id) && $amount !== 0) {
+        } elseif ($rental_id > 0 && $amount !== 0) {
 
             // Grab a reference to the rental record.
             $renter = Renter::find($rental_id);
@@ -109,7 +90,5 @@ class PaymentController extends Controller
         }
 
         return redirect('/payment');
-
     }
-
 }

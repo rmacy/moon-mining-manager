@@ -4,6 +4,14 @@
 
 @section('content')
 
+    @if (\Session::has('message'))
+        <div class="row">
+            <div class="col-12">
+                {!! \Session::get('message') !!}
+            </div>
+        </div>
+    @endif
+
     <div class="row">
 
         <div class="col-12">
@@ -30,7 +38,7 @@
                         @foreach ($renters as $renter)
                             @if (!isset($renter->end_date) || strtotime($renter->end_date) >= time())
                                 <option value="{{ $renter->id }}">
-                                    {{ $renter->character ? $renter->character->name : '' }}
+                                    {{ $renter->character_name }}
                                     ({{ $renter->refinery ? $renter->refinery->name : '' }})
                                 </option>
                             @endif

@@ -22,6 +22,9 @@
                                     Renter
                                 @endif
                             </th>
+                            @if ($idx === 1)
+                                <th>Refinery</th>
+                            @endif
                             <th>Created by</th>
                             <th class="numeric">Amount</th>
                             <th>Date</th>
@@ -33,10 +36,21 @@
                                 <td>
                                     @if (isset($payment->miner))
                                         {{ $payment->miner->name }}
+                                    @elseif (isset($payment->renter))
+                                        {{ $payment->renter->character_name }}
                                     @else
-                                        {{ $payment->character->name }}
+                                        @php ($id = $payment->renter_id ? $payment->renter_id : $payment->minder_id)
+                                        <a href="https://evewho.com/character/{{ $id }}" target="_blank">
+                                            {{ $id }}
+                                        </a>
                                     @endif
                                 </td>
+                                @if ($idx === 1)
+                                    <td>
+                                        {{ $payment->renter && $payment->renter->refinery ?
+                                        $payment->renter->refinery->name : '' }}
+                                    </td>
+                                @endif
                                 <td>
                                     {{ $payment->createdBy->name }}
                                 </td>

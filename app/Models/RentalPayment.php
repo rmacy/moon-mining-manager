@@ -40,6 +40,14 @@ class RentalPayment extends Model
         return $this->hasOne('App\Models\Refinery', 'observer_id', 'refinery_id');
     }
 
+    /**
+     * Get the miner record associated with the payment.
+     */
+    public function renter()
+    {
+        return $this->belongsTo('App\Models\Renter', 'renter_id', 'character_id');
+    }
+
     public function createdBy()
     {
         return $this->belongsTo('App\Models\User', 'created_by', 'eve_id');
