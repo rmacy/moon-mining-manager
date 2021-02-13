@@ -40,6 +40,9 @@ class CalculateRent
             );
         }
 
+        // temporarily apply 50% discount
+        $monthly_rental_fee *= 0.5;
+
         // Save the updated rental fee.
         $moon->monthly_rental_fee = $monthly_rental_fee;
         $moon->save();
