@@ -41,6 +41,11 @@
                             <input type="text" id="character" placeholder="Start typing to search by character name...">
                             <button class="search">Find character</button>
                         </div>
+                        <small>
+                            If the search returns the wrong character you can also search by character ID,
+                            which can be found on <a href="https://evewho.com/" target="_blank">EveWho</a>
+                            for example.
+                        </small>
                         <input type="hidden" id="character_id" name="character_id">
                         <div class="search-response"></div>
                         <div class="character-card">
@@ -64,7 +69,10 @@
                         <select id="moon_id" name="moon_id">
                             <option value="">Select moon</option>
                             @foreach ($moons as $moon)
-                                <option value="{{ $moon->id }}">{{ $moon->system->solarSystemName }} - P {{ $moon->planet }} M {{ $moon->moon }} ({{ $moon->region->regionName }})</option>
+                                <option value="{{ $moon->id }}">
+                                    {{ $moon->system->solarSystemName }} -
+                                    P {{ $moon->planet }} M {{ $moon->moon }} ({{ $moon->region->regionName }})
+                                </option>
                             @endforeach
                         </select>
                     </div>

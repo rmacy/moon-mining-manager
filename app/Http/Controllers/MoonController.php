@@ -9,7 +9,11 @@ class MoonController extends Controller
 
     public function index()
     {
-        $moons = Moon::with(['region', 'system', 'renter'])
+        $moons = Moon::with([
+            'region', 'system', 'renter',
+            'mineral_1', 'mineral_2', 'mineral_3', 'mineral_4',
+        ])
+            ->where('available', 1)
             ->orderBy('region_id')
             ->orderBy('solar_system_id')
             ->orderBy('planet')

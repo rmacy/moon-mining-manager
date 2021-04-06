@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
@@ -183,6 +184,7 @@ class RenterController extends Controller
         if ($renter === null) {
             return redirect('/renters');
         }
+
         $esi = new EsiConnection;
         $conn = $esi->getConnection();
         $character = $conn->invoke('get', '/characters/{character_id}/', [
@@ -197,14 +199,11 @@ class RenterController extends Controller
         ]);
         $character->corporation = $corporation->name;
 
-        // Pull all the moon data.
-        $moons = Moon::orderBy('region_id')->orderBy('solar_system_id')->orderBy('planet')->orderBy('moon')->get();
-
         return view('renters.edit', [
             'renter' => $renter,
             'character' => $character,
             'refineries' => Refinery::orderBy('name')->get(),
-            'moons' => $moons,
+            'moons' => $this->getMoons(),
         ]);
     }
 
@@ -215,12 +214,9 @@ class RenterController extends Controller
      */
     public function addNewRenter()
     {
-        // Pull all the moon data.
-        $moons = Moon::orderBy('region_id')->orderBy('solar_system_id')->orderBy('planet')->orderBy('moon')->get();
-
         return view('renters.new', [
             'refineries' => Refinery::orderBy('name')->get(),
-            'moons' => $moons,
+            'moons' => $this->getMoons(),
         ]);
     }
 
@@ -228,6 +224,8 @@ class RenterController extends Controller
      * Handle new renter form submission.
      *
      * @noinspection PhpUnused
+     * @param Request|\Illuminate\Support\Facades\Request $request
+     * @return Application|RedirectResponse|Redirector
      */
     public function saveNewRenter(Request $request)
     {
@@ -250,7 +248,7 @@ class RenterController extends Controller
     /**
      * Save updated information on an existing renter.
      * @param mixed $id
-     * @param Request $request
+     * @param Request|\Illuminate\Support\Facades\Request $request
      * @return RedirectResponse|Redirector
      * @noinspection PhpUnused
      */
@@ -337,5 +335,18 @@ class RenterController extends Controller
         }
 
         return $renters;
+    }
+
+    private function getMoons()
+    {
+        // Pull all the moon data.
+        return Moon::with(['region', 'system'])
+            ->join('mapSolarSystems', 'mapSolarSystems.SolarSystemId', '=', 'moons.solar_system_id')
+            ->where('available', 1)
+            ->orderBy('region_id')
+            ->orderBy('mapSolarSystems.solarSystemName')
+            ->orderBy('planet')
+            ->orderBy('moon')
+            ->get();
     }
 }

@@ -60,7 +60,10 @@
                         <select id="refinery_id" name="refinery_id">
                             <option value="">Select refinery:</option>
                             @foreach ($refineries as $refinery)
-                                <option value="{{ $refinery->observer_id }}"{{ ($renter->refinery_id == $refinery->observer_id) ? ' selected' : '' }}>{{ $refinery->name }}</option>
+                                <option value="{{ $refinery->observer_id }}"
+                                        {{ ($renter->refinery_id == $refinery->observer_id) ? ' selected' : '' }}>
+                                    {{ $refinery->name }}
+                                </option>
                             @endforeach
                         </select>
                         <span>(if not yet dropped, enter details below)</span>
@@ -70,9 +73,13 @@
                         <select id="moon_id" name="moon_id">
                             <option value="">Select moon</option>
                             @foreach ($moons as $moon)
-                                <option value="{{ $moon->id }}"{{ ($renter->moon_id == $moon->id) ? ' selected' : '' }}>{{ $moon->system->solarSystemName }} - P {{ $moon->planet }} M {{ $moon->moon }} ({{ $moon->region->regionName }})</option>
+                                <option value="{{ $moon->id }}"{{ ($renter->moon_id == $moon->id) ? ' selected' : '' }}>
+                                    {{ $moon->system->solarSystemName }} -
+                                    P {{ $moon->planet }} M {{ $moon->moon }} ({{ $moon->region->regionName }})
+                                </option>
                             @endforeach
                         </select>
+                        <span>(Unavailable moons will show as "Select moon")</span>
                     </div>
                     <div>
                         <label for="monthly_rental_fee">Monthly rental fee</label>

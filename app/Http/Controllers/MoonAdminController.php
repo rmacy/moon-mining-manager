@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Classes\CalculateRent;
-use App\Classes\EsiConnection;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Moon;
 use App\Models\Region;
@@ -31,7 +29,12 @@ class MoonAdminController extends Controller
 
     public function index()
     {
-        $moons = Moon::with(['region', 'system', 'renter'])
+        $moons = Moon::with([
+            'region', 'system', 'renter',
+            'mineral_1', 'mineral_2', 'mineral_3', 'mineral_4',
+            'renter',
+        ])
+            ->where('available', 1)
             ->orderBy('region_id')
             ->orderBy('solar_system_id')
             ->orderBy('planet')
@@ -180,8 +183,6 @@ class MoonAdminController extends Controller
      */
     public function export()
     {
-        $conn = (new EsiConnection())->getConnection();
-
         $rows = [];
         $rows[] = [
             'Region',
@@ -295,7 +296,7 @@ class MoonAdminController extends Controller
         $fp = fopen('php://temp', 'w');
 
         foreach ($rows as $fields) {
-            fputcsv($fp, $fields, ';', '"');
+            fputcsv($fp, $fields, ';');
         }
 
         rewind($fp);
