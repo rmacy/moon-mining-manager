@@ -66,27 +66,21 @@ class CalculateRent
 
             // Base Tax Rate of 10%
             $taxRate = 10;
-            
-            // Addition of previously-taxable value for each ore. 
+
+            // Addition of previously-taxable value for each ore.
             switch ($type->groupID) {
-                // Ubiquitous R4
-                case 1884:
-                    $taxRate += 0;
+                case 1884: // Ubiquitous R4
                     break;
-                // Common R8
-                case 1920:
+                case 1920: // Common R8
                     $taxRate += 5;
                     break;
-                // Uncommon R16
-                case 1921:
+                case 1921: // Uncommon R16
                     $taxRate += 10;
                     break;
-                // Rare R32
-                case 1922:
+                case 1922: // Rare R32
                     $taxRate += 15;
                     break;
-                // Exceptional R64
-                case 1923:
+                case 1923: // Exceptional R64
                     $taxRate += 20;
                     break;
             }
