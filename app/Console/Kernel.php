@@ -35,13 +35,15 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+     * @param Schedule $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
     {
-        $rentUserId = env('RENT_CORPORATION_PRIME_USER_ID', 0);
-        $taxUserId = env('TAX_CORPORATION_PRIME_USER_ID', 0);
+        $rentUserId = (int) env('RENT_CORPORATION_PRIME_USER_ID', 0);
+        $taxUserId = (int) env('TAX_CORPORATION_PRIME_USER_ID', 0);
+        $rentCorporationId = (int) env('RENT_CORPORATION_ID', 0);
+        $taxCorporationId = (int) env('TAX_CORPORATION_ID', 0);
 
         // Poll all corporation structures to look for refineries.
         $schedule->job(new PollStructures($rentUserId))->dailyAt('00:00');
@@ -60,7 +62,8 @@ class Kernel extends ConsoleKernel
         $schedule->job(new PollWallet($taxUserId))->hourlyAt(35);
 
         // Pull the mining activity for the day and store it.
-        $schedule->job(new PollMiningObservers)->dailyAt('12:00');
+        $schedule->job(new PollMiningObservers($rentCorporationId))->dailyAt('12:00');
+        $schedule->job(new PollMiningObservers($taxCorporationId))->dailyAt('12:05');
 
         // Check for any new ores that have been mined where we don't have details of their component materials.
         $schedule->job(new UpdateReprocessedMaterials)->twiceDaily(4, 16);
@@ -95,7 +98,6 @@ class Kernel extends ConsoleKernel
 
         // Send monthly summary of delinquent renters to the site admin.
         $schedule->job(new SendRenterDelinquencyList)->monthlyOn(29, '09:00');
-
     }
 
     /**
@@ -107,6 +109,7 @@ class Kernel extends ConsoleKernel
     {
         $this->load(__DIR__.'/Commands');
 
+        /** @noinspection PhpIncludeInspection */
         require base_path('routes/console.php');
     }
 }

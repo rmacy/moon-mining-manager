@@ -18,6 +18,16 @@ class PollMiningObservers implements ShouldQueue
     public $tries = 3;
 
     /**
+     * @var int
+     */
+    private $corporationId;
+
+    public function __construct(int $corporationId)
+    {
+        $this->corporationId = $corporationId;
+    }
+
+    /**
      * Execute the job.
      *
      * @return void
@@ -25,7 +35,7 @@ class PollMiningObservers implements ShouldQueue
     public function handle()
     {
         // Grab all of the refineries and loop through them.
-        $refineries = Refinery::whereNotNull('corporation_id')->get();
+        $refineries = Refinery::where('corporation_id', $this->corporationId)->get();
         $delay_counter = 0;
 
         Log::info('PollMiningObservers: creating jobs to poll ' . count($refineries) . ' refineries');
@@ -36,7 +46,5 @@ class PollMiningObservers implements ShouldQueue
                 ->delay(Carbon::now()->addSecond(20 * $delay_counter));
             $delay_counter++;
         }
-
     }
-
 }
