@@ -93,9 +93,8 @@ class Moon extends Model
         $today = gmdate('Y-m-d');
         foreach ($this->renter as $renter) {
             if (
-                $renter->refinery_id &&
                 $renter->start_date <= $today &&
-                (! $renter->end_date || $renter->end_date >= $today)
+                (!$renter->end_date || $renter->end_date >= $today)
             ) {
                 return $renter;
             }
