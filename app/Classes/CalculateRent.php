@@ -5,7 +5,6 @@ namespace App\Classes;
 use App\Jobs\UpdateMaterialValues;
 use App\Jobs\UpdateReprocessedMaterials;
 use App\Models\Moon;
-use App\Models\SolarSystem;
 use App\Models\TaxRate;
 use App\Models\Type;
 use Illuminate\Support\Facades\Log;
@@ -23,21 +22,13 @@ class CalculateRent
         // Set the monthly rental value to zero.
         $monthly_rental_fee = 0;
 
-        $monthly_rental_fee += $this->calculateOreTaxValue(
-            $moon->mineral_1_type_id, $moon->mineral_1_percent, $moon->solar_system_id
-        );
-        $monthly_rental_fee += $this->calculateOreTaxValue(
-            $moon->mineral_2_type_id, $moon->mineral_2_percent, $moon->solar_system_id
-        );
+        $monthly_rental_fee += $this->calculateOreTaxValue($moon->mineral_1_type_id, $moon->mineral_1_percent);
+        $monthly_rental_fee += $this->calculateOreTaxValue($moon->mineral_2_type_id, $moon->mineral_2_percent);
         if ($moon->mineral_3_type_id) {
-            $monthly_rental_fee += $this->calculateOreTaxValue(
-                $moon->mineral_3_type_id, $moon->mineral_3_percent, $moon->solar_system_id
-            );
+            $monthly_rental_fee += $this->calculateOreTaxValue($moon->mineral_3_type_id, $moon->mineral_3_percent);
         }
         if ($moon->mineral_4_type_id) {
-            $monthly_rental_fee += $this->calculateOreTaxValue(
-                $moon->mineral_4_type_id, $moon->mineral_4_percent, $moon->solar_system_id
-            );
+            $monthly_rental_fee += $this->calculateOreTaxValue($moon->mineral_4_type_id, $moon->mineral_4_percent);
         }
 
         // Save the updated rental fee.
@@ -47,7 +38,7 @@ class CalculateRent
         return $monthly_rental_fee;
     }
 
-    public function calculateOreTaxValue($type_id, $percent, $solar_system_id)
+    public function calculateOreTaxValue($type_id, $percent)
     {
         // Retrieve the value of the mineral from the taxes table.
         $tax_rate = TaxRate::where('type_id', $type_id)->first();
