@@ -64,8 +64,32 @@ class CalculateRent
             $type = Type::find($type_id);
             $units = $ore_volume / $type->volume;
 
-            // Calculate the tax rate to apply (premium applied in the Impass pocket).
-            $taxRate = (SolarSystem::find($solar_system_id)->constellationID == 20000383) ? 10 : 7;
+            // Base Tax Rate of 10%
+            $taxRate = 10;
+            
+            // Addition of previously-taxable value for each ore. 
+            switch ($type->groupID) {
+                // Ubiquitous R4
+                case 1884:
+                    $taxRate += 0;
+                    break;
+                // Common R8
+                case 1920:
+                    $taxRate += 5;
+                    break;
+                // Uncommon R16
+                case 1921:
+                    $taxRate += 10;
+                    break;
+                // Rare R32
+                case 1922:
+                    $taxRate += 15;
+                    break;
+                // Exceptional R64
+                case 1923:
+                    $taxRate += 20;
+                    break;
+            }
 
             // For non-moon ores, apply a 50% discount.
             $discount = (in_array($type->groupID, [1884, 1920, 1921, 1922, 1923])) ? 1 : 0.5;
