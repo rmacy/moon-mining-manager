@@ -210,8 +210,8 @@ class MoonAdminController extends Controller
 
             // get renter name
             $renterName = '';
-            if (isset($moon->renter[0])) {
-                $renterName = $moon->renter[0]->character_name;
+            if ($moon->getActiveRenterAttribute()) {
+                $renterName = $moon->getActiveRenterAttribute()->character_name;
             } elseif ($moon->alliance_owned == 1) {
                 $renterName = 'Alliance';
             }
