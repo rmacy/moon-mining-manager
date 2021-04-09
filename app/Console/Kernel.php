@@ -42,7 +42,7 @@ class Kernel extends ConsoleKernel
     {
         $rentUserId = (int) env('RENT_CORPORATION_PRIME_USER_ID', 0);
         $taxUserId = (int) env('TAX_CORPORATION_PRIME_USER_ID', 0);
-        $rentCorporationId = (int) env('RENT_CORPORATION_ID', 0);
+        #$rentCorporationId = (int) env('RENT_CORPORATION_ID', 0);
         $taxCorporationId = (int) env('TAX_CORPORATION_ID', 0);
 
         // Poll all corporation structures to look for refineries.
@@ -62,8 +62,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new PollWallet($taxUserId))->hourlyAt(35);
 
         // Pull the mining activity for the day and store it.
-        $schedule->job(new PollMiningObservers($rentCorporationId))->dailyAt('12:00');
-        $schedule->job(new PollMiningObservers($taxCorporationId))->dailyAt('12:05');
+        $schedule->job(new PollMiningObservers($taxCorporationId))->dailyAt('12:00');
 
         // Check for any new ores that have been mined where we don't have details of their component materials.
         $schedule->job(new UpdateReprocessedMaterials)->twiceDaily(4, 16);
