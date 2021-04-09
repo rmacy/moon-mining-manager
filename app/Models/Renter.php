@@ -46,6 +46,10 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Renter extends Model
 {
+    const TYPE_INDIVIDUAL = 'individual';
+
+    const TYPE_CORPORATION = 'corporation';
+
     protected $table = 'renters';
 
     /**

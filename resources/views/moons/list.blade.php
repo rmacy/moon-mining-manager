@@ -20,6 +20,7 @@
                         <th class="numeric">Monthly fee</th>
                         <th class="numeric">Last month</th>
                         <th>Renter</th>
+                        <th>Type</th>
                         <th>updated</th>
                     </tr>
                 </thead>
@@ -57,6 +58,9 @@
                             <td>
                                 {{ $moon->active_renter ? $moon->active_renter->character_name : '' }}
                                 {{ $moon->alliance_owned ? 'Alliance' : '' }}
+                            </td>
+                            <td>
+                                {{ $moon->active_renter ? $moon->active_renter->type : '' }}
                             </td>
                             <td>{{ $moon->updated_at }}</td>
                         </tr>
