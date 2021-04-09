@@ -55,22 +55,19 @@ class EsiConnection
     }
 
     /**
-     * Returns the configured "prime" user for a corporation.
+     * Returns the configured "prime" user for a corporation from the configuration.
      *
-     * @param int $corporationId
+     * @param int $corporationId RENT_CORPORATION_ID or TAX_CORPORATION_ID from the configuration
      * @return int|null
      */
     public function getPrimeUserOfCorporation($corporationId)
     {
-        foreach ([env('RENT_CORPORATION_PRIME_USER_ID', 0), env('TAX_CORPORATION_PRIME_USER_ID', 0)] as $userId) {
-            try {
-                $corpId = $this->getCorporationId($userId);
-            } catch (\Exception $e) {
-                continue;
-            }
-            if ($corpId == $corporationId) {
-                return $userId;
-            }
+        if ($corporationId == env('RENT_CORPORATION_ID')) {
+            return env('RENT_CORPORATION_PRIME_USER_ID');
+        }
+
+        if ($corporationId == env('TAX_CORPORATION_ID')) {
+            return env('TAX_CORPORATION_PRIME_USER_ID');
         }
 
         return null;
@@ -87,8 +84,11 @@ class EsiConnection
     {
         // Eseye configuration for all connections
         $configuration = Configuration::getInstance();
+        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->datasource = env('ESEYE_DATASOURCE', 'tranquility');
+        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->logfile_location = storage_path() . '/logs';
+        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->file_cache_location = storage_path() . '/framework/cache';
 
         $authentication = null;
