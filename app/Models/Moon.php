@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property float $monthly_rental_fee
  * @property float $previous_monthly_rental_fee
  * @property int|null $renter_id
- * @property int $alliance_owned
+ * @property int $status_flag
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed $active_renter
@@ -60,7 +60,14 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Moon extends Model
 {
-    
+    const STATUS_AVAILABLE = 0;
+
+    const STATUS_ALLIANCE_OWNED = 1;
+
+    const STATUS_LOTTERY_ONLY = 2;
+
+    const STATUS_RESERVED = 3;
+
     /**
      * Get the solar system where this moon is located.
      */

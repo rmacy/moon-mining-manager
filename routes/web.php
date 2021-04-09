@@ -84,6 +84,7 @@ Route::middleware(['login'])->prefix('contact-form')->group(function () {
 // Moon composition importer.
 Route::middleware(['admin'])->prefix('moon-admin')->group(function () {
     Route::get('/list', 'MoonAdminController@index');
+    Route::post('/update-status', 'MoonAdminController@updateStatus');
     Route::get('/', 'MoonAdminController@admin');
     Route::post('/import', 'MoonAdminController@import');
     Route::post('/import_survey_data', 'MoonAdminController@importSurveyData');

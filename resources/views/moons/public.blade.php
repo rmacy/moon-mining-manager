@@ -36,12 +36,13 @@
                     <th>Mineral #4</th>
                     <th>Total %</th>
                     <th class="numeric">Rent</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($moons as $moon)
                     <tr
-                        @if (isset($moon->active_renter) || $moon->alliance_owned == 1)
+                        @if (isset($moon->active_renter) || $moon->status_flag != \App\Models\Moon::STATUS_AVAILABLE)
                             class="rented"
                         @endif
                     >
@@ -70,6 +71,11 @@
                             ) }}%
                         </td>
                         <td class="numeric">{{ number_format($moon->monthly_rental_fee, 0) }}</td>
+                        <td>
+                            {{ $moon->status_flag == \App\Models\Moon::STATUS_ALLIANCE_OWNED ? 'Alliance owned' : '' }}
+                            {{ $moon->status_flag == \App\Models\Moon::STATUS_LOTTERY_ONLY ? 'Lottery only' : '' }}
+                            {{ $moon->status_flag == \App\Models\Moon::STATUS_RESERVED ? 'Reserved' : '' }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

@@ -28,7 +28,14 @@
                         @yield('title')
                     </div>
                 </div>
+
+                <div id="systemMessage" style="display: none; position: fixed; top: 80px;
+                                               left: 50%; transform: translate(-50%, 0);
+                                               border: 6px solid blue; padding: 15px 40px;
+                                               background-color: lightgrey"></div>
+
                 @yield('content')
+
             </div>
 
         </div>

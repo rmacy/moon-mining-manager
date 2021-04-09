@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnused */
 
 namespace App\Http\Controllers;
 
@@ -42,6 +43,32 @@ class MoonAdminController extends Controller
             ->get();
 
         return view('moons.list', ['moons' => $moons]);
+    }
+
+    /**
+     * Ajax request
+     */
+    public function updateStatus(Request $request): array
+    {
+        $success = false;
+
+        $moon = Moon::find($request->input('id'));
+        $status = (int) $request->input('status');
+
+        if (
+            $moon &&
+            in_array($status, [
+                Moon::STATUS_AVAILABLE,
+                Moon::STATUS_ALLIANCE_OWNED,
+                Moon::STATUS_LOTTERY_ONLY,
+                Moon::STATUS_RESERVED
+            ])
+        ) {
+            $moon->status_flag = $status;
+            $success = $moon->save();
+        }
+
+        return ['success' => $success ];
     }
 
     public function admin()
@@ -212,7 +239,7 @@ class MoonAdminController extends Controller
             $renterName = '';
             if ($moon->getActiveRenterAttribute()) {
                 $renterName = $moon->getActiveRenterAttribute()->character_name;
-            } elseif ($moon->alliance_owned == 1) {
+            } elseif ($moon->status_flag == Moon::STATUS_ALLIANCE_OWNED) {
                 $renterName = 'Alliance';
             }
 
