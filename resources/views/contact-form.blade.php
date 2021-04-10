@@ -10,10 +10,11 @@
     <form action="/contact-form" method="post">
         {{ csrf_field() }}
         <label>
-            <textarea name="text" rows="12"></textarea>
+            <textarea name="text" rows="12" maxlength="9000"></textarea>
         </label>
         <br>
         <button>Send</button>
+        <small style="float: right; color: grey;">max. length 9,000 characters</small>
     </form>
 
 @endsection
