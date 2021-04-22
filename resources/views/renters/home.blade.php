@@ -24,6 +24,7 @@
                         <th>ID</th>
                         <th>Refinery name</th>
                         <th>Rental contact</th>
+                        <th>Rental type</th>
                         <th>Notes</th>
                         <th class="numeric">Monthly fee</th>
                         <th class="numeric">Currently owed</th>
@@ -62,6 +63,7 @@
                                     {{ $renter->character_name ? $renter->character_name : '[missing name]' }}
                                 </a>
                             </td>
+                            <td>{{ $renter->type }}</td>
                             <td>{{ $renter->notes }}</td>
                             <td class="numeric">{{ number_format($renter->monthly_rental_fee, 0) }}</td>
                             <td class="numeric">{{ number_format($renter->amount_owed, 0) }}</td>
