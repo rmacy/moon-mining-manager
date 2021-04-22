@@ -17,7 +17,10 @@
                         <th>M</th>
                         <th>Mineral composition</th>
                         <th>Total %</th>
-                        <th class="numeric">Monthly fee</th>
+                        <th class="numeric">
+                            Monthly fee<br>
+                            Corp fee
+                        </th>
                         <th class="numeric">Last month</th>
                         <th>Renter</th>
                         <th>Type</th>
@@ -54,8 +57,14 @@
                                     2
                                 ) }}%
                             </td>
-                            <td class="numeric">{{ number_format($moon->monthly_rental_fee) }}</td>
-                            <td class="numeric">{{ number_format($moon->previous_monthly_rental_fee) }}</td>
+                            <td class="numeric">
+                                {{ number_format($moon->monthly_rental_fee) }}<br>
+                                {{ number_format($moon->monthly_corp_rental_fee) }}
+                            </td>
+                            <td class="numeric">
+                                {{ number_format($moon->previous_monthly_rental_fee) }}<br>
+                                {{ number_format($moon->previous_monthly_corp_rental_fee) }}
+                            </td>
                             <td>
                                 {{ $moon->active_renter ? $moon->active_renter->character_name : '' }}
                             </td>

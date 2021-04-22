@@ -8,6 +8,7 @@
 
     <p class="center">
         To inquire about renting a moon, please use the
+        <!--suppress HtmlUnknownTarget -->
         <a href="/contact-form">contact form</a>
         quoting the relevant moon ID.
     </p>
@@ -35,7 +36,8 @@
                     <th>Mineral #3</th>
                     <th>Mineral #4</th>
                     <th>Total %</th>
-                    <th class="numeric">Rent</th>
+                    <th class="numeric">Rent (Individuals)</th>
+                    <th class="numeric">Rent (Corporations)</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -70,7 +72,8 @@
                                 2
                             ) }}%
                         </td>
-                        <td class="numeric">{{ number_format($moon->monthly_rental_fee, 0) }}</td>
+                        <td class="numeric">{{ number_format($moon->monthly_rental_fee) }}</td>
+                        <td class="numeric">{{ number_format($moon->monthly_corp_rental_fee) }}</td>
                         <td>
                             {{ $moon->status_flag == \App\Models\Moon::STATUS_ALLIANCE_OWNED ? 'Alliance owned' : '' }}
                             {{ $moon->status_flag == \App\Models\Moon::STATUS_LOTTERY_ONLY ? 'Lottery only' : '' }}

@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Moon;
+use App\Models\Renter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,17 +32,23 @@ class CalculateRent implements ShouldQueue
         foreach ($moons as $moon) {
             // Save the current month's rental fee.
             $moon->previous_monthly_rental_fee = $moon->monthly_rental_fee;
-            $monthly_rental_fee = $calc->updateMoon($moon);
+            $moon->previous_monthly_corp_rental_fee = $moon->monthly_corp_rental_fee;
 
-            Log::info(
-                'CalculateRent: updated stored monthly rental fee for moon ' . $moon->id .
-                ' to ' . $monthly_rental_fee
-            );
+            // update - saves the $moon object
+            $fee = $calc->updateMoon($moon, Renter::TYPE_INDIVIDUAL);
+            $corpFee = $calc->updateMoon($moon, Renter::TYPE_CORPORATION);
+
+            Log::info("CalculateRent: updated stored monthly rental fee for moon {$moon->id} to $fee/$corpFee");
 
             // Update the monthly rent figure if this moon is currently rented.
-            DB::table('renters')->where('moon_id', $moon->id)->update([
-                'monthly_rental_fee' => $monthly_rental_fee,
-            ]);
+            DB::table('renters')
+                ->where('moon_id', $moon->id)
+                ->where('type', Renter::TYPE_INDIVIDUAL)
+                ->update(['monthly_rental_fee' => $fee]);
+            DB::table('renters')
+                ->where('moon_id', $moon->id)
+                ->where('type', Renter::TYPE_CORPORATION)
+                ->update(['monthly_rental_fee' => $corpFee]);
         }
     }
 }

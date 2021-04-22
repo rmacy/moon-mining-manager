@@ -21,7 +21,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $mineral_4_type_id
  * @property float|null $mineral_4_percent
  * @property float $monthly_rental_fee
+ * @property float $monthly_corp_rental_fee
  * @property float $previous_monthly_rental_fee
+ * @property float $previous_monthly_corp_rental_fee
  * @property int|null $renter_id
  * @property int $status_flag
  * @property \Illuminate\Support\Carbon|null $created_at

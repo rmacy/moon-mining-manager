@@ -4,6 +4,7 @@
 namespace App\Http\Controllers;
 
 use App\Classes\CalculateRent;
+use App\Models\Renter;
 use Illuminate\Http\Request;
 use App\Models\Moon;
 use App\Models\Region;
@@ -282,7 +283,8 @@ class MoonAdminController extends Controller
         // Grab all of the moon records and loop through them.
         $moons = Moon::all();
         foreach ($moons as $moon) {
-            $calc->updateMoon($moon);
+            $calc->updateMoon($moon, Renter::TYPE_INDIVIDUAL);
+            $calc->updateMoon($moon, Renter::TYPE_CORPORATION);
         }
 
         // Redirect back to admin.
