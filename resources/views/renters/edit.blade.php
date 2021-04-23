@@ -31,8 +31,14 @@
                     <div>
                         <label for="type">Type of rental</label>
                         <select id="type" name="type">
-                            <option value="individual"{{ ($renter->type == 'individual') ? ' selected' : '' }}>Individual</option>
-                            <option value="corporation"{{ ($renter->type == 'corporation') ? ' selected' : '' }}>Corporation</option>
+                            <option value="{{\App\Models\Renter::TYPE_INDIVIDUAL}}"
+                                    {{ ($renter->type == \App\Models\Renter::TYPE_INDIVIDUAL) ? ' selected' : '' }}>
+                                Individual
+                            </option>
+                            <option value="{{\App\Models\Renter::TYPE_CORPORATION}}"
+                                    {{ ($renter->type == \App\Models\Renter::TYPE_CORPORATION) ? ' selected' : '' }}>
+                                Corporation
+                            </option>
                         </select>
                     </div>
                     <div>
@@ -74,6 +80,7 @@
                             <option value="">Select moon</option>
                             @foreach ($moons as $moon)
                                 <option value="{{ $moon->id }}"{{ ($renter->moon_id == $moon->id) ? ' selected' : '' }}>
+                                    {{ $moon->id }} -
                                     {{ $moon->system->solarSystemName }} -
                                     P {{ $moon->planet }} M {{ $moon->moon }} ({{ $moon->region->regionName }})
                                 </option>
@@ -83,7 +90,8 @@
                     </div>
                     <div>
                         <label for="monthly_rental_fee">Monthly rental fee</label>
-                        <input type="text" id="monthly_rental_fee" name="monthly_rental_fee" value="{{ $renter->monthly_rental_fee }}">
+                        <input type="text" id="monthly_rental_fee" name="monthly_rental_fee"
+                               value="{{ $renter->monthly_rental_fee }}">
                     </div>
                     <div>
                         <label for="notes">Notes</label>
@@ -95,7 +103,8 @@
                     </div>
                     <div>
                         <label for="end_date">Contract end date (yyyy-mm-dd)</label>
-                        <input type="text" id="end_date" name="end_date" value="{{ $renter->end_date }}" placeholder="{{ date('Y-m-d') }}">
+                        <input type="text" id="end_date" name="end_date"
+                               value="{{ $renter->end_date }}" placeholder="{{ date('Y-m-d') }}">
                     </div>
                     <div class="form-actions">
                         <button type="submit">Save changes</button>

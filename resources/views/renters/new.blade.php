@@ -30,9 +30,9 @@
                 <div class="card information">
                     <div>
                         <label for="type">Type of rental</label>
-                        <select id="type" name="type">
-                            <option value="individual">Individual</option>
-                            <option value="corporation">Corporation</option>
+                        <select id="type" name="type" onchange="updateFee()">
+                            <option value="{{\App\Models\Renter::TYPE_INDIVIDUAL}}">Individual</option>
+                            <option value="{{\App\Models\Renter::TYPE_CORPORATION}}">Corporation</option>
                         </select>
                     </div>
                     <div>
@@ -66,10 +66,13 @@
                     </div>
                     <div>
                         <label for="moon_id">Location</label>
-                        <select id="moon_id" name="moon_id">
+                        <select id="moon_id" name="moon_id" onchange="updateFee()">
                             <option value="">Select moon</option>
                             @foreach ($moons as $moon)
-                                <option value="{{ $moon->id }}">
+                                <option value="{{ $moon->id }}"
+                                        data-fee="{{ $moon->monthly_rental_fee }}"
+                                        data-corp-fee="{{ $moon->monthly_corp_rental_fee }}">
+                                    {{ $moon->id }} -
                                     {{ $moon->system->solarSystemName }} -
                                     P {{ $moon->planet }} M {{ $moon->moon }} ({{ $moon->region->regionName }})
                                 </option>
@@ -122,7 +125,16 @@
                 e.preventDefault();
             });
         });
-    
+
+        function updateFee() {
+            if ($('#type').val() === 'individual') {
+                var fee = $('#moon_id').find('option:selected').data('fee')
+            } else {
+                var fee = $('#moon_id').find('option:selected').data('corpFee')
+            }
+            $('#monthly_rental_fee').val(fee);
+        }
+
     </script>
 
 @endsection
