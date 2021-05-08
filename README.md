@@ -24,6 +24,16 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 - Login at http://your.domain/admin with a character of your corporation with the in-game roles 
   Accountant and Station_Manager to create the required ESI token.
 
+### EVE tables
+
+You will need to import the following EVE dump tables into your database. They can be downloaded from
+[Fuzzworks](https://www.fuzzwork.co.uk/dump/latest/).
+
+* invTypes
+* invTypeMaterials
+* mapSolarSystems
+* mapRegions
+
 ## Operation instructions
 
 * Run `php artisan queue:work` to start the job queue process. See the 
@@ -34,16 +44,6 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
   your refineries in order to retrieve citadel information.
 * Manually add the primary user's ID to the `whitelist` table. They can now log in to view the application and 
   authorise any other users.
-
-### EVE tables
-
-You will need to import the following EVE dump tables into your database. They can be downloaded from 
-[Fuzzworks](https://www.fuzzwork.co.uk/dump/latest/).
-
-* invTypes
-* invTypeMaterials
-* mapSolarSystems
-* mapRegions
 
 ## License
 
