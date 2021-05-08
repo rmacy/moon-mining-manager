@@ -16,6 +16,14 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
   (must have director role within the corporation) and alliance, and whitelisted alliances/corporations
 * Regenerate js/css with `npm run production` if they have changed.
 
+## Initial setup
+
+- Add your admin user to the table `whitelist` with `is_admin` = `1`.
+- Add mail templates to the table `templates`: weekly_invoice, receipt, renter_invoice, renter_notification, 
+  renter_reminder.
+- Login at http://your.domain/admin with a character of your corporation with the in-game roles 
+  Accountant and Station_Manager to create the required ESI token.
+
 ## Operation instructions
 
 * Run `php artisan queue:work` to start the job queue process. See the 
