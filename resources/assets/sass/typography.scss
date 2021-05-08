@@ -40,17 +40,29 @@ body {
 }
 
 .refinery-active {
-    animation: blink-animation 1s linear infinite;
-    -webkit-animation: blink-animation 1s linear infinite;
+    animation: pulse-animation 3s ease-in-out infinite;
+    -webkit-animation: pulse-animation 3s ease-in-out infinite;
 }
 
-@keyframes blink-animation {
-    to {
-        color: #fff;
+@keyframes pulse-animation {
+    0% {
+        color: #242626;
+    }
+    50% {
+	color: #ccc;
+    }
+    100% {
+	color: #242626;
     }
 }
-@-webkit-keyframes blink-animation {
-    to {
-        color: #fff;
+@-webkit-keyframes pulse-animation {
+    0% {
+        color: #242626;
+    }
+    50% {
+	color: #ccc;
+    }
+    100% {
+	color: #242626;
     }
 }
