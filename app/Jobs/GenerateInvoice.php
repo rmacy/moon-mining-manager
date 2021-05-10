@@ -85,7 +85,7 @@ class GenerateInvoice implements ShouldQueue
 
         Log::info(
             'GenerateInvoice: saved new invoice for miner ' . $miner->eve_id .
-            ' for amount ' . $miner->amount_owed
+            ' for amount ' . number_format($miner->amount_owed)
         );
 
     }
