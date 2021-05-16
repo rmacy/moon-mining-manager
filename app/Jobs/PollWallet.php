@@ -16,9 +16,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Seat\Eseye\Eseye;
-use Seat\Eseye\Exceptions\EsiScopeAccessDeniedException;
-use Seat\Eseye\Exceptions\InvalidContainerDataException;
-use Seat\Eseye\Exceptions\UriDataMissingException;
 
 class PollWallet implements ShouldQueue
 {
@@ -49,7 +46,7 @@ class PollWallet implements ShouldQueue
     /**
      * @var string yyyy-mm-dd
      */
-    private $date = '';
+    private $date;
 
     /**
      * @param int $userId
@@ -110,6 +107,8 @@ class PollWallet implements ShouldQueue
                 }
 
                 // Look for matching payers among renters and miners.
+                /* @var Renter $renter */
+                /* @var Miner $miner */
                 $renter = Renter::where([
                     ['character_id', $transaction->first_party_id],
                     ['amount_owed', $transaction->amount],
@@ -159,9 +158,7 @@ class PollWallet implements ShouldQueue
      * @param \stdClass $transaction
      * @param Renter $renter
      * @param int $ref_id
-     * @throws EsiScopeAccessDeniedException
-     * @throws InvalidContainerDataException
-     * @throws UriDataMissingException
+     * @throws \Exception
      */
     private function processRents($transaction, Renter $renter, $ref_id)
     {
@@ -184,34 +181,7 @@ class PollWallet implements ShouldQueue
             'character_id' => $renter->character_id,
         ]);
 
-        // Send a receipt.
-        $template = Template::where('name', 'receipt')->first();
-
-        // Replace placeholder elements in email template.
-        $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
-        $template->subject = str_replace('{name}', $character->name, $template->subject);
-        $template->subject = str_replace('{amount}', $transaction->amount, $template->subject);
-        $template->subject = str_replace('{amount_owed}', $renter->amount_owed, $template->subject);
-        $template->body = str_replace('{date}', date('Y-m-d'), $template->body);
-        $template->body = str_replace('{name}', $character->name, $template->body);
-        $template->body = str_replace('{amount}', $transaction->amount, $template->body);
-        $template->body = str_replace('{amount_owed}', $renter->amount_owed, $template->body);
-        $mail = array(
-            'body' => $template->body,
-            'recipients' => array(
-                array(
-                    'recipient_id' => $renter->character_id,
-                    'recipient_type' => 'character'
-                )
-            ),
-            'subject' => $template->subject,
-            'approved_cost' => 5000,
-        );
-
-        // Queue sending the eve mail, spaced at 1-minute intervals to avoid triggering the mail spam limiter (4/min).
-        SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->delay_counter));
-        $this->delay_counter++;
-        Log::info('PollWallet: queued job to send rental receipt eve mail');
+        $this->dispatchMail($character->name, $transaction, $renter->amount_owed, $renter->character_id, 'rental');
     }
 
     /**
@@ -232,7 +202,7 @@ class PollWallet implements ShouldQueue
         if (isset($reason) && strlen($reason) > 0) {
             // Split by commas.
             $elements = explode(',', $reason);
-            $recipients = [];
+            $recipients = []; /* @var Miner[] $recipients */
 
             // For each element found, test it to see if it is a character ID or name, and find a
             // reference to the relevant miner.
@@ -249,8 +219,13 @@ class PollWallet implements ShouldQueue
             Log::info(
                 'PollWallet: detected player-entered reason for payment, ' .
                     'parsed for alternative recipients of payment, found ' .
-                    count($recipients) . ' additional valid recipients',
-                ['recipients' => $recipients]
+                    count($recipients) . ' additional valid recipients.',
+                [
+                    'recipients' => array_map(function ($recipient) {
+                        return ['eve_id' => $recipient['eve_id'], 'name' => $recipient['name']];
+                    }, $recipients),
+                    'reason' => $reason
+                ]
             );
 
             // If any valid recipients were found, create payments to them.
@@ -297,23 +272,35 @@ class PollWallet implements ShouldQueue
             $miner->save();
         }
 
+        $this->dispatchMail($miner->name, $transaction, $miner->amount_owed, $miner->eve_id, 'tax');
+    }
+
+    /**
+     * @param string $name
+     * @param \stdClass $transaction
+     * @param float $amountOwed
+     * @param int $recipientCharacterId
+     */
+    private function dispatchMail($name, $transaction, $amountOwed, $recipientCharacterId, string $type)
+    {
         // Send a receipt.
+        /* @var Template $template */
         $template = Template::where('name', 'receipt')->first();
 
         // Replace placeholder elements in email template.
         $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
-        $template->subject = str_replace('{name}', $miner->name, $template->subject);
+        $template->subject = str_replace('{name}', $name, $template->subject);
         $template->subject = str_replace('{amount}', $transaction->amount, $template->subject);
-        $template->subject = str_replace('{amount_owed}', $miner->amount_owed, $template->subject);
+        $template->subject = str_replace('{amount_owed}', $amountOwed, $template->subject);
         $template->body = str_replace('{date}', date('Y-m-d'), $template->body);
-        $template->body = str_replace('{name}', $miner->name, $template->body);
+        $template->body = str_replace('{name}', $name, $template->body);
         $template->body = str_replace('{amount}', $transaction->amount, $template->body);
-        $template->body = str_replace('{amount_owed}', $miner->amount_owed, $template->body);
+        $template->body = str_replace('{amount_owed}', $amountOwed, $template->body);
         $mail = array(
             'body' => $template->body,
             'recipients' => array(
                 array(
-                    'recipient_id' => $miner->eve_id,
+                    'recipient_id' => $recipientCharacterId,
                     'recipient_type' => 'character'
                 )
             ),
@@ -322,8 +309,7 @@ class PollWallet implements ShouldQueue
 
         // Queue sending the eve mail, spaced at 1 minute intervals to avoid triggering the mail spam limiter (4/min).
         SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->delay_counter));
-        Log::info('PollWallet: queued job to send tax receipt eve mail in ' . $this->delay_counter . ' minutes');
         $this->delay_counter++;
-
+        Log::info("PollWallet: queued job to send $type receipt eve mail in " . $this->delay_counter . ' minutes');
     }
 }
