@@ -251,8 +251,13 @@ class PollWallet implements ShouldQueue
                     ' on behalf of miner ' . $recipient->eve_id . ' for ' . $payment_amount);
 
                 // Deduct the amount from the recipient's outstanding balance.
-                $recipient->amount_owed -= $payment_amount;
-                $recipient->save();
+                if ($recipient->id == $miner->id) {
+                    $miner->amount_owed -= $payment_amount;
+                    $miner->save();
+                } else {
+                    $recipient->amount_owed -= $payment_amount;
+                    $recipient->save();
+                }
             }
         }
 
