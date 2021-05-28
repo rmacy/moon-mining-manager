@@ -27,8 +27,8 @@ class CalculateRent implements ShouldQueue
     {
         $calc = new \App\Classes\CalculateRent();
 
-        // Grab all of the moon records and loop through them.
-        $moons = Moon::all();
+        // Grab all of the (available) moons and loop through them.
+        $moons = Moon::where('available', 1)->get();
         foreach ($moons as $moon) {
             // Save the current month's rental fee.
             $moon->previous_monthly_rental_fee = $moon->monthly_rental_fee;

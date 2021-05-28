@@ -233,7 +233,7 @@ class MoonAdminController extends Controller
             '% 4',
         ];
 
-        foreach (Moon::all()->sortBy('id') as $moon) {
+        foreach (Moon::where('available', 1)->get()->sortBy('id') as $moon) {
             /* @var $moon Moon */
 
             // get renter name
@@ -280,8 +280,8 @@ class MoonAdminController extends Controller
     {
         $calc = new CalculateRent();
 
-        // Grab all of the moon records and loop through them.
-        $moons = Moon::all();
+        // Grab all of the (available) moons and loop through them.
+        $moons = Moon::where('available', 1)->get();
         foreach ($moons as $moon) {
             $calc->updateMoon($moon, Renter::TYPE_INDIVIDUAL);
             $calc->updateMoon($moon, Renter::TYPE_CORPORATION);
