@@ -248,7 +248,7 @@ class PollWallet implements ShouldQueue
                 $payment->amount_received = $payment_amount;
                 $payment->save();
                 Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id .
-                    ' on behalf of miner ' . $recipient->eve_id . ' for ' . number_format($payment_amount));
+                    ' on behalf of miner ' . $recipient->eve_id . ' for ' . $payment_amount);
 
                 // Deduct the amount from the recipient's outstanding balance.
                 if ($recipient->id == $miner->id) {
