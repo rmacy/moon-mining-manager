@@ -296,11 +296,11 @@ class PollWallet implements ShouldQueue
         $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
         $template->subject = str_replace('{name}', $name, $template->subject);
         $template->subject = str_replace('{amount}', $transaction->amount, $template->subject);
-        $template->subject = str_replace('{amount_owed}', $amountOwed, $template->subject);
+        $template->subject = str_replace('{amount_owed}', number_format($amountOwed), $template->subject);
         $template->body = str_replace('{date}', date('Y-m-d'), $template->body);
         $template->body = str_replace('{name}', $name, $template->body);
         $template->body = str_replace('{amount}', $transaction->amount, $template->body);
-        $template->body = str_replace('{amount_owed}', $amountOwed, $template->body);
+        $template->body = str_replace('{amount_owed}', number_format($amountOwed), $template->body);
         $mail = array(
             'body' => $template->body,
             'recipients' => array(

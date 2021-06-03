@@ -104,16 +104,18 @@ class MoonAdminController extends Controller
             $moon->mineral_1_percent = round(str_replace(',', '.', $row[6]), 3);
             $moon->mineral_2_type_id = Type::where('typeName', $row[7])->first()->typeID;
             $moon->mineral_2_percent = round(str_replace(',', '.', $row[8]), 3);
-            if ($row[9]) {
+            if (isset($row[9])) {
                 $moon->mineral_3_type_id = Type::where('typeName', $row[9])->first()->typeID;
                 $moon->mineral_3_percent = round(str_replace(',', '.', $row[10]), 3);
             }
-            if ($row[11]) {
+            if (isset($row[11])) {
                 $moon->mineral_4_type_id = Type::where('typeName', $row[11])->first()->typeID;
                 $moon->mineral_4_percent = round(str_replace(',', '.', $row[12]), 3);
             }
             $moon->monthly_rental_fee = 0;
+            $moon->monthly_corp_rental_fee = 0;
             $moon->previous_monthly_rental_fee = 0;
+            $moon->previous_monthly_corp_rental_fee = 0;
             $moon->save();
         }
 
