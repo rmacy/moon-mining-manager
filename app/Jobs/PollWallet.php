@@ -248,7 +248,7 @@ class PollWallet implements ShouldQueue
                 $payment->amount_received = $payment_amount;
                 $payment->save();
                 Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id .
-                    ' on behalf of miner ' . $recipient->eve_id . ' for ' . $payment_amount);
+                    ' on behalf of miner ' . $recipient->eve_id . ' for ' . number_format($payment_amount));
 
                 // Deduct the amount from the recipient's outstanding balance.
                 if ($recipient->id == $miner->id) {
@@ -296,11 +296,11 @@ class PollWallet implements ShouldQueue
         $template->subject = str_replace('{date}', date('Y-m-d'), $template->subject);
         $template->subject = str_replace('{name}', $name, $template->subject);
         $template->subject = str_replace('{amount}', $transaction->amount, $template->subject);
-        $template->subject = str_replace('{amount_owed}', $amountOwed, $template->subject);
+        $template->subject = str_replace('{amount_owed}', number_format($amountOwed), $template->subject);
         $template->body = str_replace('{date}', date('Y-m-d'), $template->body);
         $template->body = str_replace('{name}', $name, $template->body);
         $template->body = str_replace('{amount}', $transaction->amount, $template->body);
-        $template->body = str_replace('{amount_owed}', $amountOwed, $template->body);
+        $template->body = str_replace('{amount_owed}', number_format($amountOwed), $template->body);
         $mail = array(
             'body' => $template->body,
             'recipients' => array(

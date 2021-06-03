@@ -117,7 +117,9 @@ class AuthController extends Controller
     {
         if ($authUser = User::where('eve_id', $user->id)->first()) {
             $authUser->token = $user->token;
-            $authUser->refresh_token = $user->refreshToken;
+            if ($user->refreshToken !== null) {
+                $authUser->refresh_token = $user->refreshToken;
+            }
             $authUser->save();
             return $authUser;
         }

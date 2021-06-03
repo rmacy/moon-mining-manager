@@ -83,7 +83,7 @@ class GenerateRentalInvoice implements ShouldQueue
         $renter->amount_owed += $invoice_amount;
         $renter->generate_invoices_job_run = date('Y-m-d H:i:s');
         Log::info('GenerateRentalInvoice: updated stored amount owed by renter ' . $character->name .
-            ' for refinery ' . $refinery->name . ' to ' . $renter->amount_owed);
+            ' for refinery ' . $refinery->name . ' to ' . number_format($renter->amount_owed));
         $renter->save();
 
         // Pick up the renter invoice template to apply text substitutions.

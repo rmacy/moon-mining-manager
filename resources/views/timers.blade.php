@@ -30,7 +30,7 @@
 
     <h1>Active Alliance Moon Mining Extraction Timers</h1>
 
-    <h1 id="current_time">{{ date('H:i:s') }}</h1>
+    <h1 id="current_time">{{ date('H:i:s') }} EVE</h1>
 
     <table class="timers">
         <thead>
