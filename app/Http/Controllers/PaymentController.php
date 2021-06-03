@@ -30,8 +30,8 @@ class PaymentController extends Controller
     public function addNewPayment()
     {
         return view('payment.new', [
-            'miners' => Miner::orderBy('name', 'asc')->get(),
-            'renters' => Renter::orderBy('character_name', 'asc')->get(),
+            'miners' => Miner::orderBy('name')->get(),
+            'renters' => Renter::orderBy('character_name')->get(),
         ]);
     }
 

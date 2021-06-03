@@ -281,7 +281,7 @@ class RenterController extends Controller
         $renter->notes = $request->notes;
         $renter->monthly_rental_fee = $request->monthly_rental_fee;
         $renter->start_date = $request->start_date;
-        $renter->end_date = $request->end_date ? $request->end_date : null;
+        $renter->end_date = $request->end_date ?: null;
         $renter->updated_by = Auth::user()->eve_id;
 
         $renter->save();
@@ -316,7 +316,7 @@ class RenterController extends Controller
     private function addMissingNames($renters)
     {
         $esi = new EsiConnection;
-        foreach ($renters as $key => $renter) {
+        foreach ($renters as $renter) {
             if (! empty($renter->character_name)) {
                 continue;
             }

@@ -54,7 +54,7 @@ class GenerateRentalInvoice implements ShouldQueue
         ]);
 
         // Grab a reference to the refinery that is being rented.
-        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first();
+        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
 
         // Calculate the amount to invoice, taking into account partial months at the start of rental agreements.
         $this_month = date('n');
@@ -87,7 +87,7 @@ class GenerateRentalInvoice implements ShouldQueue
         $renter->save();
 
         // Pick up the renter invoice template to apply text substitutions.
-        $template = Template::where('name', 'renter_invoice')->first();
+        $template = Template::where('name', 'renter_invoice')->first(); /* @var Template $template */
 
         // Grab the template subject and body.
         $subject = $template->subject;
@@ -96,12 +96,12 @@ class GenerateRentalInvoice implements ShouldQueue
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
         $subject = str_replace('{name}', $character->name, $subject);
-        $subject = str_replace('{amount_owed}', number_format($renter->amount_owed, 0), $subject);
+        $subject = str_replace('{amount_owed}', number_format($renter->amount_owed), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
         $body = str_replace('{name}', $character->name, $body);
         $body = str_replace('{refinery}', $refinery->name, $body);
-        $body = str_replace('{amount_owed}', number_format($renter->amount_owed, 0), $body);
-        $body = str_replace('{monthly_rental_fee}', number_format($invoice_amount, 0), $body);
+        $body = str_replace('{amount_owed}', number_format($renter->amount_owed), $body);
+        $body = str_replace('{monthly_rental_fee}', number_format($invoice_amount), $body);
         $mail = array(
             'body' => $body,
             'recipients' => array(

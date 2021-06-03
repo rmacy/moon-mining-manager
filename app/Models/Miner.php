@@ -99,6 +99,7 @@ class Miner extends Model
      */
     public function getLatestPaymentAttribute()
     {
+        /* @var Payment $latest_payment */
         $latest_payment = DB::table('payments')->where('miner_id', $this->eve_id)->select('updated_at')
             ->orderBy('updated_at', 'desc')->first();
         return (isset($latest_payment)) ? $latest_payment->updated_at : NULL;
@@ -109,6 +110,7 @@ class Miner extends Model
      */
     public function getLatestInvoiceAttribute()
     {
+        /* @var Invoice $latest_invoice */
         $latest_invoice = DB::table('invoices')->where('miner_id', $this->eve_id)->select('updated_at')
             ->orderBy('updated_at', 'desc')->first();
         return (isset($latest_invoice)) ? $latest_invoice->updated_at : NULL;
@@ -119,6 +121,7 @@ class Miner extends Model
      */
     public function getLatestMiningActivityAttribute()
     {
+        /* @var MiningActivity $latest_mining_activity */
         $latest_mining_activity = DB::table('mining_activities')->where('miner_id', $this->eve_id)
             ->select('created_at')->orderBy('created_at', 'desc')->first();
         return (isset($latest_mining_activity)) ? $latest_mining_activity->created_at : NULL;

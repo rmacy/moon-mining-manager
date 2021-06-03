@@ -44,14 +44,14 @@ class SendRenterDelinquencyList implements ShouldQueue
                 'character_id' => $renter->character_id,
             ]);
             // Grab a reference to the refinery that is being rented.
-            $refinery = Refinery::where('observer_id', $renter->refinery_id)->first();
+            $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
             // Output the details of this renter to the email body.
             $body .= 'Renter: <url=showinfo:1376//'.$renter->character_id.'>' . $character->name . '</url>';
             $body .= "\n";
             $body .= 'Refinery: <loc><url=https://moons.bravecollective.com/renters/refinery/' .
                 $renter->refinery_id . '>' . $refinery->name . '</url></loc>';
             $body .= "\n";
-            $body .= 'Balance: ' . number_format($renter->amount_owed, 0) . ' ISK';
+            $body .= 'Balance: ' . number_format($renter->amount_owed) . ' ISK';
             $body .= "\n\n";
         }
         $mail = array(

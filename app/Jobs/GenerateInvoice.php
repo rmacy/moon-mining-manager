@@ -42,10 +42,10 @@ class GenerateInvoice implements ShouldQueue
     {
 
         // Retrieve the miner record.
-        $miner = Miner::where('eve_id', $this->id)->first();
+        $miner = Miner::where('eve_id', $this->id)->first(); /* @var Miner $miner */
 
         // Pick up the invoice template to apply text substitutions.
-        $template = Template::where('name', 'weekly_invoice')->first();
+        $template = Template::where('name', 'weekly_invoice')->first(); /* @var Template $template */
 
         // Grab the template subject and body.
         $subject = $template->subject;
@@ -54,10 +54,10 @@ class GenerateInvoice implements ShouldQueue
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
         $subject = str_replace('{name}', $miner->name, $subject);
-        $subject = str_replace('{amount_owed}', number_format($miner->amount_owed, 0), $subject);
+        $subject = str_replace('{amount_owed}', number_format($miner->amount_owed), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
         $body = str_replace('{name}', $miner->name, $body);
-        $body = str_replace('{amount_owed}', number_format($miner->amount_owed, 0), $body);
+        $body = str_replace('{amount_owed}', number_format($miner->amount_owed), $body);
         $mail = array(
             'body' => $body,
             'recipients' => array(

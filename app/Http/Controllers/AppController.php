@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnused */
 
 namespace App\Http\Controllers;
 
@@ -45,6 +46,7 @@ class AppController extends Controller
         $total_income = DB::table('payments')->select(DB::raw('SUM(amount_received) AS total'))->first();
 
         // Grab the top miner, refinery and system.
+        /* @var Payment $top_payer */
         $top_payer = Payment::select(DB::raw('miner_id, SUM(amount_received) AS total'))
             ->groupBy('miner_id')->orderBy('total', 'desc')->first();
         if (isset($top_payer)) {
@@ -52,9 +54,11 @@ class AppController extends Controller
             $top_miner->total = $top_payer->total;
         }
         $top_refinery = Refinery::orderBy('income', 'desc')->first();
+        /* @var Refinery $top_refinery_system */
         $top_refinery_system = Refinery::select(DB::raw('solar_system_id, SUM(income) AS total'))
             ->groupBy('solar_system_id')->orderBy('total', 'desc')->first();
         if (isset($top_refinery_system) && $top_refinery_system->solar_system_id > 0) {
+            /* @var SolarSystem $top_system */
             $top_system = SolarSystem::find($top_refinery_system->solar_system_id);
             $top_system->total = $top_refinery_system->total;
         }
@@ -145,7 +149,7 @@ class AppController extends Controller
 
     public function toggleFormMail($id)
     {
-        $user = Whitelist::where('eve_id', $id)->first();
+        $user = Whitelist::where('eve_id', $id)->first(); /* @var Whitelist $user */
         if ($user) {
             $user->form_mail = !$user->form_mail;
             $user->save();

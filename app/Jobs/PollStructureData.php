@@ -57,7 +57,7 @@ class PollStructureData implements ShouldQueue
         ]);
 
         // Update the refinery item with the new information.
-        $refinery = Refinery::where('observer_id', $this->structure_id)->first();
+        $refinery = Refinery::where('observer_id', $this->structure_id)->first(); /* @var Refinery $refinery */
         $refinery->name = $structure->name;
         $refinery->solar_system_id = $structure->solar_system_id;
         $refinery->corporation_id = $structure->owner_id;

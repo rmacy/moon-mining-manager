@@ -82,7 +82,7 @@ class PollExtractions implements ShouldQueue
         // Loop through all the extraction data, updating the current status and time remaining
         // for any active extraction cycles.
         foreach ($timers as $timer) {
-            $refinery = Refinery::where('observer_id', $timer->structure_id)->first();
+            $refinery = Refinery::where('observer_id', $timer->structure_id)->first(); /* @var Refinery $refinery */
             $refinery->extraction_start_time = $this->convertTimestampFormat($timer->extraction_start_time);
             $refinery->chunk_arrival_time = $this->convertTimestampFormat($timer->chunk_arrival_time);
             $refinery->natural_decay_time = $this->convertTimestampFormat($timer->natural_decay_time);

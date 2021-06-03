@@ -52,7 +52,7 @@ class GenerateRentReminder implements ShouldQueue
         ]);
 
         // Grab a reference to the refinery that is being rented.
-        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first();
+        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
 
         // Grab the current outstanding balance for this refinery.
         $outstanding_balance = round($renter->amount_owed);
@@ -67,11 +67,11 @@ class GenerateRentReminder implements ShouldQueue
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
         $subject = str_replace('{name}', $character->name, $subject);
-        $subject = str_replace('{outstanding_balance}', number_format($outstanding_balance, 0), $subject);
+        $subject = str_replace('{outstanding_balance}', number_format($outstanding_balance), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
         $body = str_replace('{name}', $character->name, $body);
         $body = str_replace('{refinery}', $refinery->name, $body);
-        $body = str_replace('{outstanding_balance}', number_format($outstanding_balance, 0), $body);
+        $body = str_replace('{outstanding_balance}', number_format($outstanding_balance), $body);
         $mail = array(
             'body' => $body,
             'recipients' => array(

@@ -92,7 +92,7 @@ class TimerController extends Controller
         return view('timers', [
             'miner' => (isset($miner)) ? $miner : NULL,
             'activity_log' => (isset($activity_log)) ? $activity_log : NULL,
-            'is_whitelisted_user' => (isset($whitelist)) ? TRUE : FALSE,
+            'is_whitelisted_user' => isset($whitelist),
             'timers' => $refineries,
         ]);
 

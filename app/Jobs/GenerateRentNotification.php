@@ -53,13 +53,13 @@ class GenerateRentNotification implements ShouldQueue
         ]);
 
         // Grab a reference to the refinery that is being rented.
-        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first();
+        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
 
         // Round the rental amount since we don't need to worry about cents.
         $monthly_rental_fee = round($renter->monthly_rental_fee);
 
         // Pick up the renter notice template to apply text substitutions.
-        $template = Template::where('name', 'renter_notification')->first();
+        $template = Template::where('name', 'renter_notification')->first(); /* @var Template $template */
 
         // Grab the template subject and body.
         $subject = $template->subject;
@@ -68,11 +68,11 @@ class GenerateRentNotification implements ShouldQueue
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
         $subject = str_replace('{name}', $character->name, $subject);
-        $subject = str_replace('{monthly_rental_fee}', number_format($monthly_rental_fee, 0), $subject);
+        $subject = str_replace('{monthly_rental_fee}', number_format($monthly_rental_fee), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
         $body = str_replace('{name}', $character->name, $body);
         $body = str_replace('{refinery}', $refinery->name, $body);
-        $body = str_replace('{monthly_rental_fee}', number_format($monthly_rental_fee, 0), $body);
+        $body = str_replace('{monthly_rental_fee}', number_format($monthly_rental_fee), $body);
         $mail = array(
             'body' => $body,
             'recipients' => array(

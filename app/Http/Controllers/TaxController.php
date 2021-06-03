@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnused */
 
 namespace App\Http\Controllers;
 
@@ -28,7 +29,7 @@ class TaxController extends Controller
         foreach ($materials as $material) {
             $history[$material->materialTypeID] = ReprocessedMaterialsHistory::where(
                 'type_id', $material->materialTypeID
-            )->orderBy('updated_at', 'asc')->get();
+            )->orderBy('updated_at')->get();
         }
 
         return view('taxes.history', [
