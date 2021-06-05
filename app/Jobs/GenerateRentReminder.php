@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Models\Refinery;
 use App\Models\Renter;
 use App\Models\Template;
 use Carbon\Carbon;
@@ -51,8 +50,12 @@ class GenerateRentReminder implements ShouldQueue
             'character_id' => $renter->character_id,
         ]);
 
-        // Grab a reference to the refinery that is being rented.
-        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
+        // Grab a reference to the refinery/moon that is being rented.
+        $nameRented = $renter->getRentedName();
+        if ($nameRented === null) {
+            Log::info("GenerateRentReminder: Renter $renter->id without moon, aborting.");
+            return;
+        }
 
         // Grab the current outstanding balance for this refinery.
         $outstanding_balance = round($renter->amount_owed);
@@ -70,7 +73,7 @@ class GenerateRentReminder implements ShouldQueue
         $subject = str_replace('{outstanding_balance}', number_format($outstanding_balance), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
         $body = str_replace('{name}', $character->name, $body);
-        $body = str_replace('{refinery}', $refinery->name, $body);
+        $body = str_replace('{refinery}', $nameRented, $body);
         $body = str_replace('{outstanding_balance}', number_format($outstanding_balance), $body);
         $mail = array(
             'body' => $body,

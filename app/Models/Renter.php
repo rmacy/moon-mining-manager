@@ -72,4 +72,20 @@ class Renter extends Model
     {
         return $this->belongsTo('App\Models\User', 'updated_by', 'eve_id');
     }
+
+    /**
+     * Returns name of refinery if it exists, otherwise the "name" of the moon if that exists or null.
+     */
+    public function getRentedName(): ?string
+    {
+        $refinery = Refinery::where('observer_id', $this->refinery_id)->first(); /* @var Refinery $refinery */
+        if ($refinery) {
+            return (string) $refinery->name;
+        }
+        $moon = Moon::where('id', $this->moon_id)->first(); /* @var Moon $moon */
+        if ($moon) {
+            return $moon->getName(false);
+        }
+        return null;
+    }
 }

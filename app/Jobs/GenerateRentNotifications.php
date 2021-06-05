@@ -26,7 +26,7 @@ class GenerateRentNotifications implements ShouldQueue
     {
         // Grab all the renters with active agreements.
         $renters = Renter::whereRaw(
-            'refinery_id IS NOT NULL && start_date <= CURDATE() AND (end_date IS NULL OR end_date >= CURDATE())'
+            'moon_id IS NOT NULL && start_date <= CURDATE() AND (end_date IS NULL OR end_date >= CURDATE())'
         )->get();
 
         // Loop through all the renters and send a notification to them about next month's rent amount.

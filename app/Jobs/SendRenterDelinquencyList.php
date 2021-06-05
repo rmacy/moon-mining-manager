@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Models\Refinery;
 use App\Models\Renter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,9 +30,9 @@ class SendRenterDelinquencyList implements ShouldQueue
 
         // Grab all the renters with active agreements where they currently have an outstanding balance.
         $renters = Renter::whereRaw(
-            'refinery_id IS NOT NULL && start_date <= CURDATE() ' .
+            'moon_id IS NOT NULL && start_date <= CURDATE() ' .
             'AND (end_date IS NULL OR end_date >= CURDATE()) AND amount_owed > 0'
-        )->get();
+        )->get(); /* @var Renter[] $renters*/
 
         // Generate the email to send to the administrator.
         $subject = 'Moon Rental Delinquency Report for ' . date('Y-m-d');
@@ -43,13 +42,19 @@ class SendRenterDelinquencyList implements ShouldQueue
             $character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
                 'character_id' => $renter->character_id,
             ]);
-            // Grab a reference to the refinery that is being rented.
-            $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
+
+            // Grab a reference to the refinery/moon that is being rented.
+            $nameRented = $renter->getRentedName();
+            if ($nameRented === null) {
+                Log::info("SendRenterDelinquencyList: Renter $renter->id without moon, aborting.");
+                return;
+            }
+
             // Output the details of this renter to the email body.
             $body .= 'Renter: <url=showinfo:1376//'.$renter->character_id.'>' . $character->name . '</url>';
             $body .= "\n";
             $body .= 'Refinery: <loc><url=https://moons.bravecollective.com/renters/refinery/' .
-                $renter->refinery_id . '>' . $refinery->name . '</url></loc>';
+                $renter->refinery_id . '>' . $nameRented . '</url></loc>';
             $body .= "\n";
             $body .= 'Balance: ' . number_format($renter->amount_owed) . ' ISK';
             $body .= "\n\n";
@@ -71,6 +76,5 @@ class SendRenterDelinquencyList implements ShouldQueue
         Log::info('SendRenterDelinquencyList: dispatched job to send mail', [
             'mail' => $mail,
         ]);
-
     }
 }

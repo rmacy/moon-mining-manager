@@ -26,7 +26,7 @@ class GenerateRentReminders implements ShouldQueue
     {
         // Grab all the renters with active agreements where they currently have an outstanding balance.
         $renters = Renter::whereRaw(
-            'refinery_id IS NOT NULL && start_date <= CURDATE() ' .
+            'moon_id IS NOT NULL && start_date <= CURDATE() ' .
             'AND (end_date IS NULL OR end_date >= CURDATE()) ' .
             'AND amount_owed > 0'
         )->get();

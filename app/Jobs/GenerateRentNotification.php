@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Models\Refinery;
 use App\Models\Renter;
 use App\Models\Template;
 use Carbon\Carbon;
@@ -42,7 +41,6 @@ class GenerateRentNotification implements ShouldQueue
      */
     public function handle()
     {
-
         // Retrieve the renter record.
         $renter = Renter::find($this->id);
 
@@ -52,8 +50,12 @@ class GenerateRentNotification implements ShouldQueue
             'character_id' => $renter->character_id,
         ]);
 
-        // Grab a reference to the refinery that is being rented.
-        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
+        // Grab a reference to the refinery/moon that is being rented.
+        $nameRented = $renter->getRentedName();
+        if ($nameRented === null) {
+            Log::info("GenerateRentNotification: Renter $renter->id without moon, aborting.");
+            return;
+        }
 
         // Round the rental amount since we don't need to worry about cents.
         $monthly_rental_fee = round($renter->monthly_rental_fee);
@@ -71,7 +73,7 @@ class GenerateRentNotification implements ShouldQueue
         $subject = str_replace('{monthly_rental_fee}', number_format($monthly_rental_fee), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
         $body = str_replace('{name}', $character->name, $body);
-        $body = str_replace('{refinery}', $refinery->name, $body);
+        $body = str_replace('{refinery}', $nameRented, $body);
         $body = str_replace('{monthly_rental_fee}', number_format($monthly_rental_fee), $body);
         $mail = array(
             'body' => $body,
@@ -85,11 +87,10 @@ class GenerateRentNotification implements ShouldQueue
             'approved_cost' => 5000,
         );
 
-        // Queue sending the evemail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
+        // Queue sending the eve mail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
         SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->mail_delay));
         Log::info('GenerateRentNotification: dispatched job to send mail in ' . $this->mail_delay . ' minutes', [
             'mail' => $mail,
         ]);
-
     }
 }

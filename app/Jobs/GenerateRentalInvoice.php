@@ -3,8 +3,6 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
-use App\Models\Moon;
-use App\Models\Refinery;
 use App\Models\RentalInvoice;
 use App\Models\Renter;
 use App\Models\Template;
@@ -55,14 +53,12 @@ class GenerateRentalInvoice implements ShouldQueue
         ]);
 
         // Grab a reference to the refinery/moon that is being rented.
-        $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
-        $moon = Moon::where('id', $renter->moon_id)->first(); /* @var Moon $moon */
-        if (!$moon) {
+        $nameRented = $renter->getRentedName();
+        if ($nameRented === null) {
             // technically possible here, but should never happen
             Log::info("GenerateRentalInvoice: Renter $this->id without moon? Aborting.");
             return;
         }
-        $nameRented = $refinery ? $refinery->name : $moon->getName(false);
 
         // Calculate the amount to invoice, taking into account partial months at the start of rental agreements.
         $this_month = date('n');
