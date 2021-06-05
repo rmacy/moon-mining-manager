@@ -29,7 +29,7 @@ class GenerateRentalInvoices implements ShouldQueue
         // and will end after or on the first day of this month
         // and were not yet updated this month
         $renters = Renter::whereRaw(
-            'refinery_id IS NOT NULL AND 
+            'moon_id IS NOT NULL AND 
             start_date < DATE_SUB(CURDATE(), INTERVAL DAYOFMONTH(CURDATE()) - 1 DAY) AND
             (
                 end_date IS NULL OR 

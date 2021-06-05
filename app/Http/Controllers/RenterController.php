@@ -67,7 +67,7 @@ class RenterController extends Controller
             return redirect('/renters');
         }
 
-        $renter = Renter::where('refinery_id', $id)->first();
+        $renter = Renter::where('refinery_id', $id)->first(); /* @var Renter $renter */
         $refinery = Refinery::where('observer_id', $id)->first();
 
         // Pull the renter character information via ESI.
@@ -160,7 +160,7 @@ class RenterController extends Controller
                 ->select(DB::raw('SUM(amount_received) AS total'))->where('renter_id', $id)->first()->total,
             'total_rent_due' => DB::table('renters')
                 ->select(DB::raw('SUM(amount_owed) AS total'))->where('character_id', $id)->first()->total,
-            'rentals' => Renter::where('character_id', $id)->whereNotNull('refinery_id')->get(),
+            'rentals' => Renter::where('character_id', $id)->whereNotNull('moon_id')->get(),
         ]);
 
     }

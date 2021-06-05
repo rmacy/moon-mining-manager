@@ -80,9 +80,7 @@
                             <option value="">Select moon</option>
                             @foreach ($moons as $moon)
                                 <option value="{{ $moon->id }}"{{ ($renter->moon_id == $moon->id) ? ' selected' : '' }}>
-                                    {{ $moon->id }} -
-                                    {{ $moon->system->solarSystemName }} -
-                                    P {{ $moon->planet }} M {{ $moon->moon }} ({{ $moon->region->regionName }})
+                                    {{ $moon->id }} - {{ $moon->getName() }}
                                 </option>
                             @endforeach
                         </select>

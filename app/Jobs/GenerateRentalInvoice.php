@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Classes\EsiConnection;
+use App\Models\Moon;
 use App\Models\Refinery;
 use App\Models\RentalInvoice;
 use App\Models\Renter;
@@ -53,8 +54,15 @@ class GenerateRentalInvoice implements ShouldQueue
             'character_id' => $renter->character_id,
         ]);
 
-        // Grab a reference to the refinery that is being rented.
+        // Grab a reference to the refinery/moon that is being rented.
         $refinery = Refinery::where('observer_id', $renter->refinery_id)->first(); /* @var Refinery $refinery */
+        $moon = Moon::where('id', $renter->moon_id)->first(); /* @var Moon $moon */
+        if (!$moon) {
+            // technically possible here, but should never happen
+            Log::info("GenerateRentalInvoice: Renter $this->id without moon? Aborting.");
+            return;
+        }
+        $nameRented = $refinery ? $refinery->name : $moon->getName(false);
 
         // Calculate the amount to invoice, taking into account partial months at the start of rental agreements.
         $this_month = date('n');
@@ -82,8 +90,10 @@ class GenerateRentalInvoice implements ShouldQueue
         // Update the amount this renter currently owes.
         $renter->amount_owed += $invoice_amount;
         $renter->generate_invoices_job_run = date('Y-m-d H:i:s');
-        Log::info('GenerateRentalInvoice: updated stored amount owed by renter ' . $character->name .
-            ' for refinery ' . $refinery->name . ' to ' . number_format($renter->amount_owed));
+        Log::info(
+            'GenerateRentalInvoice: updated stored amount owed by renter ' . $character->name .
+            ' for refinery/moon ' . $nameRented . ' to ' . $renter->amount_owed
+        );
         $renter->save();
 
         // Pick up the renter invoice template to apply text substitutions.
@@ -99,7 +109,7 @@ class GenerateRentalInvoice implements ShouldQueue
         $subject = str_replace('{amount_owed}', number_format($renter->amount_owed), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
         $body = str_replace('{name}', $character->name, $body);
-        $body = str_replace('{refinery}', $refinery->name, $body);
+        $body = str_replace('{refinery}', $nameRented, $body);
         $body = str_replace('{amount_owed}', number_format($renter->amount_owed), $body);
         $body = str_replace('{monthly_rental_fee}', number_format($invoice_amount), $body);
         $mail = array(
@@ -114,7 +124,7 @@ class GenerateRentalInvoice implements ShouldQueue
             'approved_cost' => 5000,
         );
 
-        // Queue sending the evemail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
+        // Queue sending the EVE mail, spaced at 1 minute intervals to avoid triggering the mail spam limiter (4/min).
         SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->mail_delay));
         Log::info('GenerateRentalInvoice: dispatched job to send mail in ' . $this->mail_delay . ' minutes', [
             'mail' => $mail,
@@ -124,12 +134,13 @@ class GenerateRentalInvoice implements ShouldQueue
         $invoice = new RentalInvoice;
         $invoice->renter_id = $renter->character_id;
         $invoice->refinery_id = $renter->refinery_id;
+        $invoice->moon_id = $renter->moon_id;
         $invoice->amount = $invoice_amount;
         $invoice->save();
 
-        Log::info('GenerateRentalInvoice: saved new invoice for renter ' . $renter->character_id .
-            ' at refinery ' . $renter->refinery_id . ' for amount ' . $invoice_amount);
-
+        Log::info(
+            'GenerateRentalInvoice: saved new invoice for renter ' . $renter->character_id .
+            ' at refinery/moon ' . $nameRented . ' for amount ' . $invoice_amount
+        );
     }
-
 }

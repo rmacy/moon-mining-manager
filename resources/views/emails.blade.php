@@ -12,7 +12,10 @@
                 <ul>
                     <li><strong>{date}</strong> - the current date</li>
                     <li><strong>{name}</strong> - the name of the recipient</li>
-                    <li><strong>{refinery}</strong> - the name of a rented refinery</li>
+                    <li>
+                        <strong>{refinery}</strong> - the name of a rented refinery or of the moon if the
+                        refinery is not available
+                    </li>
                     <li><strong>{amount_owed}</strong> - the total amount currently owed by the recipient</li>
                     <li><strong>{monthly_rental_fee}</strong> - the monthly rental fee for a rented refinery</li>
                     <li><strong>{outstanding_balance}</strong> - the outstanding balance owed for a rented refinery</li>

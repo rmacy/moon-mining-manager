@@ -23,7 +23,7 @@
                                 @endif
                             </th>
                             @if ($idx === 1)
-                                <th>Refinery</th>
+                                <th>Refinery/Moon</th>
                             @endif
                             <th>Created by</th>
                             <th class="numeric">Amount</th>
@@ -47,8 +47,11 @@
                                 </td>
                                 @if ($idx === 1)
                                     <td>
-                                        {{ $payment->renter && $payment->renter->refinery ?
-                                        $payment->renter->refinery->name : '' }}
+                                        @if ($payment->refinery)
+                                            {{ $payment->refinery->name }}
+                                        @elseif ($payment->moon)
+                                            {{ $payment->moon->getName() }}
+                                        @endif
                                     </td>
                                 @endif
                                 <td>

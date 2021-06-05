@@ -107,13 +107,11 @@ class PollWallet implements ShouldQueue
                 }
 
                 // Look for matching payers among renters and miners.
-                /* @var Renter $renter */
-                /* @var Miner $miner */
                 $renter = Renter::where([
                     ['character_id', $transaction->first_party_id],
                     ['amount_owed', $transaction->amount],
-                ])->first();
-                $miner = Miner::where('eve_id', $transaction->first_party_id)->first();
+                ])->first(); /* @var Renter $renter */
+                $miner = Miner::where('eve_id', $transaction->first_party_id)->first(); /* @var Miner $miner */
 
                 // First check if the payment comes from a recognised renter and is exactly
                 // the right amount for an outstanding refinery balance
@@ -166,6 +164,7 @@ class PollWallet implements ShouldQueue
         $payment = new RentalPayment;
         $payment->renter_id = $transaction->first_party_id;
         $payment->refinery_id = $renter->refinery_id;
+        $payment->moon_id = $renter->moon_id;
         $payment->ref_id = $ref_id;
         $payment->amount_received = $transaction->amount;
         $payment->save();
@@ -173,8 +172,11 @@ class PollWallet implements ShouldQueue
         // Clear their outstanding debt.
         $renter->amount_owed = 0;
         $renter->save();
-        Log::info('PollWallet: saved a new payment from renter ' . $renter->character_id .
-            ' at refinery ' . $renter->refinery_id . ' for ' . $transaction->amount);
+        Log::info(
+            'PollWallet: saved a new payment from renter ' . $renter->character_id .
+            ' at refinery ' . $renter->refinery_id . '/moon  ' . $renter->moon_id .
+            ' for ' . $transaction->amount
+        );
 
         // Retrieve the name of the character.
         $character = $this->conn->invoke('get', '/characters/{character_id}/', [

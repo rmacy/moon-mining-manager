@@ -42,7 +42,7 @@ class PaymentController extends Controller
         $amount = (int) $request->input('amount');
         $user = Auth::user();
 
-        if (($miner_id > 0 && $rental_id > 0) || $amount === 0) {
+        if (($miner_id === 0 && $rental_id === 0) || $amount === 0) {
             return redirect('/payment/new')
                 ->with('message', 'Please choose a miner OR renter and add an amount <> 0.');
         }
@@ -74,6 +74,7 @@ class PaymentController extends Controller
             $rental_payment = new RentalPayment;
             $rental_payment->renter_id = $renter->character_id;
             $rental_payment->refinery_id = $renter->refinery_id;
+            $rental_payment->moon_id = $renter->moon_id;
             $rental_payment->amount_received = $amount;
             $rental_payment->created_by = $user->eve_id;
             $rental_payment->save();
@@ -83,10 +84,12 @@ class PaymentController extends Controller
             $renter->save();
 
             // Log the payment.
-            Log::info('PaymentController: rental payment of ' . number_format($amount) .
+            Log::info(
+                'PaymentController: rental payment of ' . number_format($amount) .
                 ' ISK manually submitted for renter ' . $renter->character_id .
-                ' renting refinery ' . $renter->refinery_id . ' by ' . $user->eve_id);
-
+                ' renting refinery ' . $renter->refinery_id . // refinery_id can be null
+                '/moon ' . $renter->moon_id . ' by ' . $user->eve_id
+            );
         }
 
         return redirect('/payment');

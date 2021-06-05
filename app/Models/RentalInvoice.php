@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $renter_id
  * @property int $refinery_id
+ * @property int $moon_id
  * @property float $amount
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -33,5 +34,10 @@ class RentalInvoice extends Model
     public function refinery()
     {
         return $this->hasOne('App\Models\Refinery', 'observer_id', 'refinery_id');
+    }
+
+    public function moon()
+    {
+        return $this->hasOne('App\Models\Moon', 'id', 'moon_id');
     }
 }

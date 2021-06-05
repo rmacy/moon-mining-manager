@@ -72,9 +72,7 @@
                                 <option value="{{ $moon->id }}"
                                         data-fee="{{ $moon->monthly_rental_fee }}"
                                         data-corp-fee="{{ $moon->monthly_corp_rental_fee }}">
-                                    {{ $moon->id }} -
-                                    {{ $moon->system->solarSystemName }} -
-                                    P {{ $moon->planet }} M {{ $moon->moon }} ({{ $moon->region->regionName }})
+                                    {{ $moon->id }} - {{ $moon->getName() }})
                                 </option>
                             @endforeach
                         </select>

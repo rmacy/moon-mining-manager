@@ -39,7 +39,8 @@
                             @if (!isset($renter->end_date) || strtotime($renter->end_date) >= time())
                                 <option value="{{ $renter->id }}">
                                     {{ $renter->character_name }}
-                                    ({{ $renter->refinery ? $renter->refinery->name : '' }})
+                                    ({{ $renter->refinery ? $renter->refinery->name :
+                                        ($renter->moon ? $renter->moon->getName(false) : '') }})
                                 </option>
                             @endif
                         @endforeach

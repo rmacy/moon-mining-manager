@@ -50,10 +50,16 @@
                         <tr>
                             <td>
                                 @if (isset($activity->amount))
-                                    <em>{{ $activity->refinery->name }}</em> invoice sent
+                                    <em>{{ $activity->refinery ?
+                                            $activity->refinery->name :
+                                            ($activity->moon ? $activity->moon->getName(false) : '')
+                                    }}</em> invoice sent
                                 @endif
                                 @if (isset($activity->amount_received))
-                                <em>{{ $activity->refinery->name }}</em> payment received
+                                    <em>{{ $activity->refinery ?
+                                            $activity->refinery->name :
+                                            ($activity->moon ? $activity->moon->getName(false) : '')
+                                    }}</em> payment received
                                 @endif
                             </td>
                             <td class="numeric">
@@ -77,7 +83,7 @@
         <div class="col-4">
 
             <div class="card-heading">
-                Refineries rented
+                Refineries/Moons rented
             </div>
 
             <table>
@@ -85,13 +91,15 @@
                     @foreach ($rentals as $rental)
                         <tr>
                             <td>
-                                <a href="/renters/refinery/{{$rental->refinery_id }}">{{ $rental->refinery->name }}</a>
+                                @if (isset($rental->refinery_id))
+                                    <a href="/renters/refinery/{{$rental->refinery_id }}">
+                                        {{ $rental->refinery->name }}</a>
+                                    <br>
+                                @endif
                                 @if (isset($rental->moon_id))
                                     Moon ID: {{ $rental->moon_id }}
                                     <br>
-                                    P{{ $rental->moon->planet }}-M{{ $rental->moon->moon }},
-                                    {{ $rental->moon->system->solarSystemName }},
-                                    {{ $rental->moon->region->regionName }}
+                                    {{ $rental->moon->getName() }}
                                 @endif
                             </td>
                         </tr>

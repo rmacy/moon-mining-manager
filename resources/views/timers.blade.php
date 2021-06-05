@@ -113,7 +113,10 @@
 
     @if ($activity_log)
         <div class="mining-activity">
-            <h2>Your mining activity log (<a href="https://wiki.bravecollective.com/member/alliance/industry/moonmining">wiki link</a>)</h2>
+            <h2>
+                Your mining activity log
+                (<a href="https://wiki.bravecollective.com/member/alliance/industry/moonmining">wiki link</a>)
+            </h2>
             <ul id="activity-log">
                 @foreach ($activity_log as $event)
                     <li>
@@ -125,7 +128,8 @@
                             @php
                                 $refinery = \App\Models\Refinery::where('observer_id', $event->refinery_id)->first();
                             @endphp
-                            Mining recorded in {{ $refinery->system->solarSystemName }} ({{ number_format($event->quantity, 0) }} units)
+                            Mining recorded in {{ $refinery->system->solarSystemName }}
+                            ({{ number_format($event->quantity, 0) }} units)
                             @if (isset($event->tax_amount))
                                 ~ {{ number_format($event->tax_amount) }} ISK
                             @endif

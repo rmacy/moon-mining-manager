@@ -135,4 +135,14 @@ class Moon extends Model
         return $this->belongsTo('App\Models\Type', 'mineral_4_type_id');
     }
 
+    public function getName(bool $withRegionName = true): string
+    {
+        $name = "{$this->system->solarSystemName} - P$this->planet M$this->moon";
+
+        if ($withRegionName) {
+            $name .= " ({$this->region->regionName})";
+        }
+
+        return $name;
+    }
 }
