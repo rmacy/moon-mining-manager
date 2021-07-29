@@ -173,8 +173,10 @@ class MoonAdminController extends Controller
                 $moon->planet = $planet;
                 $moon->moon = $moonNumber;
                 $moon->monthly_rental_fee = 0;
+                $moon->monthly_corp_rental_fee = 0;
                 if (! $moon->previous_monthly_rental_fee) {
                     $moon->previous_monthly_rental_fee = 0;
+                    $moon->previous_monthly_corp_rental_fee = 0;
                 }
                 $moon->mineral_1_type_id = null;
                 $moon->mineral_1_percent = null;
