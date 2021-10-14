@@ -99,17 +99,9 @@ class EsiConnection
                 throw new \Exception('User '. $userId .' not found.');
             }
 
-            $url = 'https://login.eveonline.com/oauth/token';
+            $url = 'https://login.eveonline.com/v2/oauth/token';
             $secret = env('EVEONLINE_CLIENT_SECRET');
             $client_id = env('EVEONLINE_CLIENT_ID');
-
-            // If we are running on Sisi, override the oauth location and client information.
-            if (env('ESEYE_DATASOURCE', 'tranquility') == 'singularity')
-            {
-                $url = 'https://sisilogin.testeveonline.com/oauth/token';
-                $secret = env('TESTEVEONLINE_CLIENT_SECRET');
-                $client_id = env('TESTEVEONLINE_CLIENT_ID');
-            }
 
             // Need to request a new valid access token from EVE SSO using the refresh token of the original request.
             $response = Curl::to($url)

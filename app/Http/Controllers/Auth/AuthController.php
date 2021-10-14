@@ -18,9 +18,7 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        // Set the Socialite driver to use based on whether we are working with TQ or Sisi.
-        $this->socialite_driver = (env('ESEYE_DATASOURCE', 'tranquility') != 'singularity') ?
-            'eveonline' : 'eveonline-sisi';
+        $this->socialite_driver = 'eve-sso';
     }
 
     /**

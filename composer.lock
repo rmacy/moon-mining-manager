@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "da3757a4e375395e3adeb437c3bfa635",
+    "content-hash": "55c70b759fc677934d5c5e1f78936801",
     "packages": [
         {
             "name": "bravecollective/web-ui",
@@ -14,7 +14,6 @@
                 "url": "https://github.com/bravecollective/web-ui.git",
                 "reference": "92d8877358286550a630beac0257042f3c7df82b"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "assets-files": [
@@ -27,7 +26,7 @@
             "license": [
                 "MIT"
             ],
-            "time": "2019-09-29T12:56:32+00:00"
+            "time": "2019-09-29T12:58:02+00:00"
         },
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -220,10 +219,6 @@
                 "parser",
                 "php"
             ],
-            "support": {
-                "issues": "https://github.com/doctrine/lexer/issues",
-                "source": "https://github.com/doctrine/lexer/tree/1.0.2"
-            },
             "time": "2019-06-08T11:03:04+00:00"
         },
         {
@@ -454,10 +449,6 @@
                 "proxy",
                 "trusted proxy"
             ],
-            "support": {
-                "issues": "https://github.com/fideloper/TrustedProxy/issues",
-                "source": "https://github.com/fideloper/TrustedProxy/tree/master"
-            },
             "time": "2017-06-15T17:19:42+00:00"
         },
         {
@@ -803,10 +794,6 @@
                     "email": "jakub.onderka@gmail.com"
                 }
             ],
-            "support": {
-                "issues": "https://github.com/JakubOnderka/PHP-Console-Color/issues",
-                "source": "https://github.com/JakubOnderka/PHP-Console-Color/tree/master"
-            },
             "abandoned": "php-parallel-lint/php-console-color",
             "time": "2018-09-29T17:23:10+00:00"
         },
@@ -854,10 +841,6 @@
                 }
             ],
             "description": "Highlight PHP code in terminal",
-            "support": {
-                "issues": "https://github.com/JakubOnderka/PHP-Console-Highlighter/issues",
-                "source": "https://github.com/JakubOnderka/PHP-Console-Highlighter/tree/master"
-            },
             "abandoned": "php-parallel-lint/php-console-highlighter",
             "time": "2018-09-29T18:48:56+00:00"
         },
@@ -1423,59 +1406,6 @@
             "time": "2021-01-20T01:40:53+00:00"
         },
         {
-            "name": "matthewpennell/eveonline-socialite-sisi",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/matthewpennell/eveonline-socialite-sisi.git",
-                "reference": "0b7cf8bae6a177d3dd5e4013bb598132e378a6c4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/matthewpennell/eveonline-socialite-sisi/zipball/0b7cf8bae6a177d3dd5e4013bb598132e378a6c4",
-                "reference": "0b7cf8bae6a177d3dd5e4013bb598132e378a6c4",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "^6.3",
-                "laravel/socialite": "3.*",
-                "php": "^5.6 || ^7.0"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "matthewpennell\\Socialite\\EveOnline\\Providers\\EveOnlineServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "matthewpennell\\Socialite\\EveOnline\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Matthew Pennell",
-                    "email": "github@matthewpennell.com"
-                },
-                {
-                    "name": "Andre Peiffer",
-                    "email": "necrotex@gmail.com"
-                }
-            ],
-            "description": "EveOnline SSO (Singularity) Provider for Laravel Socialite",
-            "support": {
-                "source": "https://github.com/matthewpennell/eveonline-socialite-sisi/tree/master"
-            },
-            "time": "2017-10-11T20:37:49+00:00"
-        },
-        {
             "name": "monolog/monolog",
             "version": "1.26.0",
             "source": {
@@ -1732,55 +1662,6 @@
             "time": "2020-12-20T10:01:03+00:00"
         },
         {
-            "name": "nullx27/eveonline-socialite",
-            "version": "v0.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/nullx27/eveonline-socialite.git",
-                "reference": "f1964175cf634add879a507ac96947cef485fe5e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/nullx27/eveonline-socialite/zipball/f1964175cf634add879a507ac96947cef485fe5e",
-                "reference": "f1964175cf634add879a507ac96947cef485fe5e",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "^6.3",
-                "laravel/socialite": "3.*",
-                "php": "^5.6 || ^7.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "nullx27\\Socialite\\EveOnline\\Providers\\EveOnlineServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "nullx27\\Socialite\\EveOnline\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Andre Peiffer",
-                    "email": "necrotex@gmail.com"
-                }
-            ],
-            "description": "EveOnline SSO Provider for Laravel Socialite",
-            "support": {
-                "issues": "https://github.com/nullx27/eveonline-socialite/issues",
-                "source": "https://github.com/nullx27/eveonline-socialite/tree/v0.5"
-            },
-            "time": "2017-12-20T14:38:43+00:00"
-        },
-        {
             "name": "paragonie/random_compat",
             "version": "v9.99.99",
             "source": {
@@ -1943,10 +1824,6 @@
                 "container-interop",
                 "psr"
             ],
-            "support": {
-                "issues": "https://github.com/php-fig/container/issues",
-                "source": "https://github.com/php-fig/container/tree/master"
-            },
             "time": "2017-02-14T16:28:37+00:00"
         },
         {
@@ -1997,9 +1874,6 @@
                 "request",
                 "response"
             ],
-            "support": {
-                "source": "https://github.com/php-fig/http-message/tree/master"
-            },
             "time": "2016-08-06T14:39:51+00:00"
         },
         {
@@ -2098,9 +1972,6 @@
                 "psr-16",
                 "simple-cache"
             ],
-            "support": {
-                "source": "https://github.com/php-fig/simple-cache/tree/master"
-            },
             "time": "2017-10-23T01:57:42+00:00"
         },
         {
@@ -2219,10 +2090,6 @@
                 }
             ],
             "description": "A polyfill for getallheaders.",
-            "support": {
-                "issues": "https://github.com/ralouphie/getallheaders/issues",
-                "source": "https://github.com/ralouphie/getallheaders/tree/develop"
-            },
             "time": "2019-03-08T08:55:37+00:00"
         },
         {
@@ -4102,9 +3969,6 @@
                     "email": "mike.vanriel@naenius.com"
                 }
             ],
-            "support": {
-                "source": "https://github.com/barryvdh/ReflectionDocBlock/tree/v2.0.6"
-            },
             "time": "2018-12-13T10:34:14+00:00"
         },
         {
@@ -5344,10 +5208,6 @@
                 }
             ],
             "description": "Component for reading phar.io manifest information from a PHP Archive (PHAR)",
-            "support": {
-                "issues": "https://github.com/phar-io/manifest/issues",
-                "source": "https://github.com/phar-io/manifest/tree/master"
-            },
             "time": "2018-07-08T19:23:20+00:00"
         },
         {
@@ -5395,10 +5255,6 @@
                 }
             ],
             "description": "Library for handling version information and constraints",
-            "support": {
-                "issues": "https://github.com/phar-io/version/issues",
-                "source": "https://github.com/phar-io/version/tree/master"
-            },
             "time": "2018-07-08T19:19:57+00:00"
         },
         {
@@ -5689,10 +5545,6 @@
                 "testing",
                 "xunit"
             ],
-            "support": {
-                "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/master"
-            },
             "time": "2018-10-31T16:06:48+00:00"
         },
         {
@@ -5794,10 +5646,6 @@
             "keywords": [
                 "template"
             ],
-            "support": {
-                "issues": "https://github.com/sebastianbergmann/php-text-template/issues",
-                "source": "https://github.com/sebastianbergmann/php-text-template/tree/1.2.1"
-            },
             "time": "2015-06-21T13:50:34+00:00"
         },
         {
@@ -6391,10 +6239,6 @@
             "keywords": [
                 "global state"
             ],
-            "support": {
-                "issues": "https://github.com/sebastianbergmann/global-state/issues",
-                "source": "https://github.com/sebastianbergmann/global-state/tree/2.0.0"
-            },
             "time": "2017-04-27T15:39:26+00:00"
         },
         {
@@ -6665,10 +6509,6 @@
             ],
             "description": "Library that helps with managing the version number of Git-hosted PHP projects",
             "homepage": "https://github.com/sebastianbergmann/version",
-            "support": {
-                "issues": "https://github.com/sebastianbergmann/version/issues",
-                "source": "https://github.com/sebastianbergmann/version/tree/master"
-            },
             "time": "2016-10-03T07:35:21+00:00"
         },
         {
@@ -6882,10 +6722,6 @@
                 }
             ],
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
-            "support": {
-                "issues": "https://github.com/theseer/tokenizer/issues",
-                "source": "https://github.com/theseer/tokenizer/tree/master"
-            },
             "time": "2019-06-13T22:48:21+00:00"
         },
         {
@@ -6945,8 +6781,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "bravecollective/web-ui": 20,
-        "matthewpennell/eveonline-socialite-sisi": 20
+        "bravecollective/web-ui": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
@@ -6958,5 +6793,5 @@
     "platform-overrides": {
         "php": "7.1.0"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "1.1.0"
 }
