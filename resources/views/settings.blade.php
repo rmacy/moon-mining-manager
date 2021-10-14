@@ -13,8 +13,8 @@
         @foreach ($admin_users as $user)
             <div class="col-4">
                 <div class="card access">
-                    <img src="{{ $user->user->avatar }}" class="avatar" alt="avatar">
-                    <div class="primary">{{ $user->user->name }}</div>
+                    <img src="{{ $user->user ? $user->user->avatar : '#' }}" class="avatar" alt="avatar">
+                    <div class="primary">{{ $user->user ? $user->user->name : '' }}</div>
                     <div class="secondary">Added by {{ $user->whitelister->name }}</div>
                     <div class="inline-form">
                         <form method="post" action="/access/blacklist/{{ $user->eve_id }}">
