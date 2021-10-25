@@ -202,7 +202,7 @@ class RenterController extends Controller
         return view('renters.edit', [
             'renter' => $renter,
             'character' => $character,
-            'refineries' => Refinery::orderBy('name')->get(),
+            'refineries' => Refinery::orderBy('name')->where('available', 1)->get(),
             'moons' => $this->getMoons(),
         ]);
     }
@@ -215,7 +215,7 @@ class RenterController extends Controller
     public function addNewRenter()
     {
         return view('renters.new', [
-            'refineries' => Refinery::orderBy('name')->get(),
+            'refineries' => Refinery::orderBy('name')->where('available', 1)->get(),
             'moons' => $this->getMoons(),
         ]);
     }

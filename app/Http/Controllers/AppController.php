@@ -60,10 +60,10 @@ class AppController extends Controller
             /** @noinspection PhpUndefinedFieldInspection */
             $top_miner->total = $top_payer->total;
         }
-        $top_refinery = Refinery::orderBy('income', 'desc')->first();
+        $top_refinery = Refinery::orderBy('income', 'desc')->where('available', 1)->first();
         /* @var Refinery $top_refinery_system */
         $top_refinery_system = Refinery::select(DB::raw('solar_system_id, SUM(income) AS total'))
-            ->groupBy('solar_system_id')->orderBy('total', 'desc')->first();
+            ->where('available', 1)->groupBy('solar_system_id')->orderBy('total', 'desc')->first();
         if (isset($top_refinery_system) && $top_refinery_system->solar_system_id > 0) {
             /* @var SolarSystem $top_system */
             $top_system = SolarSystem::find($top_refinery_system->solar_system_id);
@@ -79,7 +79,7 @@ class AppController extends Controller
                 ->orderBy('amount_owed', 'desc')->get(),
             'ninjas' => $blacklist_whereRaw ? Miner::whereRaw($blacklist_whereRaw)->get() : [],
             'total_amount_owed' => $total_amount_owed ? $total_amount_owed->total : 0,
-            'refineries' => Refinery::orderBy('income', 'desc')->get(),
+            'refineries' => Refinery::orderBy('income', 'desc')->where('available', 1)->get(),
             'total_income' => $total_income->total,
         ]);
     }
