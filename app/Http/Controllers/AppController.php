@@ -9,6 +9,7 @@ use App\Models\Refinery;
 use App\Models\SolarSystem;
 use App\Models\User;
 use App\Models\Whitelist;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -35,14 +36,19 @@ class AppController extends Controller
             $whitelist_where[] = 'corporation_id IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
             $blacklist_where[] = 'corporation_id NOT IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
         }
+        $whitelist_whereRaw = null;
+        $blacklist_whereRaw = null;
         if (count($whitelist_where)) {
             $whitelist_whereRaw = '(' . implode(' OR ', $whitelist_where) . ')';
             $blacklist_whereRaw = '(' . implode(' AND ', $blacklist_where) . ')';
         }
 
         // Calculate the total currently owed and total income generated.
-        $total_amount_owed = DB::table('miners')->select(DB::raw('SUM(amount_owed) AS total'))
-            ->where('amount_owed', '>', 0)->whereRaw($whitelist_whereRaw)->first();
+        $total_amount_owed = null;
+        if ($whitelist_whereRaw) {
+            $total_amount_owed = DB::table('miners')->select(DB::raw('SUM(amount_owed) AS total'))
+                ->where('amount_owed', '>', 0)->whereRaw($whitelist_whereRaw)->first();
+        }
         $total_income = DB::table('payments')->select(DB::raw('SUM(amount_received) AS total'))->first();
 
         // Grab the top miner, refinery and system.
@@ -51,6 +57,7 @@ class AppController extends Controller
             ->groupBy('miner_id')->orderBy('total', 'desc')->first();
         if (isset($top_payer)) {
             $top_miner = Miner::where('eve_id', $top_payer->miner_id)->first();
+            /** @noinspection PhpUndefinedFieldInspection */
             $top_miner->total = $top_payer->total;
         }
         $top_refinery = Refinery::orderBy('income', 'desc')->first();
@@ -60,6 +67,7 @@ class AppController extends Controller
         if (isset($top_refinery_system) && $top_refinery_system->solar_system_id > 0) {
             /* @var SolarSystem $top_system */
             $top_system = SolarSystem::find($top_refinery_system->solar_system_id);
+            /** @noinspection PhpUndefinedFieldInspection */
             $top_system->total = $top_refinery_system->total;
         }
 
@@ -69,8 +77,8 @@ class AppController extends Controller
             'top_system' => (isset($top_system)) ? $top_system : null,
             'miners' => Miner::where('amount_owed', '>=', 1)->whereRaw($whitelist_whereRaw)
                 ->orderBy('amount_owed', 'desc')->get(),
-            'ninjas' => Miner::whereRaw($blacklist_whereRaw)->get(),
-            'total_amount_owed' => $total_amount_owed->total,
+            'ninjas' => $blacklist_whereRaw ? Miner::whereRaw($blacklist_whereRaw)->get() : [],
+            'total_amount_owed' => $total_amount_owed ? $total_amount_owed->total : 0,
             'refineries' => Refinery::orderBy('income', 'desc')->get(),
             'total_income' => $total_income->total,
         ]);
@@ -161,7 +169,7 @@ class AppController extends Controller
     /**
      * Logout the currently authenticated user.
      *
-     * @return View
+     * @return RedirectResponse
      */
     public function logout()
     {
