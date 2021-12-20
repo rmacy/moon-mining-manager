@@ -44,6 +44,7 @@ class AuthController extends Controller
             'esi-mail.send_mail.v1',
             'esi-universe.read_structures.v1',
             'esi-corporations.read_structures.v1',
+            'esi-characters.read_notifications.v1',
         ])->redirect();
     }
 

@@ -131,6 +131,7 @@ class EsiConnection
                     'esi-mail.send_mail.v1',
                     'esi-universe.read_structures.v1',
                     'esi-corporations.read_structures.v1',
+                    'esi-characters.read_notifications.v1',
                 ],
                 'token_expires' => isset($new_token->expires_in) ?
                     date('Y-m-d H:i:s', time() + $new_token->expires_in) :

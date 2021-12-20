@@ -11,6 +11,7 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
   - esi-corporations.read_structures.v1 
   - esi-wallet.read_corporation_wallets.v1 
   - esi-industry.read_corporation_mining.v1
+  - esi-characters.read_notifications.v1
 
 ## Installation instructions
 
@@ -37,8 +38,16 @@ You will need to import the following EVE dump tables into your database. They c
 
 * invTypes
 * invTypeMaterials
+* invUniqueNames
 * mapSolarSystems
 * mapRegions
+
+## Updates
+
+### 2021-12-20
+
+- Added esi-characters.read_notifications.v1 scope to admin login - add this to your EVE app.
+- Added invUniqueNames table with data from Fuzzworks - see below.
 
 ## Operation instructions
 
