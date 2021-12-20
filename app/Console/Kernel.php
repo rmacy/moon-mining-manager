@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\ReadExtractionNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\PollWallet;
@@ -60,6 +61,10 @@ class Kernel extends ConsoleKernel
         // Check for miners making payments to the corporation wallet.
         $schedule->job(new PollWallet($rentUserId))->hourlyAt(30);
         $schedule->job(new PollWallet($taxUserId))->hourlyAt(35);
+
+        // Check notifications
+        $schedule->job(new ReadExtractionNotifications($taxUserId))->hourlyAt(40);
+        $schedule->job(new ReadExtractionNotifications($rentUserId))->hourlyAt(45);
 
         // Pull the mining activity for the day and store it.
         $schedule->job(new PollMiningObservers($taxCorporationId))->dailyAt('12:00');
