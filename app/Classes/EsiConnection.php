@@ -85,7 +85,7 @@ class EsiConnection
         // Eseye configuration for all connections
         $configuration = Configuration::getInstance();
         /** @noinspection PhpUndefinedFieldInspection */
-        $configuration->datasource = env('ESEYE_DATASOURCE', 'tranquility');
+        $configuration->datasource = 'tranquility';
         /** @noinspection PhpUndefinedFieldInspection */
         $configuration->logfile_location = storage_path() . '/logs';
         /** @noinspection PhpUndefinedFieldInspection */
