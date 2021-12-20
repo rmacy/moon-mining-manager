@@ -115,9 +115,13 @@ class AuthController extends Controller
     {
         if ($authUser = User::where('eve_id', $user->id)->first()) {
             $authUser->token = $user->token;
-            if ($user->refreshToken !== null) {
+
+            // Set refresh token, but only if there are scopes. This ensures that an admin token is
+            // not overwritten if the user logs in again using the normal login.
+            if ($user->refreshToken !== null && !empty($user->user['Scopes'])) {
                 $authUser->refresh_token = $user->refreshToken;
             }
+
             $authUser->save();
             return $authUser;
         }
