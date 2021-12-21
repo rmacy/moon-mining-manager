@@ -47,7 +47,7 @@ You will need to import the following EVE dump tables into your database. They c
 ### 2021-12-20
 
 - Added esi-characters.read_notifications.v1 scope to admin login - add this to your EVE app.
-- Added invUniqueNames table with data from Fuzzworks - see below.
+- Added invUniqueNames table with data from Fuzzworks - see [EVE tables](#eve-tables).
 
 ## Operation instructions
 
