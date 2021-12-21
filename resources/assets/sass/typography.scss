@@ -4,7 +4,8 @@ body {
     line-height: 20px;
 }
 
-.font-weight-normal {
+.font-weight-normal,
+.font-weight-normal .tablesorter-header-inner {
     font-weight: 400;
 }
 

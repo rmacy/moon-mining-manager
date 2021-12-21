@@ -19,7 +19,7 @@ class ExtractionsController extends Controller
 
     public function index(Request $request): View
     {
-        $limit = 10;
+        $limit = (int)$request->get('limit', 50);
         $page = (int)$request->get('page', 1);
         $offset = $page > 1 ? ($page - 1) * $limit : 0;
         $corporation = (int)$request->get('corporation');
@@ -65,7 +65,10 @@ class ExtractionsController extends Controller
             $extractionQuery->whereIn('moon_id', [$moonId]);
         }
         $total = $extractionQuery->count();
-        $extractions = $extractionQuery->offset($offset)->limit($limit)->get();
+        if ($limit > 0) {
+            $extractionQuery->offset($offset)->limit($limit);
+        }
+        $extractions = $extractionQuery->get();
 
         // Fetch mined volumes
         foreach ($extractions as $num => $extraction) {
