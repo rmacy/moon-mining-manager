@@ -9,6 +9,7 @@
     <li><a href="/miners"><i class="icon-users"></i>Miners</a></li>
     <li><a href="/moon-admin/list"><i class="icon-">&#9789;</i>Moons</a><br></li>
     <li><a href="/moon-admin">&nbsp; &nbsp; &nbsp; Moon Admin</a><br></li>
+    <li><a href="/extractions">&nbsp; &nbsp; &nbsp; Extractions</a><br></li>
     <li><a href="/renters"><i class="icon-rocket"></i>Renters</a> </li>
     <li><a href="/renters/expired">&nbsp; &nbsp; &nbsp; &nbsp;Expired contracts</a> </li>
     <li><a href="/reports"><i class="icon-stats-dots"></i>Reports</a></li>

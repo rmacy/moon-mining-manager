@@ -92,6 +92,10 @@ Route::middleware(['admin'])->prefix('moon-admin')->group(function () {
     Route::get('/calculate', 'MoonAdminController@calculate');
 });
 
+Route::middleware(['admin'])->prefix('extractions')->group(function () {
+    Route::get('/', 'ExtractionsController@index');
+});
+
 // Payment management.
 Route::middleware(['admin'])->prefix('payment')->group(function () {
     Route::get('/', 'PaymentController@listManualPayments');
