@@ -40,7 +40,7 @@
             @endfor
         </p>
 
-        <table>
+        <table class="moon-extractions">
             <thead>
                 <tr>
                     <th>Detonation</th>
