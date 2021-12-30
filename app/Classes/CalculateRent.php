@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class CalculateRent
 {
-    protected $total_ore_volume = 14400000; // 14.4m m3 represents a 30 day mining cycle, approximately
+    protected $total_ore_volume = 28800000; // 28.8m m3 represents a 30 day mining cycle, approximately
 
     public function updateMoon(Moon $moon, $contractType): int
     {
