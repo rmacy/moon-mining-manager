@@ -27,6 +27,7 @@ class ExtractionsController extends Controller
         $moonId = (int)$request->get('moon');
 
         // All moons with detonations from the selected corporation
+        /** @noinspection PhpUndefinedMethodInspection */
         $moonsQuery = Extraction::select('moon_id')->distinct()
             ->with('invMoon:itemID,itemName')
             ->whereHas('refinery', function ($q)  use ($corporationId) {
@@ -38,7 +39,8 @@ class ExtractionsController extends Controller
 
         // Collect all detonation dates from all moons
         $detonations = [];
-        $detonationsQuery = Extraction::select(['id', 'moon_id', 'notification_timestamp']);
+        $detonationsQuery = Extraction::select(['id', 'moon_id', 'notification_timestamp'])
+            ->orderBy('notification_timestamp', 'desc');
         foreach ($detonationsQuery->get() as $detonation) {
             $detonations[$detonation->moon_id][] = [
                 'detonation_id' => $detonation->id,
@@ -47,6 +49,7 @@ class ExtractionsController extends Controller
         }
 
         // Get extraction data
+        /** @noinspection PhpUndefinedMethodInspection */
         $extractionQuery = (new Extraction)
             ->select([
                 'id', 'moon_id', 'extractions.refinery_id', 'notification_timestamp',
