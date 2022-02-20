@@ -39,7 +39,7 @@ class CalculateRent
         return $fee;
     }
 
-    public function calculateOreTaxValue($type_id, $percent, $contractType): int
+    private function calculateOreTaxValue($type_id, $percent, $contractType): int
     {
         // Retrieve the value of the mineral from the taxes table.
         $tax_rate = TaxRate::where('type_id', $type_id)->first();
@@ -47,17 +47,17 @@ class CalculateRent
         // If we don't have a stored tax rate for this ore type, queue a job to calculate it.
         if (isset($tax_rate)) {
             // Grab the stored value of this ore.
-            $ore_value = $tax_rate->value;
+            $oreValue = $tax_rate->value;
 
             // Calculate what volume of the total ore will be this type.
-            $ore_volume = $this->total_ore_volume * $percent / 100;
+            $oreVolume = $this->total_ore_volume * $percent / 100;
 
             // Based on the volume of the ore type, how many units does that volume represent.
             $type = Type::find($type_id);
-            $units = $ore_volume / $type->volume;
+            $units = $oreVolume / $type->volume;
 
-            // Base Tax Rate of 10% for individuals and 5% for corporations
-            $taxRate = $contractType === Renter::TYPE_CORPORATION ? 5 : 10;
+            // Base Tax Rate of 5%
+            $taxRate = 5;
 
             // Addition of previously-taxable value for each ore.
             switch ($type->groupID) {
@@ -77,11 +77,17 @@ class CalculateRent
                     break;
             }
 
+            // Reduce rent for corporations by 30%
+            $taxRate *= $contractType === Renter::TYPE_CORPORATION ? 0.7 : 1;
+
+            // Reduce moon value to 70% for rent calculation
+            $moonValue = $oreValue * $units * 0.7;
+
             // For non-moon ores, apply a 50% discount.
             $discount = (in_array($type->groupID, [1884, 1920, 1921, 1922, 1923])) ? 1 : 0.5;
 
             // Calculate the tax value to be charged for the volume of this ore that can be mined.
-            return (int) round($ore_value * $units * $taxRate / 100 * $discount);
+            return (int) round($moonValue * $taxRate / 100 * $discount);
         } else {
             // Add a new record for this unknown ore type.
             $tax_rate = new TaxRate;
