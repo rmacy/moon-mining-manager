@@ -24,6 +24,8 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 * Run `php artisan migrate` to create the database tables
 * Regenerate js/css with `npm run production`, if they have changed.
 
+See also https://laravel.com/docs/5.5/installation.
+
 ## Initial setup
 
 - Add your admin user to the table `whitelist` with `is_admin` = `1`.
