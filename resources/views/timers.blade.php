@@ -53,19 +53,25 @@
                 >
                     <td>
                         <h2>{{ $timer->system->solarSystemName }}</h2>
-                        <h3>{{ $timer->system->region->regionName }}</h3>
-                        <a href="http://evemaps.dotlan.net/map/{{ str_replace(' ', '_', $timer->system->region->regionName) }}/{{ $timer->system->solarSystemName }}">View on Dotlan</a>
+                        <h3>{{ $timer->system->region->regionName }}</h3>asdasd
+                        <a href="http://evemaps.dotlan.net/map/{{
+                                str_replace(' ', '_', $timer->system->region->regionName) }}/{{
+                                $timer->system->solarSystemName }}">
+                            View on Dotlan
+                        </a>
                     </td>
                     <td>{{ $timer->name }}</td>
                     <td>
                         @if ($timer->claimed_by_primary || $timer->claimed_by_secondary)
                             {{ date('H:i l jS F', strtotime($timer->detonation_time)) }}
                             <br>
-                            <a href="http://time.nakamura-labs.com/?#{{ strtotime($timer->chunk_arrival_time) }}" target="_blank">Timezone conversion</a>
+                            <a href="http://time.nakamura-labs.com/?#{{ strtotime($timer->chunk_arrival_time) }}"
+                               target="_blank">Timezone conversion</a>
                         @else
                             {{ date('H:i l jS F', strtotime($timer->natural_decay_time)) }}
                             <br>
-                            <a href="http://time.nakamura-labs.com/?#{{ strtotime($timer->natural_decay_time) }}" target="_blank">Timezone conversion</a>
+                            <a href="http://time.nakamura-labs.com/?#{{ strtotime($timer->natural_decay_time) }}"
+                               target="_blank">Timezone conversion</a>
                         @endif
                     </td>
                     @if ($is_whitelisted_user)
@@ -80,7 +86,11 @@
                                 @if (strtotime($timer->natural_decay_time) >= time())
                                     <form method="post" action="/timers/claim/1/{{ $timer->observer_id }}">
                                         {{ csrf_field() }}
-                                        <label for="detonation">Enter detonation time ({{ date('H:i', strtotime($timer->chunk_arrival_time)) }}-{{ date('H:i', strtotime($timer->natural_decay_time)) }})</label>
+                                        <label for="detonation">
+                                            Enter detonation time
+                                            ({{ date('H:i', strtotime($timer->chunk_arrival_time)) }} -
+                                            {{ date('H:i', strtotime($timer->natural_decay_time)) }})
+                                        </label>
                                         <input id="detonation" name="detonation" type="text" size="10">
                                         <button type="submit">Claim detonation</button>
                                     </form>
@@ -98,7 +108,11 @@
                                 @if (strtotime($timer->natural_decay_time) >= time())
                                     <form method="post" action="/timers/claim/2/{{ $timer->observer_id }}">
                                         {{ csrf_field() }}
-                                        <label for="detonation">Enter detonation time  ({{ date('H:i', strtotime($timer->chunk_arrival_time)) }}-{{ date('H:i', strtotime($timer->natural_decay_time)) }})</label>
+                                        <label for="detonation">
+                                            Enter detonation time
+                                            ({{ date('H:i', strtotime($timer->chunk_arrival_time)) }} -
+                                            {{ date('H:i', strtotime($timer->natural_decay_time)) }})
+                                        </label>
                                         <input id="detonation" name="detonation" type="text" size="10">
                                         <button type="submit">Claim detonation</button>
                                     </form>
@@ -120,7 +134,7 @@
             <ul id="activity-log">
                 @foreach ($activity_log as $event)
                     <li>
-                        {{ date('Y-m-d', strtotime($event->created_at)) }} -
+                        {{ date('Y-m-d H:i', strtotime($event->updated_at)) }} -
                         @if (isset($event->amount))
                             Invoice sent for {{ number_format($event->amount) }} ISK
                         @endif
@@ -144,17 +158,15 @@
     @endif
 
     <script>
-
         window.onload = function () {
-
             setInterval(function () {
                 var x = new Date();
                 var hour = x.getUTCHours(),
                     minute = x.getUTCMinutes(),
                     second = x.getUTCSeconds();
-                document.getElementById('current_time').innerHTML = pad(hour) + ':' + pad(minute) + ':' + pad(second) + ' EVE';
+                document.getElementById('current_time').innerHTML =
+                    pad(hour) + ':' + pad(minute) + ':' + pad(second) + ' EVE';
             }, 1000);
-
         }
 
         function pad(num) {
@@ -162,7 +174,6 @@
             if (num > 9) return num;
             return '0' + num;
         }
-
     </script>
 
 @endsection

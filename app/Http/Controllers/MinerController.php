@@ -58,13 +58,4 @@ class MinerController extends Controller
         ]);
 
     }
-
-    private function sortByDate($a, $b)
-    {
-        if ($a->created_at == $b->created_at) {
-            return 0;
-        }
-        return ($a->created_at > $b->created_at) ? -1 : 1;
-    }
-
 }

@@ -164,13 +164,4 @@ class TimerController extends Controller
         return redirect('/timers');
 
     }
-
-    private function sortByDate($a, $b)
-    {
-        if ($a->created_at == $b->created_at) {
-            return 0;
-        }
-        return ($a->created_at > $b->created_at) ? -1 : 1;
-    }
-
 }

@@ -11,7 +11,7 @@
             @include('common.card', [
                 'avatar' => $miner->avatar,
                 'name' => $miner->name, 
-                'sub' => (isset($miner->corporation->name) ? $miner->corporation->name : 'UNKNOWN'),
+                'sub' => isset($miner->corporation) ? $miner->corporation->name : 'UNKNOWN',
             ])
         </div>
 
@@ -43,7 +43,7 @@
                         <th>Activity</th>
                         <th>Location</th>
                         <th class="numeric">Amount</th>
-                        <th>Date</th>
+                        <th>Created</th>
                         <th>Updated</th>
                     </tr>
                 </thead>
@@ -57,7 +57,7 @@
                                 @if (isset($activity->quantity))
                                     {{ $activity->type->typeName }}
                                     <br>
-                                    <small>{{ number_format($activity->quantity, 0) }} units</small>
+                                    <small>{{ number_format($activity->quantity) }} units</small>
                                 @endif
                                 @if (isset($activity->amount_received))
                                     Payment received
@@ -83,11 +83,11 @@
                                     @endif
                                 @endif
                             </td>
-                            <td title="@if (! isset($activity->quantity)) {{ date('g:ia', strtotime($activity->created_at)) }} @endif">
-                                {{ date('M j, Y', strtotime($activity->created_at)) }}
+                            <td>
+                                {{ date('M j, Y g:i a', strtotime($activity->created_at)) }}
                             </td>
-                            <td title="@if (! isset($activity->quantity)) {{ date('g:ia', strtotime($activity->updated_at)) }} @endif">
-                                {{ date('M j, Y', strtotime($activity->updated_at)) }}
+                            <td>
+                                {{ date('M j, Y g:i a', strtotime($activity->updated_at)) }}
                             </td>
                         </tr>
                     @endforeach
@@ -100,7 +100,9 @@
 
     <script>
         window.addEventListener('load', function () {
-            $('#miningActivity').tablesorter();
+            $('#miningActivity').tablesorter({
+                sortList: [[4, 1]]
+            });
         });
     </script>
 
