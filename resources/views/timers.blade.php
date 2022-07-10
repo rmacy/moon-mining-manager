@@ -30,7 +30,7 @@
 
     <h1>Active Alliance Moon Mining Extraction Timers</h1>
 
-    <h1 id="current_time">{{ date('H:i:s') }} EVE</h1>
+    <h1 id="current_time">{{ gmdate('H:i:s, l j F,') }} EVE</h1>
 
     <table class="timers">
         <thead>
@@ -160,12 +160,16 @@
     <script>
         window.onload = function () {
             setInterval(function () {
-                var x = new Date();
-                var hour = x.getUTCHours(),
-                    minute = x.getUTCMinutes(),
-                    second = x.getUTCSeconds();
+                const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const monthNames = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+                const x = new Date();
                 document.getElementById('current_time').innerHTML =
-                    pad(hour) + ':' + pad(minute) + ':' + pad(second) + ' EVE';
+                    pad(x.getUTCHours()) + ':' + pad(x.getUTCMinutes()) + ':' + pad(x.getUTCSeconds()) + ', ' +
+                    weekday[x.getUTCDay()] + ' ' + x.getUTCDate() + ' ' + monthNames[x.getUTCMonth()] +
+                    ', EVE';
             }, 1000);
         }
 
