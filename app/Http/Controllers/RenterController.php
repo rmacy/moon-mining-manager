@@ -55,14 +55,11 @@ class RenterController extends Controller
     /**
      * Show a summary of invoices and payments for a specific refinery.
      *
-     * @param $id
-     * @return mixed
      * @throws \Exception
      * @noinspection PhpUnused
      */
     public function refineryDetails($id = NULL)
     {
-
         if ($id == NULL) {
             return redirect('/renters');
         }
@@ -99,7 +96,7 @@ class RenterController extends Controller
         }
 
         // Sort the log into reverse chronological order.
-        usort($activity_log, [$this, "sortByDate"]);
+        usort($activity_log, [$this, "sortByCreatedDate"]);
 
         return view('renters.refinery', [
             'renter' => $renter,
@@ -113,13 +110,11 @@ class RenterController extends Controller
      * Show a summary of invoices and payments for a specific character that is renting refinery(s).
      *
      * @param null|int $id
-     * @return mixed
      * @throws \Exception
      * @noinspection PhpUnused
      */
     public function renterDetails($id = NULL)
     {
-
         if ($id == NULL) {
             return redirect('/renters');
         }
@@ -151,7 +146,7 @@ class RenterController extends Controller
         }
 
         // Sort the log into reverse chronological order.
-        usort($activity_log, [$this, "sortByDate"]);
+        usort($activity_log, [$this, "sortByCreatedDate"]);
 
         return view('renters.character', [
             'renter' => $renter,
@@ -169,7 +164,6 @@ class RenterController extends Controller
      * Form to edit an existing renter record.
      *
      * @param null|int $id
-     * @return mixed
      * @throws \Exception
      * @noinspection PhpUnused
      */
@@ -287,7 +281,7 @@ class RenterController extends Controller
         $renter->save();
     }
 
-    private function sortByDate($a, $b)
+    private function sortByCreatedDate($a, $b): int
     {
         if ($a->created_at == $b->created_at) {
             return 0;
