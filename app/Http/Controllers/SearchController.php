@@ -25,11 +25,12 @@ class SearchController extends Controller
 
         // Even with strict search enabled ESI sometimes returns more than one character,
         // quick way to fix this is to allow search by character ID.
+        /** @noinspection PhpUndefinedFieldInspection */
         $query = $request->q;
         if (is_numeric($query)) {
             $characterId = $query;
         } else {
-            $characterId = $this->esiSearch($query);
+            $characterId = $this->esiSearch((string)$query);
         }
 
         if ($characterId > 0) {
@@ -40,24 +41,18 @@ class SearchController extends Controller
     }
 
     /**
-     * @param $query
-     * @return int
      * @throws \Exception
      */
-    private function esiSearch($query)
+    private function esiSearch(string $query):int
     {
-        $result = $this->conn->setQueryString([
-            'categories' => 'character',
-            'search' => $query,
-            'strict' => 'true',
-        ])->invoke('get', '/search/');
+        $result = $this->conn->setBody([$query])->invoke('post', '/universe/ids/');
 
         Log::info('SearchController: results returned by /search query', [
             'result' => $result,
         ]);
 
-        if (isset($result) && isset($result->character)) {
-            return $result->character[0];
+        if (isset($result->characters[0])) {
+            return (int) $result->characters[0]->id;
         }
 
         return 0;
