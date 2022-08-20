@@ -148,7 +148,7 @@
             .miner-bar {
                 background: #242626;
                 color: #fff;
-                position: fixed;
+                position: absolute;
                 top: 50px;
                 left: 0;
                 height: 100px;
