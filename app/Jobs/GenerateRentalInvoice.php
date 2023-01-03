@@ -117,7 +117,7 @@ class GenerateRentalInvoice implements ShouldQueue
                 )
             ),
             'subject' => $subject,
-            'approved_cost' => 5000,
+            'approved_cost' => 0,
         );
 
         // Queue sending the EVE mail, spaced at 1 minute intervals to avoid triggering the mail spam limiter (4/min).

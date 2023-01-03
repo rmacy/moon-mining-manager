@@ -84,7 +84,7 @@ class GenerateRentNotification implements ShouldQueue
                 )
             ),
             'subject' => $subject,
-            'approved_cost' => 5000,
+            'approved_cost' => 0,
         );
 
         // Queue sending the eve mail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
