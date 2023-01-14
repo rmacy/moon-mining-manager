@@ -4,15 +4,16 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 
 ## Requirements
 
-* PHP 7.1+
+* PHP >=7.1, <8
 * MySQL
-* An [EVE app](https://developers.eveonline.com) with the following scopes: 
-  - esi-mail.send_mail.v1 
-  - esi-universe.read_structures.v1 
-  - esi-corporations.read_structures.v1 
-  - esi-wallet.read_corporation_wallets.v1 
+* An [EVE app](https://developers.eveonline.com) with the following scopes:
+  - esi-mail.send_mail.v1
+  - esi-universe.read_structures.v1
+  - esi-corporations.read_structures.v1
+  - esi-wallet.read_corporation_wallets.v1
   - esi-characters.read_notifications.v1
-  - esi-industry.read_corporation_mining.v1
+  - esi-industry.read_corporation_mining.v1  
+    Callback URL: https://your.domain.tld/callback
 
 ## Installation instructions
 

@@ -7,6 +7,7 @@
     "require": {
         "php": ">=7.1.0",
         "ext-json": "*",
+        "ext-pdo_mysql": "*",
         "bravecollective/web-ui": "*@dev",
         "eveseat/eseye": "^1.1.0",
         "fideloper/proxy": "^3.0",
@@ -67,6 +68,10 @@
         "optimize-autoloader": true,
         "platform": {
             "php": "7.1.0"
+        },
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true,
+            "frontpack/composer-assets-plugin": true
         }
     }
 }
