@@ -40,7 +40,12 @@ class ProcessMiningActivity implements ShouldQueue
 
         // Grab all of the unprocessed mining activity records from the last day and loop through them.
         /** @var MiningActivity[] $activity */
-        $activity = MiningActivity::where('processed', 0)->get();
+        $corporationId = (int)env('TAX_CORPORATION_ID', 0);
+        $activity = MiningActivity::where('processed', 0)
+            ->whereHas('refinery', function ($q) use ($corporationId) {
+                $q->where('corporation_id', '=', $corporationId);
+            })
+            ->get();
 
         Log::info('ProcessMiningActivity: found ' . count($activity) . ' mining activity entries to process');
 
