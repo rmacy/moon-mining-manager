@@ -45,25 +45,25 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($timers as $timer)
-                <tr
+        @foreach ($timers as $timer)
+            <tr
                     @if (strtotime($timer->natural_decay_time) < time())
                         class="past"
                     @endif
-                >
-                    <td>
-                        <h2>{{ $timer->system->solarSystemName }}</h2>
-                        <h3>{{ $timer->system->region->regionName }}</h3>asdasd
-                        <a href="http://evemaps.dotlan.net/map/{{
+            >
+                <td>
+                    <h2>{{ $timer->system->solarSystemName }}</h2>
+                    <h3>{{ $timer->system->region->regionName }}</h3>
+                    <a href="http://evemaps.dotlan.net/map/{{
                                 str_replace(' ', '_', $timer->system->region->regionName) }}/{{
                                 $timer->system->solarSystemName }}">
-                            View on Dotlan
-                        </a>
-                    </td>
-                    <td>{{ $timer->name }}</td>
-                    <td>
-                        @if ($timer->claimed_by_primary || $timer->claimed_by_secondary)
-                            {{ date('H:i l jS F', strtotime($timer->detonation_time)) }}
+                        View on Dotlan
+                    </a>
+                </td>
+                <td>{{ $timer->name }}</td>
+                <td>
+                    @if ($timer->claimed_by_primary || $timer->claimed_by_secondary)
+                        {{ date('H:i l jS F', strtotime($timer->detonation_time)) }}
                             <br>
                             <a href="http://time.nakamura-labs.com/?#{{ strtotime($timer->chunk_arrival_time) }}"
                                target="_blank">Timezone conversion</a>
