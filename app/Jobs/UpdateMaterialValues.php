@@ -31,7 +31,7 @@ class UpdateMaterialValues implements ShouldQueue
         // Loop through and create a job to poll the API for price history.
         foreach ($materials as $material) {
             UpdateMaterialValue::dispatch($material->materialTypeID)
-                ->delay(Carbon::now()->addSeconds($delay_counter * 5));
+                ->delay(Carbon::now()->addSeconds($delay_counter * 10));
             $delay_counter++;
         }
 

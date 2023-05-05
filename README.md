@@ -46,23 +46,23 @@ You will need to import the following EVE dump tables into your database. They c
 * mapSolarSystems
 * mapRegions
 
+## Operation instructions
+
+* Run `php artisan queue:work` to start the job queue process. See the
+  [Laravel documentation on Queues](https://laravel.com/docs/5.5/queues) for more information on how to use
+  Supervisor to manage job queues.
+* Add a Cron for the [Task Scheduler](https://laravel.com/docs/5.5/scheduling)
+* Have your primary users login to the application. They must have director roles within the corporation that owns
+  your refineries in order to retrieve citadel information.
+* Manually add the primary user's ID to the `whitelist` table. They can now log in to view the application and 
+  authorise any other users.
+
 ## Updates
 
 ### 2021-12-20
 
 - Added esi-characters.read_notifications.v1 scope to admin login - add this to your EVE app.
 - Added invUniqueNames table with data from Fuzzworks - see [EVE tables](#eve-tables).
-
-## Operation instructions
-
-* Run `php artisan queue:work` to start the job queue process. See the 
-  [Laravel documentation on Queues](https://laravel.com/docs/5.5/queues) for more information on how to use 
-  Supervisor to manage job queues.
-* Add a Cron for the [Task Scheduler](https://laravel.com/docs/5.5/scheduling)
-* Have your primary users login to the application. They must have director roles within the corporation that owns 
-  your refineries in order to retrieve citadel information.
-* Manually add the primary user's ID to the `whitelist` table. They can now log in to view the application and 
-  authorise any other users.
 
 ## License
 
