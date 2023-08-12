@@ -70,7 +70,7 @@ class ContactFormController extends Controller
     {
         $webHookUrl = env('SLACK_WEBHOOK_URL', '');
         if ($webHookUrl === '') {
-            Log::error('ContactFormController: SLACK_WEBHOOK_URL not set.');
+            Log::warning('ContactFormController: SLACK_WEBHOOK_URL not set.');
             return;
         }
 
