@@ -41,34 +41,43 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $rentUserId = (int) env('RENT_CORPORATION_PRIME_USER_ID', 0);
+        $rentUserId = (int)env('RENT_CORPORATION_PRIME_USER_ID', 0);
         $taxUserId = (int)env('TAX_CORPORATION_PRIME_USER_ID', 0);
         $rentCorporationId = (int)env('RENT_CORPORATION_ID', 0);
         $taxCorporationId = (int)env('TAX_CORPORATION_ID', 0);
 
-        // Poll all corporation structures to look for refineries.
-        $schedule->job(new PollStructures($rentUserId))->dailyAt('00:00');
-        $schedule->job(new PollStructures($taxUserId))->dailyAt('00:05');
+        if ($rentUserId) {
+            // Poll all corporation structures to look for refineries.
+            $schedule->job(new PollStructures($rentUserId))->dailyAt('00:00');
 
-        // Poll all refineries for information about upcoming extraction cycles.
-        $schedule->job(new PollExtractions($rentUserId))->dailyAt('00:10');
-        $schedule->job(new PollExtractions($taxUserId))->dailyAt('00:15');
+            // Poll all refineries for information about upcoming extraction cycles.
+            $schedule->job(new PollExtractions($rentUserId))->dailyAt('00:10');
 
-        // Check for any newly active refineries.
-        $schedule->job(new PollRefineries($rentUserId))->dailyAt('00:20');
-        $schedule->job(new PollRefineries($taxUserId))->dailyAt('00:25');
+            // Check for any newly active refineries.
+            $schedule->job(new PollRefineries($rentUserId))->dailyAt('00:20');
 
-        // Check for miners making payments to the corporation wallet.
-        $schedule->job(new PollWallet($rentUserId))->hourlyAt(30);
-        $schedule->job(new PollWallet($taxUserId))->hourlyAt(35);
+            // Check for miners making payments to the corporation wallet.
+            $schedule->job(new PollWallet($rentUserId))->hourlyAt(30);
 
-        // Check notifications
-        $schedule->job(new ReadExtractionNotifications($taxUserId))->hourlyAt(40);
-        $schedule->job(new ReadExtractionNotifications($rentUserId))->hourlyAt(45);
+            // Check notifications
+            $schedule->job(new ReadExtractionNotifications($rentUserId))->hourlyAt(40);
+        }
+
+        if ($taxUserId) {
+            $schedule->job(new PollStructures($taxUserId))->dailyAt('00:05');
+            $schedule->job(new PollExtractions($taxUserId))->dailyAt('00:15');
+            $schedule->job(new PollRefineries($taxUserId))->dailyAt('00:25');
+            $schedule->job(new PollWallet($taxUserId))->hourlyAt(35);
+            $schedule->job(new ReadExtractionNotifications($taxUserId))->hourlyAt(45);
+        }
 
         // Pull the mining activity for the day and store it.
-        $schedule->job(new PollMiningObservers($taxCorporationId))->dailyAt('12:00');
-        $schedule->job(new PollMiningObservers($rentCorporationId))->dailyAt('12:05');
+        if ($rentCorporationId && $rentUserId) {
+            $schedule->job(new PollMiningObservers($rentCorporationId))->dailyAt('12:00');
+        }
+        if ($taxCorporationId && $taxUserId) {
+            $schedule->job(new PollMiningObservers($taxCorporationId))->dailyAt('12:05');
+        }
 
         // Check for any new ores that have been mined where we don't have details of their component materials.
         $schedule->job(new UpdateReprocessedMaterials)->twiceDaily(4, 16);
