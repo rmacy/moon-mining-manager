@@ -40,7 +40,7 @@ class SendEvemail implements ShouldQueue
     {
         $userId = env('MAIL_USER_ID', 0);
         if ($userId <= 0) {
-            Log::info(
+            Log::error(
                 'SendEvemail: cannot send mail to character ' .
                 $this->mail['recipients'][0]['recipient_id'] . ', MAIL_USER_ID not set'
             );
