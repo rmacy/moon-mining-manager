@@ -115,11 +115,11 @@ class AuthController extends Controller
     private function findOrCreateUser($user)
     {
         if ($authUser = User::where('eve_id', $user->id)->first()) {
-            $authUser->token = $user->token;
 
-            // Set refresh token, but only if there are scopes. This ensures that an admin token is
+            // Set tokens, but only if there are scopes. This ensures that an admin token is
             // not overwritten if the user logs in again using the normal login.
             if ($user->refreshToken !== null && !empty($user->user['Scopes'])) {
+                $authUser->token = $user->token;
                 $authUser->refresh_token = $user->refreshToken;
             }
 
