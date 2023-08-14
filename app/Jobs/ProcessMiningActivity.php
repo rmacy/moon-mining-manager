@@ -26,19 +26,18 @@ class ProcessMiningActivity implements ShouldQueue
      */
     public function handle()
     {
-
         Log::info('ProcessMiningActivity: starting...');
 
         // Create arrays to hold miner and refinery details. We'll write it back to the database when we're done.
         $miner_data = [];
         $refinery_data = [];
 
-        // Grab all of the ore values and tax rates to refer to in calculations. This
+        // Grab all the ore values and tax rates to refer to in calculations. This
         // returns an array keyed by type_id, so individual values/tax rates can be returned
         // by reference to $tax_rates[type_id]->value or $tax_rates[type_id]->tax_rate.
         $tax_rates = TaxRate::select(['type_id', 'value', 'tax_rate'])->get()->keyBy('type_id');
 
-        // Grab all of the unprocessed mining activity records from the last day and loop through them.
+        // Grab all the unprocessed mining activity records from the last day and loop through them.
         /** @var MiningActivity[] $activity */
         $corporationId = (int)env('TAX_CORPORATION_ID', 0);
         $activity = MiningActivity::where('processed', 0)
@@ -78,13 +77,12 @@ class ProcessMiningActivity implements ShouldQueue
             $entry->save();
         }
 
-        // Loop through all of the miner data and update the database records.
-        if (count($miner_data)) {
-            foreach ($miner_data as $key => $value) {
-                // We don't need to check if this miner exists, since they will all have been
-                // created during the PollRefinery job.
-                /** @var Miner $miner */
-                $miner = Miner::where('eve_id', $key)->first();
+        // Loop through all the miner data and update the database records.
+        foreach ($miner_data as $key => $value) {
+            /** @var Miner $miner */
+            $miner = Miner::where('eve_id', $key)->first();
+            if ($miner) {
+                // All miners should have been created by the PollRefinery job.
                 $miner->amount_owed += $value;
                 $miner->save();
                 Log::info(
@@ -107,7 +105,5 @@ class ProcessMiningActivity implements ShouldQueue
                 );
             }
         }
-
     }
-
 }
