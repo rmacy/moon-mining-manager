@@ -41,8 +41,8 @@ You will need to import the following EVE dump tables into your database. They c
 ## Initial setup
 
 - Add your admin user to the table `whitelist` with `is_admin` = `1`. They can now log in and authorise other users.
-- Add mail templates to the table `templates`: weekly_invoice, receipt, renter_invoice, renter_notification,
-  renter_reminder.
+- Add the following mail templates to the table `templates`: `weekly_invoice`, `receipt`, `renter_invoice`,
+  `renter_notification`, `renter_reminder`.
 - Login at http://your.domain/admin with a director of your corporations to create the required ESI tokens. Add the
   IDs to the environment variables `*_PRIME_USER_ID`.
 - Login at http://your.domain/admin with a character that should be used to send mails and add the ID to the
@@ -54,6 +54,15 @@ You will need to import the following EVE dump tables into your database. They c
   [Laravel documentation on Queues](https://laravel.com/docs/5.5/queues) for more information on how to use
   Supervisor to manage job queues.
 * Add a Cron for the [Task Scheduler](https://laravel.com/docs/5.5/scheduling)
+
+## Further Configuration
+
+Login with you admin user and configure the application:
+
+- Edit the mail templates at "Manage Emails".
+- Set the tax for each ore (the list will be populated automatically by a cron job).
+- Make sure at least one character receives mails from the contact form (at "Settings") or set up a Slack hook.
+- Import moon data.
 
 ## Updates
 
