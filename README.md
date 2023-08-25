@@ -43,8 +43,8 @@ You can use Docker to run the app.
 * Shell into the PHP container via `docker-compose exec moon_php /bin/sh`.
 * Shell into the Node.js container via `docker-compose run moon_node /bin/sh`.
 
-If you wish, there is a `docker-compose.override.yml.example` file included. You can rename it to
-`docker-compose.override.yml` to use a containerized database.
+> If you wish, there is a `docker-compose.override.yml.example` file included. You can rename it to
+> `docker-compose.override.yml` to use a containerized database.
 
 ## Initial setup
 
