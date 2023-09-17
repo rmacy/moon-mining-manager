@@ -32,7 +32,7 @@ class CorporationChecks implements ShouldQueue
         foreach ($miners as $miner) {
             CorporationCheck::dispatch($miner->eve_id)->delay(Carbon::now()->addSecond(15 * $delay_counter));
             Log::info('CorporationChecks: dispatched job to check the corporation for miner ' .
-                $miner->eve_id . ' in ' . (15 * $delay_counter) . ' seconds');
+                $miner->eve_id . ' in ' . (5 * $delay_counter) . ' seconds');
             $delay_counter++;
         }
 
