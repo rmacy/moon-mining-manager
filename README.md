@@ -91,12 +91,13 @@ Login with you admin user and configure the application:
 - Make sure at least one character receives mails from the contact form (at "Settings") or set up a Slack hook.
 - Import moon data.
 
-## Updates
+## Changelog
 
 Only updates that require work are listed here at the moment.
 
 ### 2023-10-17
 
+- Raised minimum required PHP version to 8.1.0.
 - Added `APP_URL` environment variable to generate URLs (see [.env.example](.env.example)).
 
 ### 2021-12-20
