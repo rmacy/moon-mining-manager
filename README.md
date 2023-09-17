@@ -95,6 +95,10 @@ Login with you admin user and configure the application:
 
 Only updates that require work are listed here at the moment.
 
+### 2023-10-17
+
+- Added `APP_URL` environment variable to generate URLs (see [.env.example](.env.example)).
+
 ### 2021-12-20
 
 - Added esi-characters.read_notifications.v1 scope to admin login - add this to your EVE app.

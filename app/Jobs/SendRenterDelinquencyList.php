@@ -51,13 +51,10 @@ class SendRenterDelinquencyList implements ShouldQueue
             }
 
             // Output the details of this renter to the email body.
-            $body .= 'Renter: <url=showinfo:1376//'.$renter->character_id.'>' . $character->name . '</url>';
-            $body .= "\n";
-            $body .= 'Refinery: <loc><url=https://moons.bravecollective.com/renters/refinery/' .
-                $renter->refinery_id . '>' . $nameRented . '</url></loc>';
-            $body .= "\n";
-            $body .= 'Balance: ' . number_format($renter->amount_owed) . ' ISK';
-            $body .= "\n\n";
+            $url = env('APP_URL', '');
+            $body .= "Renter: <url=showinfo:1376//$renter->character_id>$character->name</url>\n";
+            $body .= "Refinery: <loc><url=$url$renter->refinery_id>$nameRented</url></loc>\n";
+            $body .= 'Balance: ' . number_format($renter->amount_owed) . "ISK\n\n";
         }
         $mail = array(
             'body' => $body,
