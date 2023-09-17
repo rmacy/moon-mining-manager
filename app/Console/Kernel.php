@@ -111,7 +111,9 @@ class Kernel extends ConsoleKernel
         $schedule->job(new GenerateRentReminders)->monthlyOn(26, '09:00');
 
         // Send monthly summary of delinquent renters to the site admin.
-        $schedule->job(new SendRenterDelinquencyList)->monthlyOn(29, '09:00');
+        if ((int)env('ADMIN_USER_ID', 0) > 0) {
+            $schedule->job(new SendRenterDelinquencyList)->monthlyOn(29, '09:00');
+        }
     }
 
     /**
