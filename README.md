@@ -14,7 +14,6 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
   - esi-characters.read_notifications.v1
   - esi-industry.read_corporation_mining.v1  
     Callback URL: https://your.domain.tld/callback
-* A MySQL/MariaDB database
 
 ## Installation Instructions
 
@@ -39,12 +38,12 @@ See also https://laravel.com/docs/10.x/installation.
 
 You can use Docker to run the app.
 
-* Start the dev containers: `docker-compose up`.
-* Shell into the PHP container via `docker-compose exec moon_php /bin/sh`.
-* Shell into the Node.js container via `docker-compose run moon_node /bin/sh`.
-
-> If you wish, there is a `docker-compose.override.yml.example` file included. You can rename it to
-> `docker-compose.override.yml` to use a containerized database.
+Start the dev containers and shells:
+```
+docker-compose up
+docker-compose exec moon_php /bin/sh
+docker-compose run moon_node /bin/sh
+```
 
 Generate files and annotations with the IDE Helper for Laravel:
 ```
