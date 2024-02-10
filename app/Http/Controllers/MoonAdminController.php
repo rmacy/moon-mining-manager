@@ -34,7 +34,6 @@ class MoonAdminController extends Controller
         $moons = Moon::with([
             'region', 'system', 'renter',
             'mineral_1', 'mineral_2', 'mineral_3', 'mineral_4',
-            'renter',
         ])
             ->where('available', 1)
             ->orderBy('region_id')
@@ -213,8 +212,10 @@ class MoonAdminController extends Controller
     /**
      * @throws \Exception
      */
-    public function export()
+    public function export(Request $request)
     {
+        $all = $request->input('all');
+
         $rows = [];
         $rows[] = [
             'Region',
@@ -237,13 +238,21 @@ class MoonAdminController extends Controller
             '% 4',
         ];
 
-        foreach (Moon::where('available', 1)->get()->sortBy('id') as $moon) {
-            /* @var $moon Moon */
+        $with = ['region', 'system', 'renter', 'mineral_1', 'mineral_2', 'mineral_3', 'mineral_4'];
+        if ($all === '1') {
+            $moons = Moon::with($with)->get()->sortBy('id');
+            $filename = 'moon-export-all-' . date('Ymd-His') . '.csv';
+        } else {
+            $moons = Moon::with($with)->where('available', 1)->get()->sortBy('id');
+            $filename = 'moon-export-available-' . date('Ymd-His') . '.csv';
+        }
 
+        foreach ($moons as $moon) { /* @var $moon Moon */
             // get renter name
             $renterName = '';
-            if ($moon->getActiveRenterAttribute()) {
-                $renterName = $moon->getActiveRenterAttribute()->character_name;
+            $renter = $moon->getActiveRenterAttribute();
+            if ($renter) {
+                $renterName = $renter->character_name;
             } elseif ($moon->status_flag == Moon::STATUS_ALLIANCE_OWNED) {
                 $renterName = 'Alliance';
             }
@@ -273,7 +282,7 @@ class MoonAdminController extends Controller
 
         return response($this->arrayToCsv($rows), 200, [
             'Content-Type' => 'text/cvs',
-            'Content-disposition' => 'attachment;filename=moon-export.csv'
+            'Content-disposition' => "attachment;filename=$filename"
         ]);
     }
 

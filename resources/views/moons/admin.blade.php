@@ -20,7 +20,8 @@
             </div>
             <div class="card">
                 <a href="/moon-admin/calculate">Calculate monthly rents</a><br>
-                <a href="/moon-admin/export">Export</a>
+                <a href="/moon-admin/export">Export available</a>
+                <a href="/moon-admin/export?all=1">Export all</a>
             </div>
         </div>
     </div>
