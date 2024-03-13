@@ -8,7 +8,7 @@
 
         @foreach ($materials as $material)
             <div class="col-4">
-                <div class="card-heading">{{ $material->type->typeName }}</div>
+                <div class="card-heading">{{ $material->type?->typeName }}</div>
                 <div class="card">
                     <canvas id="chart-{{ $material->materialTypeID }}"></canvas>
                     <script>

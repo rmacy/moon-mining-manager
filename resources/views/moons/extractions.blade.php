@@ -100,24 +100,22 @@
                             2
                         )}}%
                     </td>
-                    <td data-id="{{$extraction->ore1_type_id}}">{{$extraction->ore1->typeName}}</td>
-                    <td>{{number_format($extraction->ore1_volume)}}</td>
-                    <td>{{number_format($extraction->ore1_mined * 10)}}</td>
-                    <td>{{round($extraction->ore1_mined * 10 / $extraction->ore1_volume * 100, 2)}}</td>
-                    <td data-id="{{$extraction->ore2_type_id}}">{{$extraction->ore2->typeName}}</td>
-                    <td>{{number_format($extraction->ore2_volume)}}</td>
-                    <td>{{number_format($extraction->ore2_mined * 10)}}</td>
-                    <td>{{round($extraction->ore2_mined * 10 / $extraction->ore2_volume * 100, 2)}}</td>
-                    <td data-id="{{$extraction->ore3_type_id}}">
-                        {{$extraction->ore3 ? $extraction->ore3->typeName : ''}}
-                    </td>
+                    <td data-id="{{$extraction->ore1_type_id}}">{{$extraction->ore1?->typeName}}</td>
+                    <td>{{$extraction->ore1 ? number_format($extraction->ore1_volume) : ''}}</td>
+                    <td>{{$extraction->ore1 ? number_format($extraction->ore1_mined * 10) : ''}}</td>
+                    <td>{{$extraction->ore1 ?
+                            round($extraction->ore1_mined * 10 / $extraction->ore1_volume * 100, 2) : ''}}</td>
+                    <td data-id="{{$extraction->ore2_type_id}}">{{$extraction->ore2?->typeName}}</td>
+                    <td>{{$extraction->ore2 ? number_format($extraction->ore2_volume) : ''}}</td>
+                    <td>{{$extraction->ore2 ? number_format($extraction->ore2_mined * 10) : ''}}</td>
+                    <td>{{$extraction->ore2 ?
+                            round($extraction->ore2_mined * 10 / $extraction->ore2_volume * 100, 2) : ''}}</td>
+                    <td data-id="{{$extraction->ore3_type_id}}">{{$extraction->ore3?->typeName}}</td>
                     <td>{{$extraction->ore3 ? number_format($extraction->ore3_volume) : ''}}</td>
                     <td>{{$extraction->ore3 ? number_format($extraction->ore3_mined * 10) : ''}}</td>
                     <td>{{$extraction->ore3 ?
-                        round($extraction->ore3_mined * 10 / $extraction->ore3_volume * 100, 2) : ''}}</td>
-                    <td data-id="{{$extraction->ore4_type_id}}">
-                        {{$extraction->ore4 ? $extraction->ore4->typeName : ''}}
-                    </td>
+                            round($extraction->ore3_mined * 10 / $extraction->ore3_volume * 100, 2) : ''}}</td>
+                    <td data-id="{{$extraction->ore4_type_id}}">{{$extraction->ore4?->typeName}}</td>
                     <td>{{$extraction->ore4 ? number_format($extraction->ore4_volume) : ''}}</td>
                     <td>{{$extraction->ore4 ? number_format($extraction->ore4_mined * 10) : ''}}</td>
                     <td>{{$extraction->ore4 ?
