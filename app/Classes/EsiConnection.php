@@ -42,7 +42,7 @@ class EsiConnection
      *
      * @param int $userId
      * @return int
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function getCorporationId($userId)
     {
@@ -84,12 +84,10 @@ class EsiConnection
     {
         // Eseye configuration for all connections
         $configuration = Configuration::getInstance();
-        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->http_client = 'GuzzleHttp\Client';
+        $configuration->esi_host = env('EVEONLINE_ESI_HOST', 'esi.evetech.net');
         $configuration->datasource = 'tranquility';
-        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->logfile_location = storage_path() . '/logs';
-        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->file_cache_location = storage_path() . '/framework/cache';
 
         $authentication = null;
