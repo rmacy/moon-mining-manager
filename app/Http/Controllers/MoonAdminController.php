@@ -268,13 +268,13 @@ class MoonAdminController extends Controller
                 $renterName,
                 '', // status
                 '', //
-                $moon->mineral_1->typeName,
-                $moon->mineral_1_percent . '%',
-                $moon->mineral_2->typeName,
-                $moon->mineral_2_percent . '%',
-                $moon->mineral_3 ? $moon->mineral_3->typeName : '',
+                $moon->mineral_1?->typeName,
+                $moon->mineral_1_percent ? $moon->mineral_1_percent . '%' : '',
+                $moon->mineral_2?->typeName,
+                $moon->mineral_2_percent ? $moon->mineral_2_percent . '%' : '',
+                $moon->mineral_3?->typeName,
                 $moon->mineral_3_percent ? $moon->mineral_3_percent . '%' : '',
-                $moon->mineral_4 ? $moon->mineral_4->typeName : '',
+                $moon->mineral_4?->typeName,
                 $moon->mineral_4_percent ? $moon->mineral_4_percent . '%' : '',
             ];
             $rows[] = $cols;

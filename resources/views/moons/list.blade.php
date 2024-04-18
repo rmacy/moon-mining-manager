@@ -41,8 +41,10 @@
                             <td>{{ $moon->planet }}</td>
                             <td>{{ $moon->moon }}</td>
                             <td>
-                                {{ $moon->mineral_1->typeName }} ({{ round($moon->mineral_1_percent, 2) }}%)
-                                &#0183; {{ $moon->mineral_2->typeName }} ({{ round($moon->mineral_2_percent, 2) }}%)
+                                {{ $moon->mineral_1?->typeName }} ({{ round($moon->mineral_1_percent, 2) }}%)
+                                @if ($moon->mineral_2_type_id)
+                                    &#0183; {{ $moon->mineral_2->typeName }} ({{ round($moon->mineral_2_percent, 2) }}%)
+                                @endif
                                 @if ($moon->mineral_3_type_id)
                                     &#0183; {{ $moon->mineral_3->typeName }} ({{ round($moon->mineral_3_percent, 2) }}%)
                                 @endif

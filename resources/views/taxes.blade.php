@@ -36,7 +36,7 @@
                 <tbody>
                     @foreach ($tax_rates as $rate)
                         <tr>
-                            <td>{{ $rate->type->typeName }}</td>
+                            <td>{{ $rate->type?->typeName }}</td>
                             <td class="numeric">
                                 {{ number_format($rate->value, 2) }} ISK
                                 <!--

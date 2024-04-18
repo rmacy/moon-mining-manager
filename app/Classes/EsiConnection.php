@@ -42,7 +42,7 @@ class EsiConnection
      *
      * @param int $userId
      * @return int
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function getCorporationId($userId)
     {
@@ -84,12 +84,11 @@ class EsiConnection
     {
         // Eseye configuration for all connections
         $configuration = Configuration::getInstance();
-        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->http_client = 'GuzzleHttp\Client';
+        $configuration->esi_host = env('EVEONLINE_ESI_HOST', 'esi.evetech.net');
+        $configuration->sso_host = env('EVEONLINE_SSO_HOST', 'login.eveonline.com');
         $configuration->datasource = 'tranquility';
-        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->logfile_location = storage_path() . '/logs';
-        /** @noinspection PhpUndefinedFieldInspection */
         $configuration->file_cache_location = storage_path() . '/framework/cache';
 
         $authentication = null;
@@ -100,7 +99,7 @@ class EsiConnection
                 throw new \Exception('User '. $userId .' not found.');
             }
 
-            $url = 'https://login.eveonline.com/v2/oauth/token';
+            $url = "https://$configuration->sso_host/v2/oauth/token";
             $secret = env('EVEONLINE_CLIENT_SECRET');
             $client_id = env('EVEONLINE_CLIENT_ID');
 

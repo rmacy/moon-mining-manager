@@ -93,18 +93,22 @@ class ExtractionsController extends Controller
             }
 
             // fetch sums
-            $extractions[$num]['ore1_mined'] = (new MiningActivity)
-                ->where('refinery_id', $extraction->refinery_id)
-                ->whereIn('type_id', $this->getTypeIds($extraction->ore1->typeName))
-                ->where('created_at', '>=', $from)
-                ->where('created_at', '<', $to)
-                ->sum('quantity');
-            $extractions[$num]['ore2_mined'] = (new MiningActivity)
-                ->where('refinery_id', $extraction->refinery_id)
-                ->whereIn('type_id', $this->getTypeIds($extraction->ore2->typeName))
-                ->where('created_at', '>=', $from)
-                ->where('created_at', '<', $to)
-                ->sum('quantity');
+            if ($extraction->ore1) { // should always be there
+                $extractions[$num]['ore1_mined'] = (new MiningActivity)
+                    ->where('refinery_id', $extraction->refinery_id)
+                    ->whereIn('type_id', $this->getTypeIds($extraction->ore1->typeName))
+                    ->where('created_at', '>=', $from)
+                    ->where('created_at', '<', $to)
+                    ->sum('quantity');
+            }
+            if ($extraction->ore2) {
+                $extractions[$num]['ore2_mined'] = (new MiningActivity)
+                    ->where('refinery_id', $extraction->refinery_id)
+                    ->whereIn('type_id', $this->getTypeIds($extraction->ore2->typeName))
+                    ->where('created_at', '>=', $from)
+                    ->where('created_at', '<', $to)
+                    ->sum('quantity');
+            }
             if ($extraction->ore3) {
                 $extractions[$num]['ore3_mined'] = (new MiningActivity)
                     ->where('refinery_id', $extraction->refinery_id)

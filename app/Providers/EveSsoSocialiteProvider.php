@@ -12,6 +12,7 @@ class EveSsoSocialiteProvider extends AbstractProvider implements ProviderInterf
 
     protected function getAuthUrl($state): string
     {
+        // This is the URL for the client redirect, so do not use EVEONLINE_SSO_HOST.
         return $this->buildAuthUrlFromBase(
             'https://login.eveonline.com/v2/oauth/authorize',
             $state
@@ -20,7 +21,8 @@ class EveSsoSocialiteProvider extends AbstractProvider implements ProviderInterf
 
     protected function getTokenUrl(): string
     {
-        return 'https://login.eveonline.com/v2/oauth/token';
+        $ssoHost = env('EVEONLINE_SSO_HOST', 'login.eveonline.com');
+        return "https://$ssoHost/v2/oauth/token";
     }
 
     protected function getUserByToken($token): array

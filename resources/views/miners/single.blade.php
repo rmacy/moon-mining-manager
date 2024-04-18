@@ -55,7 +55,7 @@
                                     Invoice sent
                                 @endif
                                 @if (isset($activity->quantity))
-                                    {{ $activity->type->typeName }}
+                                        {{ $activity->type?->typeName }}
                                     <br>
                                     <small>{{ number_format($activity->quantity) }} units</small>
                                 @endif
