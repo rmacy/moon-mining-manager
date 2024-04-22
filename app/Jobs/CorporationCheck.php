@@ -54,7 +54,7 @@ class CorporationCheck implements ShouldQueue
         ]);
 
         $req = $conn->setBody([
-            intval($this-> miner_id)
+            intval($this->miner_id)
         ])->invoke('post', '/characters/affiliation/');
         $affiliations = current($req->getArrayCopy());
 
