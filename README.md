@@ -30,7 +30,7 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 * Run `composer install` to install backend dependencies.
 * Run `php artisan key:generate`.
 * Run `php artisan migrate` to create the database tables.
-* Regenerate js/css with `npm run production`, if they have changed.
+* Regenerate js/css with `npm run build`, if they have changed.
 
 See also https://laravel.com/docs/10.x/installation.
 
