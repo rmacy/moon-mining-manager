@@ -1,3 +1,3 @@
-require('./bootstrap');
-require('tablesorter');
+import './bootstrap';
+import 'tablesorter';
 import Chart from 'chart.js';
